@@ -24,9 +24,14 @@ if [ ! -d "./infrastructure/.terraform" ]; then
 fi
 
 echo "[+] Destroying infrastructure"
-IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform destroy -auto-approve -var-file=variables.tfvars || { echo "[-] Failed to destroy infrastructure"; exit 1; }
+IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform destroy -auto-approve -var-file=variables.tfvars
 
-echo "[+] Infrastructure destroyed successfully"
+if [ $? -eq 0 ]; then
+    echo "Terraform applied successfully."
+else
+    echo "Terraform apply encountered an error, but continuing with script."
+fi
+#echo "[+] Infrastructure destroyed successfully"
 # delete .env and infrastructure/variables.tf
 echo "[+] Cleaning up .env and infrastructure/variables.tf"
 rm -f .env

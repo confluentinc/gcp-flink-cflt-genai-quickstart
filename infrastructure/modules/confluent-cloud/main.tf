@@ -16,10 +16,21 @@ resource "confluent_environment" "staging" {
   }
 }
 
+
+# ------------------------------------------------------
+# SERVICE ACCOUNT
+# ------------------------------------------------------
+
 resource "confluent_service_account" "app-manager" {
   display_name = "cflt-health-app-manager"
   description  = "Service Account for Kafka Cluster"
 }
+
+
+# ------------------------------------------------------
+# ROLE BINDINGS
+# ------------------------------------------------------
+
 resource "confluent_role_binding" "cluster-admin" {
   principal   = "User:${confluent_service_account.app-manager.id}"
   role_name   = "CloudClusterAdmin"
@@ -143,6 +154,48 @@ resource "confluent_kafka_topic" "chat_output_audio_response" {
 }
 
 
+# ------------------------------------------------------
+# ACLs
+# ------------------------------------------------------
+
+
+resource "confluent_kafka_acl" "app-manager-read-on-target-topic" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "*"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.app-manager.id}"
+  host          = "*"
+  operation     = "READ"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+
+
+resource "confluent_kafka_acl" "app-manager-delete-on-target-topic" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "*"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.app-manager.id}"
+  host          = "*"
+  operation     = "DELETE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
 # ------------------------------------------------------
 # Schema Registry
 # ------------------------------------------------------
