@@ -58,9 +58,11 @@ if [[ -n "$DEFAULT_ENV_FILE" && "$DEFAULT_ENV_FILE" != "-h" && "$DEFAULT_ENV_FIL
         exit 1
     fi
 fi
-# Prompt for Confluent Cloud and MongoDB credentials
+# Prompt for Confluent Cloud
 [ -z "$CONFLUENT_CLOUD_API_KEY" ] && prompt_for_input CONFLUENT_CLOUD_API_KEY "Enter your Confluent Cloud API Key" false
 [ -z "$CONFLUENT_CLOUD_API_SECRET" ] && prompt_for_input CONFLUENT_CLOUD_API_SECRET "Enter your Confluent Cloud API Secret" true
+[ -z "$CONFLUENT_KAFKA_API_KEY" ] && prompt_for_input CONFLUENT_KAFKA_API_KEY "Enter your Confluent Kafka API Key" false
+[ -z "$CONFLUENT_KAFKA_API_SECRET" ] && prompt_for_input CONFLUENT_KAFKA_API_SECRET "Enter your Confluent Kafka API Secret" true
 
 # Create .env file from variables set in this file
 echo "[+] Setting up .env file for docker-compose"
@@ -78,7 +80,8 @@ EOF
 
 echo "[+] Applying terraform"
 #IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform apply --auto-approve -var-file=variables.tfvars
-IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform plan -var-file=variables.tfvars
+#IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform plan -refresh-only -var-file=variables.tfvars
+IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform apply -var-file=variables.tfvars
 if [ $? -ne 0 ]; then
     echo "[-] Failed to apply terraform"
     exit 1

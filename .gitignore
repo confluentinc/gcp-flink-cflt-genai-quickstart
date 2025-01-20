@@ -145,5 +145,7 @@ builds/
 
 .env*
 .terraform.lock.hcl
+terraform.tfstate
+.terraform
 .DS_Store
 variables.tfvars

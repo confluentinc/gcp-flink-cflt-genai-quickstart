@@ -23,7 +23,7 @@ variable "confluent_cloud_service_provider" {
 variable "confluent_cloud_environment_name" {
   description = "The name of the Confluent Cloud environment to create"
   type        = string
-  default     = "genai-quickstart"
+  default     = "CFLT-Health-Quickstart"
 }
 
 variable "env_display_id_postfix" {

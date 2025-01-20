@@ -6,7 +6,3 @@ terraform {
     }
   }
 }
-provider "confluent" {
-  cloud_api_key    = "$CONFLUENT_CLOUD_API_KEY"
-  cloud_api_secret = "$CONFLUENT_CLOUD_API_SECRET"
-}
