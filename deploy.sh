@@ -79,8 +79,6 @@ confluent_cloud_api_secret = "$CONFLUENT_CLOUD_API_SECRET"
 EOF
 
 echo "[+] Applying terraform"
-#IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform apply --auto-approve -var-file=variables.tfvars
-#IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform plan -refresh-only -var-file=variables.tfvars
 IMAGE_ARCH=$IMAGE_ARCH docker compose run --rm terraform apply -var-file=variables.tfvars
 if [ $? -ne 0 ]; then
     echo "[-] Failed to apply terraform"

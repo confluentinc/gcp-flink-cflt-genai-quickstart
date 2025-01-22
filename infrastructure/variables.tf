@@ -21,7 +21,7 @@ variable "confluent_cloud_service_provider" {
 }
 
 variable "confluent_cloud_environment_name" {
-  description = "The name of the Confluent Cloud environment to create"
+  description = "The prefix of the Confluent Cloud environment to create"
   type        = string
   default     = "CFLT-Health-Quickstart"
 }
