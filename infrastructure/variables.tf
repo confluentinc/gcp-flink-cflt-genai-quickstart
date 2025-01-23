@@ -12,12 +12,13 @@ variable "confluent_cloud_api_secret" {
 variable "confluent_cloud_region" {
   description = "The region of Confluent Cloud Network"
   type        = string
+  default     = "us-central-1"
 }
 
 variable "confluent_cloud_service_provider" {
   description = "The cloud provider of Confluent Cloud Network"
   type        = string
-  default     = "AWS"
+  default     = "GCP"
 }
 
 variable "confluent_cloud_environment_name" {

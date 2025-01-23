@@ -61,8 +61,7 @@ fi
 # Prompt for Confluent Cloud
 [ -z "$CONFLUENT_CLOUD_API_KEY" ] && prompt_for_input CONFLUENT_CLOUD_API_KEY "Enter your Confluent Cloud API Key" false
 [ -z "$CONFLUENT_CLOUD_API_SECRET" ] && prompt_for_input CONFLUENT_CLOUD_API_SECRET "Enter your Confluent Cloud API Secret" true
-[ -z "$CONFLUENT_KAFKA_API_KEY" ] && prompt_for_input CONFLUENT_KAFKA_API_KEY "Enter your Confluent Kafka API Key" false
-[ -z "$CONFLUENT_KAFKA_API_SECRET" ] && prompt_for_input CONFLUENT_KAFKA_API_SECRET "Enter your Confluent Kafka API Secret" true
+[ -z "$CONFLUENT_CLOUD_REGION" ] && prompt_for_input CONFLUENT_CLOUD_REGION "Enter your Confluent Cloud Network Region, if not the region will be assigned to 'us-central-1'" false
 
 # Create .env file from variables set in this file
 echo "[+] Setting up .env file for docker-compose"
@@ -70,12 +69,14 @@ cat << EOF > .env
 IMAGE_ARCH=$IMAGE_ARCH
 CONFLUENT_CLOUD_API_KEY=$CONFLUENT_CLOUD_API_KEY
 CONFLUENT_CLOUD_API_SECRET=$CONFLUENT_CLOUD_API_SECRET
+CONFLUENT_CLOUD_REGION=$CONFLUENT_CLOUD_REGION
 EOF
 
 echo "[+] Setting up infrastructure/variables.tfvars"
 cat << EOF > infrastructure/variables.tfvars
 confluent_cloud_api_key = "$CONFLUENT_CLOUD_API_KEY"
 confluent_cloud_api_secret = "$CONFLUENT_CLOUD_API_SECRET"
+confluent_cloud_region = "$CONFLUENT_CLOUD_REGION"
 EOF
 
 echo "[+] Applying terraform"
