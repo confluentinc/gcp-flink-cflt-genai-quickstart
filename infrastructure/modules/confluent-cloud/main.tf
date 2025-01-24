@@ -43,7 +43,7 @@ resource "confluent_kafka_topic" "chat_input_audio_request" {
     secret = confluent_api_key.app-manager-kafka-api-key.secret
   }
   depends_on = [
-    confluent_kafka_cluster.standard
+    confluent_api_key.app-manager-kafka-api-key
   ]
 }
 
@@ -59,7 +59,7 @@ resource "confluent_kafka_topic" "generated_sql_query" {
     secret = confluent_api_key.app-manager-kafka-api-key.secret
   }
   depends_on = [
-    confluent_kafka_cluster.standard
+    confluent_api_key.app-manager-kafka-api-key
   ]
 }
 
@@ -75,7 +75,7 @@ resource "confluent_kafka_topic" "flink_executed_sql" {
     secret = confluent_api_key.app-manager-kafka-api-key.secret
   }
   depends_on = [
-    confluent_kafka_cluster.standard
+    confluent_api_key.app-manager-kafka-api-key
   ]
 }
 
@@ -91,7 +91,7 @@ resource "confluent_kafka_topic" "generated_query_results" {
     secret = confluent_api_key.app-manager-kafka-api-key.secret
   }
   depends_on = [
-    confluent_kafka_cluster.standard
+    confluent_api_key.app-manager-kafka-api-key
   ]
 }
 
@@ -107,7 +107,7 @@ resource "confluent_kafka_topic" "summary_response" {
     secret = confluent_api_key.app-manager-kafka-api-key.secret
   }
   depends_on = [
-    confluent_kafka_cluster.standard
+    confluent_api_key.app-manager-kafka-api-key
   ]
 }
 
@@ -123,7 +123,7 @@ resource "confluent_kafka_topic" "chat_output_audio_response" {
     secret = confluent_api_key.app-manager-kafka-api-key.secret
   }
   depends_on = [
-    confluent_kafka_cluster.standard
+    confluent_api_key.app-manager-kafka-api-key
   ]
 }
 
@@ -153,9 +153,6 @@ resource "confluent_api_key" "app-manager-kafka-api-key" {
   lifecycle {
     prevent_destroy = false
   }
-  depends_on = [
-    confluent_kafka_cluster.standard
-  ]
 }
 
 # ------------------------------------------------------

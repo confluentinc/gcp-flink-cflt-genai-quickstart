@@ -12,7 +12,7 @@ variable "confluent_cloud_api_secret" {
 variable "confluent_cloud_region" {
   description = "The region of Confluent Cloud Network"
   type        = string
-  default     = "us-central-1"
+  default     = "us-east1"
 }
 
 variable "confluent_cloud_service_provider" {

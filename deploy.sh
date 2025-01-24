@@ -24,6 +24,19 @@ prompt_for_input() {
         fi
     done
 }
+# Define a list of valid Confluent Cloud regions
+VALID_REGIONS=("us-east1" "us-west2" "eu-central1" "ap-southeast2")
+
+# Function to check if the region is valid
+isValidRegion() {
+  local input="$1"
+  for region in "${VALID_REGIONS[@]}"; do
+    if [[ "$input" == "$region" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
 
 # Set platform to linux/arm64 if m1 mac is detected. Otherwise set to linux/amd64
 IMAGE_ARCH=$(uname -m | grep -qE 'arm64|aarch64' && echo 'arm64' || echo 'x86_64')
@@ -61,8 +74,18 @@ fi
 # Prompt for Confluent Cloud
 [ -z "$CONFLUENT_CLOUD_API_KEY" ] && prompt_for_input CONFLUENT_CLOUD_API_KEY "Enter your Confluent Cloud API Key" false
 [ -z "$CONFLUENT_CLOUD_API_SECRET" ] && prompt_for_input CONFLUENT_CLOUD_API_SECRET "Enter your Confluent Cloud API Secret" true
-[ -z "$CONFLUENT_CLOUD_REGION" ] && prompt_for_input CONFLUENT_CLOUD_REGION "Enter your Confluent Cloud Network Region, if not the region will be assigned to 'us-central-1'" false
+while [ -z "$CONFLUENT_CLOUD_REGION" ] || ! isValidRegion "$CONFLUENT_CLOUD_REGION"; do
+  if [ -z "$CONFLUENT_CLOUD_REGION" ]; then
+    # CONFLUENT_CLOUD_REGION is not set, prompt for it
+    prompt_for_input CONFLUENT_CLOUD_REGION "Enter your Confluent Cloud Network Region" false
+  else
+    # CONFLUENT_CLOUD_REGION is set but invalid, inform the user and unset it to prompt again
+    echo "The entered region '$CONFLUENT_CLOUD_REGION' is not valid. Valid regions are: ${VALID_REGIONS[*]}"
+    unset CONFLUENT_CLOUD_REGION
+  fi
+done
 
+echo "Valid region $CONFLUENT_CLOUD_REGION selected."
 # Create .env file from variables set in this file
 echo "[+] Setting up .env file for docker-compose"
 cat << EOF > .env
