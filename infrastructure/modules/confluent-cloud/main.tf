@@ -43,7 +43,7 @@ resource "confluent_kafka_topic" "chat_input_audio_request" {
     secret = confluent_api_key.app-manager-kafka-api-key.secret
   }
   depends_on = [
-    confluent_api_key.app-manager-kafka-api-key
+    confluent_kafka_acl.app-manager-delete-on-target-topic
   ]
 }
 
@@ -218,6 +218,10 @@ resource "confluent_role_binding" "cluster-admin" {
   principal   = "User:${confluent_service_account.app-manager.id}"
   role_name   = "CloudClusterAdmin"
   crn_pattern = confluent_kafka_cluster.standard.rbac_crn
+
+  depends_on = [
+    confluent_kafka_cluster.standard
+  ]
 }
 
 # ------------------------------------------------------
