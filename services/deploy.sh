@@ -30,7 +30,6 @@ for var in "${mandatory_vars[@]}"; do
     check_env_var "$var"
 done
 
-
 IMAGE_ARCH=$(uname -m | grep -qE 'arm64|aarch64' && echo 'arm64' || echo 'x86_64')
 CURRENT_DIR=$(dirname "$0")
 SCRIPT_FOLDER=$(get_full_path "$CURRENT_DIR")

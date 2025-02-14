@@ -22,8 +22,8 @@ FROM nginx:stable-alpine AS server
 # Copy the build output to replace the default nginx contents.
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose port 8080 to the outside once the container has launched
-EXPOSE 8080
+# Expose port 80 to the outside once the container has launched
+EXPOSE 80
 
 # Command to run when the container starts
 CMD ["nginx", "-g", "daemon off;"]

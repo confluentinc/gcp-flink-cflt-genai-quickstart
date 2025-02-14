@@ -8,6 +8,5 @@ services:
     env_file:
       - .env
     volumes:
-      - ./frontend:/app/frontend
       - ./infrastructure:/app/infrastructure
       - ./.config:/root/.config
