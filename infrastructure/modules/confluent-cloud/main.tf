@@ -31,9 +31,9 @@ resource "confluent_kafka_cluster" "standard" {
   }
 }
 
-//topic that captures and stores audio
-resource "confluent_kafka_topic" "chat_input_audio_request" {
-  topic_name         = "chat_input_audio_request"
+//topic that captures and stores audio request
+resource "confluent_kafka_topic" "audio_request" {
+  topic_name         = "audio_request"
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
@@ -47,9 +47,9 @@ resource "confluent_kafka_topic" "chat_input_audio_request" {
   ]
 }
 
-//topic that stores generated sql to be executed
-resource "confluent_kafka_topic" "generated_sql_query" {
-  topic_name         = "generated_sql_query"
+//topic that stores input request as text
+resource "confluent_kafka_topic" "input_request" {
+  topic_name         = "input_request"
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
@@ -63,9 +63,9 @@ resource "confluent_kafka_topic" "generated_sql_query" {
   ]
 }
 
-//topic that stores sql executed by flink
-resource "confluent_kafka_topic" "flink_executed_sql" {
-  topic_name         = "flink_executed_sql"
+//topic that stores generated sql wrt the input
+resource "confluent_kafka_topic" "generated_sql" {
+  topic_name         = "generated_sql"
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
@@ -79,9 +79,9 @@ resource "confluent_kafka_topic" "flink_executed_sql" {
   ]
 }
 
-//topic that stores the returned records from sql query
-resource "confluent_kafka_topic" "generated_query_results" {
-  topic_name         = "generated_query_results"
+//topic that stores sql results executed by KStreams app
+resource "confluent_kafka_topic" "sql_results" {
+  topic_name         = "sql_results"
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
@@ -96,8 +96,8 @@ resource "confluent_kafka_topic" "generated_query_results" {
 }
 
 //topic that stores the summary of the response returned
-resource "confluent_kafka_topic" "summary_response" {
-  topic_name         = "summary_response"
+resource "confluent_kafka_topic" "summarised_results" {
+  topic_name         = "summarised_results"
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
@@ -112,8 +112,8 @@ resource "confluent_kafka_topic" "summary_response" {
 }
 
 //topic that stores the audio response as text
-resource "confluent_kafka_topic" "chat_output_audio_response" {
-  topic_name         = "chat_output_audio_response"
+resource "confluent_kafka_topic" "audio_response" {
+  topic_name         = "audio_response"
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
