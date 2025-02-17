@@ -14,7 +14,7 @@ interface RecordingResult {
     result: string;
 }
 
-export const AudioRecorderNew = () => {
+export const AudioRecorder = () => {
 
     const [isRecording, setIsRecording] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -23,8 +23,8 @@ export const AudioRecorderNew = () => {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const { toast } = useToast(); 
-    const { sendData, isProcessing, results } = useWebSocket(); 
+    const { toast } = useToast();
+    const { sendData, isProcessing, results } = useWebSocket();
 
 
     useEffect(() => {
@@ -54,9 +54,13 @@ export const AudioRecorderNew = () => {
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
+            const options = { mimeType: 'audio/webm; codecs=opus' }; // Or similar
+            mediaRecorderRef.current = new MediaRecorder(stream, options);
+
             mediaRecorderRef.current.ondataavailable = (e) => {
-                chunksRef.current.push(e.data);
+                if (e.data.size > 0) {
+                    chunksRef.current.push(e.data);
+                  }
             };
             mediaRecorderRef.current.start();
             setIsRecording(true);
@@ -78,22 +82,35 @@ export const AudioRecorderNew = () => {
 
     const stopRecording = async () => {
         if (mediaRecorderRef.current) {
-            mediaRecorderRef.current.stop(); 
+            await new Promise((resolve) => {
+                mediaRecorderRef.current.onstop = resolve;
+                mediaRecorderRef.current.stop();
+                mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+            });
+
             setIsRecording(false);
+            setIsPaused(false); // Ensure pause state is also reset
             stopTimer();
+            setDuration(0); // Resetting the duration
+
+            console.log("Recording size: " + chunksRef.current.reduce((totalSize, chunk) => totalSize + chunk.size, 0) + " bytes");
             const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
             const audioUrl = URL.createObjectURL(blob);
             setAudioURL(audioUrl);
 
-            // Now prepare and send the data over WebSocket
+
+            // Resetting chunks for the next recording
+            chunksRef.current = [];
+
+            // Prepare and send the data over WebSocket
+            console.log("Blob size before conversion: ", blob.size + " bytes");
             const buffer = await blob.arrayBuffer();
+            console.log("ArrayBuffer size after conversion: ", buffer.byteLength + " bytes");
+
             const base64DataUrl = await bytesToBase64DataUrl(new Uint8Array(buffer), 'audio/webm');
             sendData(base64DataUrl as string);
 
-            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-            setIsRecording(false);
-            setIsPaused(false);
-            stopTimer();
+            // Acknowledge the end of recording
             toast({
                 title: "Recording stopped",
                 description: "Your message has been recorded",
@@ -160,7 +177,7 @@ export const AudioRecorderNew = () => {
                             variant="ghost"
                             size="icon"
                             className={`w-20 h-20 rounded-full transform active:scale-95 transition-all duration-200
- 
+
             ${isRecording
                                     ? 'bg-red-500 hover:bg-red-600 animate-pulse'
                                     : 'bg-primary hover:bg-primary/90'
@@ -193,12 +210,6 @@ export const AudioRecorderNew = () => {
                             </Button>
                         </div>
                     )}
-                    {/* {audioURL && (
-            <audio controls className="w-full mt-4">
-              <source src={audioURL} type="audio/webm" />
-              Your browser does not support the audio element.
-            </audio>
-          )} */}
                 </div>
             </Card>
             <RecordingResults newResult={results} audioUrl={audioURL} />
