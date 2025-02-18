@@ -55,6 +55,20 @@ prompt_for_input() {
     done
 }
 
+# Define a list of valid Confluent Cloud regions
+VALID_REGIONS=("us-east1" "us-west2" "eu-central1" "ap-southeast2")
+
+# Function to check if the region is valid
+isValidRegion() {
+  local input="$1"
+  for region in "${VALID_REGIONS[@]}"; do
+    if [[ "$input" == "$region" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 # Function to prompt for a yes/no response. returns 1 for yes, 0 for no
 prompt_for_yes_no() {
     local prompt_message=$1
@@ -130,7 +144,18 @@ fi
 # Prompt for Confluent Cloud and MongoDB credentials
 [ -z "$CONFLUENT_CLOUD_API_KEY" ] && prompt_for_input CONFLUENT_CLOUD_API_KEY "Enter your Confluent Cloud API Key" false
 [ -z "$CONFLUENT_CLOUD_API_SECRET" ] && prompt_for_input CONFLUENT_CLOUD_API_SECRET "Enter your Confluent Cloud API Secret" true
+while [ -z "$CONFLUENT_CLOUD_REGION" ] || ! isValidRegion "$CONFLUENT_CLOUD_REGION"; do
+  if [ -z "$CONFLUENT_CLOUD_REGION" ]; then
+    # CONFLUENT_CLOUD_REGION is not set, prompt for it
+    prompt_for_input CONFLUENT_CLOUD_REGION "Enter your Confluent Cloud Network Region" false
+  else
+    # CONFLUENT_CLOUD_REGION is set but invalid, inform the user and unset it to prompt again
+    echo "The entered region '$CONFLUENT_CLOUD_REGION' is not valid. Valid regions are: ${VALID_REGIONS[*]}"
+    unset CONFLUENT_CLOUD_REGION
+  fi
+done
 
+echo "Valid region $CONFLUENT_CLOUD_REGION selected."
 # Create .env file from variables set in this file
 echo "[+] Setting up .env file for docker-compose"
 cat << EOF > .env
@@ -139,6 +164,7 @@ export GCP_REGION=$GCP_REGION
 export GCP_PROJECT_ID=$GCP_PROJECT_ID
 export GCP_GEMINI_API_KEY=$GCP_GEMINI_API_KEY
 export GCP_ACCOUNT=$GCP_ACCOUNT
+export CONFLUENT_CLOUD_REGION=$CONFLUENT_CLOUD_REGION
 export CONFLUENT_CLOUD_API_KEY=$CONFLUENT_CLOUD_API_KEY
 export CONFLUENT_CLOUD_API_SECRET=$CONFLUENT_CLOUD_API_SECRET
 export UNIQUE_ID=$unique_id
@@ -151,9 +177,9 @@ gcp_region = "$GCP_REGION"
 gcp_project_id = "$GCP_PROJECT_ID"
 gcp_gemini_api_key = "$GCP_GEMINI_API_KEY"
 gcp_account = "$GCP_ACCOUNT"
-confluent_cloud_region = "$GCP_REGION"
 confluent_cloud_api_key = "$CONFLUENT_CLOUD_API_KEY"
 confluent_cloud_api_secret = "$CONFLUENT_CLOUD_API_SECRET"
+confluent_cloud_region = "$CONFLUENT_CLOUD_REGION"
 unique_id = "$unique_id"
 EOF
 
@@ -174,6 +200,7 @@ if [ $? -ne 0 ]; then
     echo "[-] Failed to apply terraform"
     exit 1
 fi
+
 echo "[+] Terraform apply complete"
 
 source .env

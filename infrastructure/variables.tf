@@ -3,11 +3,6 @@ variable "unique_id" {
   type        = string
 }
 
-variable "confluent_cloud_api_key" {
-  description = "Confluent Cloud API Key (also referred as Cloud API ID) with EnvironmentAdmin and AccountAdmin roles provided by Kafka Ops team"
-  type        = string
-}
-
 variable "gcp_gemini_api_key" {
   description = "GCP Gemini API Key"
   type        = string
@@ -15,6 +10,21 @@ variable "gcp_gemini_api_key" {
 
 variable "gcp_project_id" {
   description = "GCP project ID"
+  type        = string
+}
+
+variable "gcp_region" {
+  description = "The GCP region to deploy the infrastructure"
+  type        = string
+}
+
+variable "gcp_account" {
+  description = "The GCP account used to deploy the infrastructure"
+  type        = string
+}
+
+variable "confluent_cloud_api_key" {
+  description = "Confluent Cloud API Key (also referred as Cloud API ID) with EnvironmentAdmin and AccountAdmin roles provided by Kafka Ops team"
   type        = string
 }
 
@@ -27,6 +37,7 @@ variable "confluent_cloud_api_secret" {
 variable "confluent_cloud_region" {
   description = "The region of Confluent Cloud Network"
   type        = string
+  default     = "us-east1"
 }
 
 variable "confluent_cloud_service_provider" {
@@ -36,19 +47,9 @@ variable "confluent_cloud_service_provider" {
 }
 
 variable "confluent_cloud_environment_name" {
-  description = "The name of the Confluent Cloud environment to create"
+  description = "The prefix of the Confluent Cloud environment to create"
   type        = string
-  default     = "genai-quickstart"
-}
-
-variable "gcp_region" {
-  description = "The GCP region to deploy the infrastructure"
-  type        = string
-}
-
-variable "gcp_account" {
-  description = "The GCP account used to deploy the infrastructure"
-  type        = string
+  default     = "CFLT-Health-Quickstart"
 }
 
 variable "env_display_id_postfix" {

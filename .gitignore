@@ -46,6 +46,14 @@ yarn.lock
 .env.development.local
 .env.test.local
 .env.production.local
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+builds/
 
 # Build/generated files
 build/
@@ -61,6 +69,14 @@ out/
 *.tfstate
 *.tfstate.*.backup
 *.tfstate.backup
+.env*
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+terraform.tfstate.backup
+terraform.tfstate
+.terraform
+.DS_Store
+variables.tfvars
 
 # Crash log files
 crash.log
@@ -74,6 +90,4 @@ crash.log
 terraform.rc
 
 # Misc
-.DS_Store
 .unique_id
-.env

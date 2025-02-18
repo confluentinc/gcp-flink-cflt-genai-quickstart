@@ -25,6 +25,3 @@ module "confluent_cloud" {
      module.gcp
   ]
 }
-
-
-
