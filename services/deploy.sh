@@ -88,7 +88,7 @@ SVC_NAME="quickstart-healthcare-ai-"$LOWER_UNIQUE_ID
 
 echo "[+] Building and Deploying WebSocket Frontend"
 IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-backend gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --source "/root/source/frontend" --region "$GCP_REGION" --allow-unauthenticated --project "$GCP_PROJECT_ID" \
---set-env-vars REACT_APP_WS_URL="ws://localhost:8080/bot"
+--set-env-vars REACT_APP_WS_URL="ws://localhost:8080/bot" --port=80
 if [ $? -ne 0 ]; then
     echo "[-] Failed to deploy Frontend end"
     exit 1
