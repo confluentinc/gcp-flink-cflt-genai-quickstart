@@ -1,5 +1,5 @@
 import { Navbar } from "@/components/Navbar";
-import { AudioRecorderNew } from "@/components/AudioRecorder";
+import { AudioRecorder } from "@/components/AudioRecorder";
 import { WebSocketProvider } from "@/components/WebSocketProvider";
 
 
@@ -9,7 +9,7 @@ const Assistant = () => {
       <Navbar />
       <main className="container mx-auto px-4 pt-32 pb-16 flex justify-center">
         <WebSocketProvider> 
-        <AudioRecorderNew />
+        <AudioRecorder />
         </WebSocketProvider>
       </main>
     </div>

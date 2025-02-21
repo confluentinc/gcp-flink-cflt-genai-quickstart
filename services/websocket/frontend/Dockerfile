@@ -4,13 +4,13 @@ FROM node:23-alpine3.20 AS builder
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json/npm-shrinkwrap.json to workdir in container
+# Copy package.json and package-lock.json to workdir in container
 COPY package*.json ./
 
-# Install dependencies including 'devDependencies' for building the app
+# Install dependencies for building the app
 RUN npm install
 
-# Copy the rest of your app's source code from your host to your image filesystem.
+# Copy the rest of the source code from your host to your image filesystem.
 COPY . .
 
 # Build the app

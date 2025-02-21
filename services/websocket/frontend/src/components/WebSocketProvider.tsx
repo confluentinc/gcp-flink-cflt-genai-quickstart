@@ -33,7 +33,7 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     const initializeWebSocket = () => {
-      const ws = new WebSocket(process.env.REACT_APP_WS_URL || 'ws://localhost:8080/bot');
+      const ws = new WebSocket('ws://localhost:8080/bot'); //TODO: This needs to be changed out for a property set my TF
       ws.onopen = () => {
         console.log('WebSocket connection established');
         setIsConnected(true);
