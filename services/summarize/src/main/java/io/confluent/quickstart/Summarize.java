@@ -19,12 +19,13 @@ import io.confluent.common.utils.TestUtils;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Produced;
 
+import java.io.IOException;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 public class Summarize {
 
@@ -34,6 +35,14 @@ public class Summarize {
     static final String authKey = System.getenv("KEY");
     static final String authSecret = System.getenv("SECRET");
 
+    static final String projectId = System.getenv("PROJECT_ID");
+    static final String location = System.getenv("LOCATION");
+
+    static final String MODEL_NAME = "gemini-2.0-flash-001";
+    static final String PROMPT = "Summarize the following paragraphs in 2 sentences. \n\n";
+
+    static VertexClient vertexClient;
+
     public static void main(final String[] args) {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
             System.out.println("Unable to run: TOPIC_IN, TOPIC_OUT and BOOTSTRAP env vars must be set.");
@@ -42,6 +51,8 @@ public class Summarize {
 
         // Configure the Streams application.
         final Properties streamsConfiguration = getStreamsConfiguration(bootstrapServers, authKey, authSecret);
+
+        vertexClient = new VertexClient(projectId, location, MODEL_NAME);
 
         // Define the processing topology of the Streams application.
         final StreamsBuilder builder = new StreamsBuilder();
@@ -93,26 +104,24 @@ public class Summarize {
         return streamsConfiguration;
     }
 
+    static String getSummary(String text) throws IOException {
+        String completePrompt = PROMPT + text;
+        return vertexClient.callModel(completePrompt);
+    }
+
     static void summarizeStream(final StreamsBuilder builder) {
-        final KStream<String, String> textLines = builder.stream(inputTopic);
-
-        final Pattern pattern = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS);
-
-//        final KTable<String, String> wordCounts = textLines
-//                // Split each text line, by whitespace, into words.  The text lines are the record
-//                // values, i.e. we can ignore whatever data is in the record keys and thus invoke
-//                // `flatMapValues()` instead of the more generic `flatMap()`.
-//                .flatMapValues(value -> Arrays.asList(pattern.split(value.toLowerCase())))
-//                // Group the split data by word so that we can subsequently count the occurrences per word.
-//                // This step re-keys (re-partitions) the input data, with the new record key being the words.
-//                // Note: No need to specify explicit serdes because the resulting key and value types
-//                // (String and String) match the application's default serdes.
-//                .groupBy((keyIgnored, word) -> word)
-//                // Count the occurrences of each word (record key).
-//                .count();
-//
-//        // Write the `KTable<String, Long>` to the output topic.
-//        wordCounts.toStream().to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+        builder.stream(inputTopic)
+            .filter((sessionId, text) -> sessionId != null && text != null)
+            // sanitize the output by removing null record values
+            .map((sessionId, text) ->
+            {
+                try {
+                    return new KeyValue<>(sessionId.toString(), getSummary(text.toString()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
     }
 
 }
