@@ -1,3 +1,28 @@
+variable "unique_id" {
+  description = "A unique identifier for the deployment"
+  type        = string
+}
+
+variable "gcp_gemini_api_key" {
+  description = "GCP Gemini API Key"
+  type        = string
+}
+
+variable "gcp_project_id" {
+  description = "GCP project ID"
+  type        = string
+}
+
+variable "gcp_region" {
+  description = "The GCP region to deploy the infrastructure"
+  type        = string
+}
+
+variable "gcp_account" {
+  description = "The GCP account used to deploy the infrastructure"
+  type        = string
+}
+
 variable "confluent_cloud_api_key" {
   description = "Confluent Cloud API Key (also referred as Cloud API ID) with EnvironmentAdmin and AccountAdmin roles provided by Kafka Ops team"
   type        = string

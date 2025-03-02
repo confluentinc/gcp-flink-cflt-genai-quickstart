@@ -155,6 +155,28 @@ resource "confluent_api_key" "app-manager-kafka-api-key" {
   }
 }
 
+resource "confluent_api_key" "clients-schema-registry-api-key" {
+  display_name = "clients-sr-api-key-${var.env_display_id_postfix}"
+  description  = "Schema Registry API Key"
+  owner {
+    id          = confluent_service_account.app-manager.id
+    api_version = confluent_service_account.app-manager.api_version
+    kind        = confluent_service_account.app-manager.kind
+  }
+  managed_resource {
+    id          = data.confluent_schema_registry_cluster.essentials.id
+    api_version = data.confluent_schema_registry_cluster.essentials.api_version
+    kind        = data.confluent_schema_registry_cluster.essentials.kind
+    environment {
+      id = confluent_environment.staging.id
+    }
+  }
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
 # ------------------------------------------------------
 # ACLs
 # ------------------------------------------------------
@@ -222,6 +244,12 @@ resource "confluent_role_binding" "cluster-admin" {
   depends_on = [
     confluent_kafka_cluster.standard
   ]
+}
+
+resource "confluent_role_binding" "client-schema-registry-developer-write" {
+  principal   = "User:${confluent_service_account.app-manager.id}"
+  crn_pattern = "${data.confluent_schema_registry_cluster.essentials.resource_name}/subject=*"
+  role_name   = "DeveloperWrite"
 }
 
 # ------------------------------------------------------

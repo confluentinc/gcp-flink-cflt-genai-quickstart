@@ -10,7 +10,7 @@ npm i
 npm run dev
 
 # Step 3: navigate to the url
-http://localhost:8001
+http://localhost:8080
 ```
 
 ## Docker Setup
@@ -42,7 +42,7 @@ To run the container and make your application accessible on port 8001, use the 
 docker run -p 8001:80 frontend-app
 ```
 
-`-p 8001:80` maps port `8001` on your local machine to port `80` in the Docker container, allowing you to access the app via http://localhost:8001 in your web browser.
+`-p 3000:80` maps port `3000` on your local machine to port `80` in the Docker container, allowing you to access the app via http://localhost:8001 in your web browser.
 
 #### Accessing the Application
 Open your web browser.
@@ -54,7 +54,7 @@ Visit http://localhost:8001 to view your React application.
 The application relies on the environment variable `REACT_APP_WS_URL`, you can pass it at runtime using the `-e` flag with docker run. Here's an example:
 
 ```bash
-docker run -e REACT_APP_WS_URL=ws://your-websocket-url -p 8080:80 my-react-app
+docker run -e VITE_WS_URL=ws://your-websocket-url -p 3000:80 my-react-app
 ```
 
 Replace `ws://your-websocket-url` with the actual WebSocket URL
