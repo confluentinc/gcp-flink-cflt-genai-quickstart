@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
 
-public class VertxClientTest {
+public class VertexClientTest {
     VertexClient client;
 
     @Before
