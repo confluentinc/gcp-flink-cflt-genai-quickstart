@@ -9,3 +9,4 @@ services:
       - .env
     volumes:
       - ./infrastructure:/app/infrastructure
+      - ./.config:/root/.config

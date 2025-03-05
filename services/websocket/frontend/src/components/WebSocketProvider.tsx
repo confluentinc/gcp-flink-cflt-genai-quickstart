@@ -4,9 +4,9 @@ import React, { createContext, useContext, useState, useEffect, useRef } from "r
 interface WebSocketContextType {
   isConnected: boolean;
   isProcessing: boolean;
-  results: any; 
+  results: any;
   sendData: (data: string) => void;
-  updateResults: (results: any) => void; 
+  updateResults: (results: any) => void;
 }
 
 const defaultWebSocketContextValue: WebSocketContextType = {
@@ -33,11 +33,24 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     const initializeWebSocket = () => {
-      const ws = new WebSocket('ws://localhost:8080/bot'); //TODO: This needs to be changed out for a property set my TF
+      const currentLocation = window.location;
+      let ws;
+
+      if (import.meta.env.VITE_WS_URL) {
+        ws = new WebSocket(import.meta.env.VITE_WS_URL);
+      } else {
+        if (window.location.protocol === 'https:') {
+          ws = new WebSocket('wss://' + window.location.host + '/ws');
+        } else {
+          ws = new WebSocket('ws://' + window.location.host + '/ws');
+        }
+      }
+
       ws.onopen = () => {
         console.log('WebSocket connection established');
         setIsConnected(true);
       };
+
       ws.onmessage = (event) => {
         console.log('Received WebSocket message:', event.data);
         try {
@@ -48,8 +61,11 @@ export const WebSocketProvider = ({ children }) => {
           console.error('Error parsing WebSocket message:', error);
         }
       };
+
       ws.onclose = () => console.log('WebSocket connection closed');
+
       ws.onerror = (error) => console.error('WebSocket error:', error);
+
       wsRef.current = ws;
     };
 

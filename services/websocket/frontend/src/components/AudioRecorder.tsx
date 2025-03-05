@@ -54,7 +54,7 @@ export const AudioRecorder = () => {
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const options = { mimeType: 'audio/webm; codecs=opus' }; // Or similar
+            const options = { mimeType: 'audio/webm; codecs=opus' };
             mediaRecorderRef.current = new MediaRecorder(stream, options);
 
             mediaRecorderRef.current.ondataavailable = (e) => {
@@ -89,24 +89,19 @@ export const AudioRecorder = () => {
             });
 
             setIsRecording(false);
-            setIsPaused(false); // Ensure pause state is also reset
+            setIsPaused(false);
             stopTimer();
             setDuration(0); // Resetting the duration
 
-            console.log("Recording size: " + chunksRef.current.reduce((totalSize, chunk) => totalSize + chunk.size, 0) + " bytes");
             const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
             const audioUrl = URL.createObjectURL(blob);
             setAudioURL(audioUrl);
-
 
             // Resetting chunks for the next recording
             chunksRef.current = [];
 
             // Prepare and send the data over WebSocket
-            console.log("Blob size before conversion: ", blob.size + " bytes");
             const buffer = await blob.arrayBuffer();
-            console.log("ArrayBuffer size after conversion: ", buffer.byteLength + " bytes");
-
             const base64DataUrl = await bytesToBase64DataUrl(new Uint8Array(buffer), 'audio/webm');
             sendData(base64DataUrl as string);
 
@@ -177,7 +172,7 @@ export const AudioRecorder = () => {
                             variant="ghost"
                             size="icon"
                             className={`w-20 h-20 rounded-full transform active:scale-95 transition-all duration-200
-
+ 
             ${isRecording
                                     ? 'bg-red-500 hover:bg-red-600 animate-pulse'
                                     : 'bg-primary hover:bg-primary/90'

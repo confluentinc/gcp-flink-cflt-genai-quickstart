@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: "QuickstartApplication"
+  config:
+    activate.on-profile: default
+
+  kafka:
+    bootstrap-servers: ${BOOTSTRAP_SERVER}
+    properties:
+      schema.registry.url: ${SR_URL}
+      basic.auth.credentials.source: USER_INFO
+      schema.registry.basic.auth.user.info: ${SR_API_KEY}:${SR_API_SECRET}
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_API_KEY}" password="${KAFKA_API_SECRET}";
+    producer:
+      client-id: ${CLIENT_ID}|producer|audio_request
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.pie.quickstart.gcp.audio.model.serdes.query.AudioQuerySerializer
+    consumer:
+      client-id: ${CLIENT_ID}|consumer|audio_response
+      group-id: ${CLIENT_ID}_audio_response_reader
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.pie.quickstart.gcp.audio.model.serdes.response.AudioResponseDeserializer
+
+server:
+  port: ${PORT:8080}
