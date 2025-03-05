@@ -15,6 +15,8 @@
  */
 package io.confluent.quickstart;
 
+import com.google.cloud.speech.v1.*;
+import com.google.protobuf.ByteString;
 import io.confluent.common.utils.TestUtils;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
@@ -22,26 +24,30 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Properties;
 
-public class AudioToText {
 
-    static final String inputTopic = System.getenv("TOPIC_IN");
-    static final String outputTopic = System.getenv("TOPIC_OUT");
-    static final String bootstrapServers = System.getenv("BOOTSTRAP");
+
+public class AudioToText {
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    //static final String inputTopic = System.getenv("TOPIC_IN");
+    //static final String outputTopic = System.getenv("TOPIC_OUT");
+    //static final String bootstrapServers = System.getenv("BOOTSTRAP");
     static final String authKey = System.getenv("KEY");
     static final String authSecret = System.getenv("SECRET");
+    static final String inputTopic = "audio_request";
+    static final String outputTopic = "input_request";
+    static final String bootstrapServers = "pkc-619z3.us-east1.gcp.confluent.cloud:9092";
 
     static final String projectId = System.getenv("PROJECT_ID");
     static final String location = System.getenv("LOCATION");
-
-    //static final String MODEL_NAME = "gemini-2.0-flash-001";
-    //static final String PROMPT = "Summarize the following paragraphs in 2 sentences. \n\n";
-
-    //static VertexClient vertexClient;
 
     public static void main(final String[] args) {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
@@ -92,7 +98,7 @@ public class AudioToText {
         }
 
         streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
-        streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
+        streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.BytesSerde.class);
         // Records should be flushed every 10 seconds. This is less than the default
         // in order to keep this example interactive.
         streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
@@ -123,18 +129,43 @@ public class AudioToText {
             return "Error during transcription";
         }
     }
+
+    public class AudioQuery {
+
+        private String sessionId;
+        private byte[] audio;
+
+        public byte[] getAudio() {
+            return audio;
+        }
+
+        public String getSessionId() {
+            return sessionId;
+        }
+
+
+    }
     static void audioToTextStream(final StreamsBuilder builder) {
-        builder.stream(inputTopic)
-                .filter((sessionId, audio) -> sessionId != null && audio != null)
-                // sanitize the output by removing null record values
-                .map((sessionId, audio) ->
-                {
-                    try {
-                        return new KeyValue<>(sessionId.toString(), audioToText(audio));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+
+        final  AudioQuery input;
+        {
+            try {
+                input = mapper.readValue(inputTopic, AudioQuery.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // Create a stream from the input topic
+        KStream<String, AudioQuery> sourceStream = builder.stream((Collection<String>) input);
+        sourceStream
+                .filter((sessionId, audioQuery) -> sessionId != null && audioQuery != null)
+                .map((sessionId, audioQuery) -> {
+                    // Access the byte array from AudioQuery and pass it to audioToText
+                    return new KeyValue<>(sessionId, audioToText(audioQuery.getAudio()));
                 })
-                .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+                .to(outputTopic, Produced.with(Serdes.String(), Serdes.String())); // Ensure outputTopic is properly defined to capture the transformation
     }
 }
+
+
+
