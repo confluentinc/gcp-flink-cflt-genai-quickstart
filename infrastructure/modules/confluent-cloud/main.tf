@@ -127,6 +127,64 @@ resource "confluent_kafka_topic" "audio_response" {
   ]
 }
 
+//topic used to setup mock data in bigquery
+resource "confluent_kafka_topic" "setup_mock_data_injection" {
+  topic_name         = "setup_mock_data_injection"
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+  depends_on = [
+    confluent_api_key.app-manager-kafka-api-key
+  ]
+}
+
+# ------------------------------------------------------
+# CONNECTOR
+# ------------------------------------------------------
+
+
+resource "confluent_connector" "bigquery_sink" {
+
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+
+  environment {
+    id = confluent_environment.staging.id
+  }
+
+  config_nonsensitive = {
+    "connector.class"                = "BigQueryStorageSink"
+    "name"                           = "BigQuerySinkConnector"
+    "topics"                         = confluent_kafka_topic.setup_mock_data_injection.topic_name
+    "auto.create"                    = "true"
+    "auto.update"                    = "true"
+    "sanitize.topics"                = "true"
+    "sanitize.field.name.replacements" = "__"
+    "schema.retention.ms"            = "86400000"
+    "project"                        = var.gcp_project_id
+    "datasets"                       = "health_quickstart_dataset"
+    "keyfile"                        = file("${path.root}/service-account-key.json")
+    "data.format"                    = "AVRO"
+    "tasks.max"                      = "1"
+
+  }
+  config_sensitive = {}
+
+  depends_on = [
+    confluent_kafka_topic.setup_mock_data_injection
+  ]
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 # ------------------------------------------------------
 # API KEYs
 # ------------------------------------------------------

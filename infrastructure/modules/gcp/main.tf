@@ -7,27 +7,13 @@ locals {
   userid = lower(var.unique_id)
 }
 
+# ------------------------------------------------------
+# SERVICE ACCOUNT
+# ------------------------------------------------------
+
 resource "google_service_account" "service_account" {
   account_id   = "cfltquickstart${local.userid}"
   display_name = "Service Account For Confluent GenAI Health Quickstart"
-}
-
-resource "google_project_iam_member" "vertex_ai" {
-  project = var.gcp_project_id
-  role    = "roles/aiplatform.admin"
-  member  = "serviceAccount:${google_service_account.service_account.email}"
-}
-
-resource "google_project_iam_member" "bigquery" {
-  project = var.gcp_project_id
-  role    = "roles/bigquery.admin"
-  member  = "serviceAccount:${google_service_account.service_account.email}"
-}
-
-resource "google_project_iam_member" "ml" {
-  project = var.gcp_project_id
-  role    = "roles/ml.admin"
-  member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_service_account_key" "service_account_key" {
@@ -45,4 +31,47 @@ resource "google_service_account_key" "service_account_key" {
 resource "local_file" "service_account_key_file" {
   content = base64decode(google_service_account_key.service_account_key.private_key)
   filename = "${path.root}/service-account-key.json"
+}
+
+# ------------------------------------------------------
+# VERTEX AI
+# ------------------------------------------------------
+
+resource "google_project_iam_member" "vertex_ai" {
+  project = var.gcp_project_id
+  role    = "roles/aiplatform.admin"
+  member  = "serviceAccount:${google_service_account.service_account.email}"
+}
+
+resource "google_project_iam_member" "ml" {
+  project = var.gcp_project_id
+  role    = "roles/ml.admin"
+  member  = "serviceAccount:${google_service_account.service_account.email}"
+}
+
+# ------------------------------------------------------
+# BIGQUERY
+# ------------------------------------------------------
+
+resource "google_bigquery_dataset" "mock_health_dataset" {
+  dataset_id                  = "health_quickstart_dataset"
+  description                 = "BigQuery For Confluent GenAI Health Quickstart"
+  location                    = var.gcp_region
+
+  access {
+    role           = "roles/bigquery.dataOwner"
+    user_by_email  = "serviceAccount:${google_service_account.service_account.email}"
+  }
+
+  labels = {
+    env = "staging"
+  }
+}
+
+
+
+resource "google_project_iam_member" "bigquery" {
+  project = var.gcp_project_id
+  role    = "roles/bigquery.admin"
+  member  = "serviceAccount:${google_service_account.service_account.email}"
 }
