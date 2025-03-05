@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.confluent</groupId>
-    <artifactId>kstreams-summarize</artifactId>
+    <artifactId>kstreams-execute-query</artifactId>
     <packaging>jar</packaging>
     <version>8.0.0-0</version>
 
@@ -93,17 +93,16 @@
 
         <dependency>
             <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-vertexai</artifactId>
-            <version>1.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-aiplatform</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.genai</groupId>
             <artifactId>google-genai</artifactId>
             <version>0.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-bigquery</artifactId>
         </dependency>
 
         <!-- Test dependencies -->
