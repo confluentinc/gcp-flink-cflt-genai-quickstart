@@ -1,6 +1,7 @@
 # Stage 1: Build the React application
 FROM node:23-alpine3.20 AS builder
 
+
 # Set the working directory in the container
 WORKDIR /app
 

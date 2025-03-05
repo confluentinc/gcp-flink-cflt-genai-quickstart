@@ -87,17 +87,17 @@ if [ ! -d "$CONFIG_FOLDER" ]; then
 fi
 
 LOWER_UNIQUE_ID=$(to_lowercase "$UNIQUE_ID")
-SVC_NAME="quickstart-healthcare-ai-"$LOWER_UNIQUE_ID
+SVC_NAME="quickstart-healthcare-ai-websocket-"$LOWER_UNIQUE_ID
 
-#Cehck is the service exists
+#Check is the service exists
 if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
-  echo "[+] Destroying WebSocket Frontend"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-frontend gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+  echo "[+] Destroying WebSocket service"
+  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-backend gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
   if [ $? -ne 0 ]; then
-      echo "[-] Failed to destroy Frontend"
+      echo "[-] Failed to destroy backend"
       exit 1
   fi
-  echo "[+] WebSocket Frontend destroyed successfully"
+  echo "[+] WebSocket destroyed successfully"
 fi
 
 echo "[+] Cleanup files"

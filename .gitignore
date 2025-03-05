@@ -64,6 +64,7 @@ out/
 
 # Local .terraform directories
 **/.terraform/*
+/infrastructure/service-account-key.json
 
 # .tfstate files
 *.tfstate
@@ -91,3 +92,4 @@ terraform.rc
 
 # Misc
 .unique_id
+.config
