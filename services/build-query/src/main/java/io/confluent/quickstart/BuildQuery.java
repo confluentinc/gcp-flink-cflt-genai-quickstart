@@ -27,7 +27,7 @@ import org.apache.kafka.streams.kstream.Produced;
 import java.io.IOException;
 import java.util.Properties;
 
-public class Summarize {
+public class BuildQuery {
 
     static final String inputTopic = System.getenv("TOPIC_IN");
     static final String outputTopic = System.getenv("TOPIC_OUT");
@@ -39,7 +39,7 @@ public class Summarize {
     static final String location = System.getenv("LOCATION");
 
     static final String MODEL_NAME = "gemini-2.0-flash-001";
-    static final String PROMPT = "Summarize the following paragraphs in 2 sentences. \n\n";
+    static final String PROMPT = "Build a BigQuery SQL query with those characteristics.\n\n";
 
     static VertexClient vertexClient;
 
@@ -54,7 +54,7 @@ public class Summarize {
         vertexClient = new VertexClient(projectId, location, MODEL_NAME);
 
         final StreamsBuilder builder = new StreamsBuilder();
-        summarizeStream(builder);
+        buildQueryStream(builder);
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
 
         streams.cleanUp();
@@ -64,8 +64,8 @@ public class Summarize {
 
     static Properties getStreamsConfiguration(final String bootstrapServers, final String key, final String secret) {
         final Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "quickstart-summarize-results");
-        streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "quickstart-summarize-results");
+        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "quickstart-build-query");
+        streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "quickstart-build-query");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         if (key != null && secret != null) {
             streamsConfiguration.put(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
@@ -82,19 +82,19 @@ public class Summarize {
         return streamsConfiguration;
     }
 
-    static String getSummary(String text) throws IOException {
+    static String getQuery(String text) throws IOException {
         String completePrompt = PROMPT + text;
         return vertexClient.callModel(completePrompt);
     }
 
-    static void summarizeStream(final StreamsBuilder builder) {
+    static void buildQueryStream(final StreamsBuilder builder) {
         builder.stream(inputTopic)
             .filter((sessionId, text) -> sessionId != null && text != null)
             // sanitize the output by removing null record values
             .map((sessionId, text) ->
             {
                 try {
-                    return new KeyValue<>(sessionId.toString(), getSummary(text.toString()));
+                    return new KeyValue<>(sessionId.toString(), getQuery(text.toString()));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
