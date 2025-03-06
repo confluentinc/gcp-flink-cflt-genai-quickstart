@@ -64,12 +64,11 @@ echo "[+] WebSocket Frontend built successfully"
 
 
 echo "[+] Building and Deploying WebSocket backend"
-IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-websocket gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy
-"$SVC_NAME" --no-cpu-throttling
- --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
+IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-websocket gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy"$SVC_NAME" --no-cpu-throttling--source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
 --set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID"
 if [ $? -ne 0 ]; then
     echo "[-] Failed to deploy back end"
     exit 1
 fi
 echo "[+] WebSocket deployed successfully"
+
