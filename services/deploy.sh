@@ -33,7 +33,7 @@ done
 IMAGE_ARCH=$(uname -m | grep -qE 'arm64|aarch64' && echo 'arm64' || echo 'x86_64')
 CURRENT_DIR=$(dirname "$0")
 SCRIPT_FOLDER=$(get_full_path "$CURRENT_DIR")
-CONFIG_FOLDER="$SCRIPT_FOLDER"/.config
+CONFIG_FOLDER="$SCRIPT_FOLDER"/.config/
 
 echo "[+] SCRIPT_FOLDER: $SCRIPT_FOLDER"
 
