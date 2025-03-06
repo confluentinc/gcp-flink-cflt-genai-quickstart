@@ -57,7 +57,7 @@ builds/
 
 # Build/generated files
 build/
-dist/
+/dist/
 out/
 
 # ----- Terraform -----
