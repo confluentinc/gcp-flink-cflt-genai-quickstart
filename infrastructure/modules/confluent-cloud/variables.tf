@@ -14,18 +14,6 @@ variable "confluent_cloud_service_provider" {
   type        = string
 }
 
-# Required for Google BigQuery V2 Connector
-variable "gcp_region" {
-  description = "The GCP region to deploy the infrastructure"
-  type        = string
-}
-
-# Required for Google BigQuery V2 Connector
-variable "gcp_project_id" {
-  description = "GCP project ID"
-  type        = string
-}
-
 variable "env_display_id_postfix" {
   description = "A random string we will be appending to resources like environment, api keys, etc. to make them unique"
   type        = string
