@@ -53,15 +53,26 @@ resource "google_project_iam_member" "ml" {
 # BIGQUERY
 # ------------------------------------------------------
 
+resource "google_project_iam_member" "bigquery" {
+  project = var.gcp_project_id
+  role    = "roles/bigquery.admin"
+  member  = "serviceAccount:${google_service_account.service_account.email}"
+}
+
 resource "google_bigquery_dataset" "mock_health_dataset" {
   dataset_id                  = "health_quickstart_dataset"
   description                 = "BigQuery For Confluent GenAI Health Quickstart"
   location                    = var.gcp_region
 
   access {
-    role           = "roles/bigquery.dataOwner"
-    user_by_email  = "serviceAccount:${google_service_account.service_account.email}"
+    role           = "OWNER"
+    user_by_email  = google_service_account.service_account.email
   }
+
+  depends_on = [
+    google_service_account.service_account,
+    google_project_iam_member.bigquery
+  ]
 
   labels = {
     env = "staging"
@@ -69,9 +80,3 @@ resource "google_bigquery_dataset" "mock_health_dataset" {
 }
 
 
-
-resource "google_project_iam_member" "bigquery" {
-  project = var.gcp_project_id
-  role    = "roles/bigquery.admin"
-  member  = "serviceAccount:${google_service_account.service_account.email}"
-}

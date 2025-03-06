@@ -58,7 +58,7 @@ echo "[+] Infrastructure destroyed successfully"
 echo "[+] Cleaning up .env, infrastructure/variables.tf and other files"
 rm -f .env
 rm -f infrastructure/variables.tfvars
-rm -rf .config
+rm -rf .config/
 rm -f infrastructure/gcp-embed-connection-result.json
 rm -f infrastructure/gcp-gemini-connection-result.json
 rm -f .unique_id

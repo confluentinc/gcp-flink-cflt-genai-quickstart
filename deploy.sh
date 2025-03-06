@@ -198,15 +198,17 @@ echo "[+] Terraform apply complete"
 
 source .env
 
-echo "[+] Deploying backend"
-
 export BOOTSTRAP_SERVER=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw bootstrap_servers)
+export KAFKA_CLUSTER_ID=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw clients_kafka_cluster_id)
 export KAFKA_API_KEY=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw clients_kafka_api_key)
 export KAFKA_API_SECRET=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw clients_kafka_api_secret)
 export SR_API_KEY=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw clients_schema_registry_api_key)
 export SR_API_SECRET=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw clients_schema_registry_api_secret)
 export SR_URL=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw schema_registry_url)
 
+export BIGQUERY_DATASET_ID=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw gcp_big_query_dataset_id)
+
+echo "[+] Deploying backend"
 ./services/deploy.sh
 
 echo "[+] Done"

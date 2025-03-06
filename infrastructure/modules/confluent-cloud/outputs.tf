@@ -10,6 +10,16 @@ output "clients_kafka_api_key" {
   sensitive   = true
 }
 
+output "clients_kafka_cluster_id" {
+  value = confluent_kafka_cluster.standard.id
+  description = "Confluent Cloud Kafka Cluster ID"
+}
+
+output "clients_kafka_cluster_name" {
+  value = confluent_kafka_cluster.standard.display_name
+  description = "Confluent Cloud Kafka Cluster Display Name"
+}
+
 output "schema_registry_url" {
   value       = data.confluent_schema_registry_cluster.essentials.rest_endpoint
   description = "URL for the Schema Registry"

@@ -31,3 +31,18 @@ output "bootstrap_servers" {
   value       = module.confluent_cloud.bootstrap_servers
   description = "Bootstrap servers for Kafka clients to connect to the kafka cluster. Removes the SASL_SSL:// prefix for ease of use."
 }
+
+output "clients_kafka_cluster_id" {
+  value       = module.confluent_cloud.clients_kafka_cluster_id
+  description = "Kafka Cluster ID"
+}
+
+output "clients_kafka_cluster_display_name" {
+  value       = module.confluent_cloud.clients_kafka_cluster_name
+  description = "Kafka Cluster Display Name"
+}
+
+output "gcp_big_query_dataset_id" {
+  value       = module.gcp.gcp_big_query_dataset_id
+  description = "GCP BigQuery Dataset ID."
+}
