@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.confluent</groupId>
-    <artifactId>kafka-streams-mini</artifactId>
+    <artifactId>kstreams-build-query</artifactId>
     <packaging>jar</packaging>
     <version>8.0.0-0</version>
 
@@ -36,7 +36,7 @@
         <kafka.streams.version>7.8.0-ccs</kafka.streams.version>
         <avro.serializer.version>7.8.0</avro.serializer.version>
         <kafka.clients.version>7.8.0-ccs</kafka.clients.version>
-        <avro.version>1.11.4</avro.version>
+        <avro.version>1.10.1</avro.version>
         <kafka.version>3.8.0</kafka.version>
         <junit.version>4.13.2</junit.version>
         <junit.jupiter.version>5.10.3</junit.jupiter.version>
@@ -44,6 +44,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <io.confluent.kafka-streams-examples.version>8.0.0-0</io.confluent.kafka-streams-examples.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>26.55.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -79,6 +91,21 @@
             <version>${avro.serializer.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-vertexai</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-aiplatform</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.genai</groupId>
+            <artifactId>google-genai</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -103,12 +130,12 @@
             <artifactId>mockito-core</artifactId>
             <version>4.11.0</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.kafka</groupId>-->
-<!--            <artifactId>kafka-test-common-runtime</artifactId>-->
-<!--            <version>${kafka.version}</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.kafka</groupId>-->
+        <!--            <artifactId>kafka-test-common-runtime</artifactId>-->
+        <!--            <version>${kafka.version}</version>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams-test-utils</artifactId>
