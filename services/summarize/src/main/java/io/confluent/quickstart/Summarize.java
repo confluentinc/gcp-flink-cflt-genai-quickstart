@@ -39,7 +39,9 @@ public class Summarize {
     static final String location = System.getenv("LOCATION");
 
     static final String MODEL_NAME = "gemini-2.0-flash-001";
-    static final String PROMPT = "Summarize the following paragraphs in 2 sentences. \n\n";
+    static final String PROMPT =
+            "Summarize the following results of a SQL query in 3 sentences maximum. Use an " +
+            "informal style, like a conversation. Do not describe the rows or columns. \n\n";
 
     static VertexClient vertexClient;
 
