@@ -12,9 +12,17 @@ public class BigQueryClientTest {
     BigQueryClient client;
 
     final String QUERY =
-            "SELECT * FROM " +
-            "`csid-281116.gcp_genai_demo.covid_hospital_occupancy` " +
-            "LIMIT 10";
+            "SELECT\n" +
+                    "    Appointments.AppointmentDate,\n" +
+                    "    Appointments.Reason\n" +
+                    "  FROM\n" +
+                    "    `csid-281116.doctors_practice.Appointments` AS Appointments\n" +
+                    "  JOIN\n" +
+                    "    `csid-281116.doctors_practice.Patients` AS Patients ON Appointments.PatientID = Patients.PatientID\n" +
+                    "  WHERE Patients.FirstName = 'Joseph'\n" +
+                    "ORDER BY\n" +
+                    "  Appointments.AppointmentDate DESC\n" +
+                    "LIMIT 3\n";
 
     @Before
     public void setup() {
@@ -22,13 +30,16 @@ public class BigQueryClientTest {
     }
 
     @Test
-    public void testOne() throws IOException {
+    public void testSimple() throws IOException {
         TableResult result = client.simpleQuery(QUERY);
         assertNotNull(result);
         result.iterateAll().forEach(rows -> rows.forEach(row -> System.out.println(row.getValue())));
-
-        String output = client.runQuery("test");
+    }
+    @Test
+    public void testFull() throws IOException {
+        String output = client.runQuery("");
         assertNotNull(output);
         System.out.println(output);
     }
+
 }
