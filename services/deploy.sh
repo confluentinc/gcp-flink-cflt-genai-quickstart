@@ -71,3 +71,77 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "[+] WebSocket deployed successfully"
+
+#Deploying Kstream App Summarise
+SERVICE_PATH="$SCRIPT_FOLDER/summarize"
+SVC_NAME="quickstart-kstream-summarise-"$LOWER_UNIQUE_ID
+echo "[+] Deploying Summarise Kstream App"
+cd services/summarize
+gcloud auth application-default login
+mvn clean package
+IMAGE_ARCH=$IMAGE_ARCH docker build -f Dockerfile .
+IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-summarise gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
+--set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID"
+if [ $? -ne 0 ]; then
+    echo "[-] Failed to deploy Summarise Kstream App"
+    exit 1
+fi
+echo "[+] Summarise Kstream App deployed successfully"
+
+cd ..
+
+#Deploying Kstream App Audio-Text-Converter
+SERVICE_PATH="$SCRIPT_FOLDER/audio-text-converter"
+SVC_NAME="quickstart-kstream-audio-text-converter-"$LOWER_UNIQUE_ID
+echo "[+] Deploying Audio-Text Converter Kstreams App"
+cd services/audio-text-converter
+#gcloud auth application-default login
+mvn clean package
+IMAGE_ARCH=$IMAGE_ARCH docker build -f Dockerfile .
+IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-audio-text-converter gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
+--set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID"
+if [ $? -ne 0 ]; then
+    echo "[-] Failed to deploy Audio Text Converter Kstream App"
+    exit 1
+fi
+echo "[+] Audio Text Converter Kstream App deployed successfully"
+
+cd ..
+
+#Deploying Kstream App Build-Query
+SERVICE_PATH="$SCRIPT_FOLDER/build-query"
+SVC_NAME="quickstart-kstream-build-query-"$LOWER_UNIQUE_ID
+echo "[+] Deploying Build Query Kstreams App"
+cd services/build-query
+#gcloud auth application-default login
+mvn clean package
+IMAGE_ARCH=$IMAGE_ARCH docker build -f Dockerfile .
+IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-build-querygcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
+--set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID"
+if [ $? -ne 0 ]; then
+    echo "[-] Failed to deploy Build Query Kstream App"
+    exit 1
+fi
+echo "[+] Build Query Kstream App deployed successfully"
+
+cd ..
+
+#Deploying Kstream App Execute Query
+SERVICE_PATH="$SCRIPT_FOLDER/execute_query"
+SVC_NAME="quickstart-kstream-execute-query-"$LOWER_UNIQUE_ID
+echo "[+] Deploying Execute Query Kstreams App"
+cd services/execute_query
+#gcloud auth application-default login
+mvn clean package
+IMAGE_ARCH=$IMAGE_ARCH docker build -f Dockerfile .
+IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-execute-query gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
+--set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID"
+if [ $? -ne 0 ]; then
+    echo "[-] Failed to deploy Execute Query Kstream App"
+    exit 1
+fi
+echo "[+] Execute Query Kstream App deployed successfully"
+
+cd ..
+
+
