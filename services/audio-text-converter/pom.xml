@@ -40,7 +40,7 @@
         <kafka.version>3.8.0</kafka.version>
         <google.cloud.speech.version>4.54.0</google.cloud.speech.version>
         <google.cloud.texttospeech.version> 2.48.0</google.cloud.texttospeech.version>
-        <confluent.version>7.6.0</confluent.version>
+        <confluent.version>7.9.0</confluent.version>
 
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

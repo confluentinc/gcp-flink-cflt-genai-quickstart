@@ -2,6 +2,8 @@
 
 set -eo pipefail
 
+export LC_ALL=C.UTF-8
+
 # Function to generate a random string of a given length
 generate_random_string() {
     local length=$1

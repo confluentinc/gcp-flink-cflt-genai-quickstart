@@ -1,6 +1,5 @@
 package io.confluent.quickstart;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.speech.v1.RecognitionAudio;
 import com.google.cloud.speech.v1.RecognitionConfig;
 import com.google.cloud.speech.v1.RecognizeResponse;
@@ -19,8 +18,8 @@ import com.google.protobuf.ByteString;
 import io.confluent.common.utils.TestUtils;
 import io.confluent.quickstart.model.AudioQuery;
 import io.confluent.quickstart.model.AudioResponse;
-import io.confluent.quickstart.model.SQLRequest;
 import io.confluent.quickstart.model.serdes.AudioQuerySerde;
+import io.confluent.quickstart.model.serdes.AudioResponseSerde;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
@@ -42,35 +41,35 @@ import java.util.Properties;
 @Slf4j
 public class AudioToTextConverter {
 
-    static final String inputTopic = System.getenv("TOPIC_IN");
-    static final String outputTopic = System.getenv("TOPIC_OUT");
-    static final String bootstrapServers = System.getenv("BOOTSTRAP");
-
-    static final String schemaRegistryUrl = "";
-    static final String schemaRegistryKey = "";
-    static final String schemaRegistrySecret = "";
+        static final String inputTopic = System.getenv("TOPIC_IN");
+        static final String outputTopic = System.getenv("TOPIC_OUT");
+        static final String bootstrapServers = System.getenv("BOOTSTRAP");
     static final String authKey = System.getenv("KEY");
     static final String authSecret = System.getenv("SECRET");
+    static final String schemaRegistryUrl = System.getenv("SR_URL");
+    static final String schemaRegistryKey = System.getenv("SR_KEY");
+    static final String schemaRegistrySecret = System.getenv("SR_SECRET");
 
     static final String audioRequestTopic = "audio_request";
     static final String inputRequestTopic = "input_request";
 
     static final String summarisedResultsTopic = "summarised_results";
     static final String audioResponseTopic = "audio_response";
+
     static final String projectId = System.getenv("PROJECT_ID");
     static final String location = System.getenv("LOCATION");
 
     public static void main(String[] args) {
-        
+
         // Build and start the Kafka Streams application
         final Properties streamsConfiguration = getStreamsConfiguration(bootstrapServers, authKey, authSecret);
         Map<String, String> kafkaConfig = (Map) streamsConfiguration;
 
         // Configure Kafka Streams
         StreamsBuilder builder = new StreamsBuilder();
-        
+
         buildAudioToTextStream(builder, kafkaConfig);
-//        buildTextToAudioStream(builder, kafkaConfig);
+        buildTextToAudioStream(builder, kafkaConfig);
 
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
 
@@ -89,24 +88,23 @@ public class AudioToTextConverter {
                 .to(inputRequestTopic, Produced.with(Serdes.String(), Serdes.String()));
     }
 
-//    private static void buildTextToAudioStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
-//
-//        // Define processing for the text-to-audio conversion
-//        KStream<String, String> summarizedResults = builder.stream(summarisedResultsTopic, Consumed.with(Serdes.String(), new SQLResponseSerde(kafkaConfig, false)));
-//
-//        // Call Google Text-to-Speech API and return audio bytes
-//        summarizedResults
-//                .filter((sessionId, text) -> sessionId != null && text != null)
+    private static void buildTextToAudioStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
+
+        // Define processing for the text-to-audio conversion
+        KStream<String, String> summarizedResults = builder.stream(summarisedResultsTopic, Consumed.with(Serdes.String(), Serdes.String()));
+
+        // Call Google Text-to-Speech API and return audio bytes
+        summarizedResults
+                .filter((sessionId, text) -> sessionId != null && text != null)
 //                .mapValues(AudioToTextConverter::synthesizeSpeech)
-//                .to(audioResponseTopic, Produced.with(Serdes.String(), Serdes.String()));
-//    }
+                .map((sessionId, text) -> new KeyValue<>(sessionId, synthesizeSpeech(sessionId, text)))
+                .to(audioResponseTopic, Produced.with(Serdes.String(), new AudioResponseSerde(kafkaConfig, false)));
+    }
 
 
     // Method to transcribe audio using Google Speech-to-Text
     private static String transcribeAudio(AudioQuery audioQuery) {
         // Initialize the return text
-        log.info("audioQueryString: {} : {}", audioQuery.getSessionId(), audioQuery.getAudio());
-
         try (SpeechClient speechClient = SpeechClient.create()) {
 
             // Builds the sync recognize request
@@ -130,26 +128,22 @@ public class AudioToTextConverter {
 
             log.info("Done processing audio for session id: {}\n{}", audioQuery.getSessionId(), results);
 
-            final String query = results.getFirst().getAlternatives(0).getTranscript();
-            return new SQLRequest(query, audioQuery.getSessionId()).toString();
+            return results.get(0).getAlternatives(0).getTranscript();
 
         } catch (Exception e) {
             log.error("Failure to transcribe Audio for session id: {}", audioQuery.getSessionId(), e);
         }
-
-        return null;
+        return "Failure to transcribe Audio for session id: " + audioQuery.getSessionId();
     }
 
     // Method to synthesize speech using Google Text-to-Speech
-    private static String synthesizeSpeech(String sessionId, String sqlResponse) {
+    private static AudioResponse synthesizeSpeech(String sessionId, String summaryResults) {
         // Google Text-to-Speech API call
-
         log.info("Processing text for session id: {}", sessionId);
 
         final TextToSpeechSettings settings;
         final Parser parser = Parser.builder().build();
         final TextContentRenderer renderer = TextContentRenderer.builder().build();
-        AudioResponse audioResponse = new AudioResponse();
 
         try {
             settings = TextToSpeechSettings.newBuilder().setEndpoint("texttospeech.googleapis.com:443").build();
@@ -160,7 +154,7 @@ public class AudioToTextConverter {
 
         try (TextToSpeechClient textToSpeechClient = TextToSpeechClient.create(settings)) {
             // Make sure the summary doesn't include any markdown formatting
-            Node document = parser.parse(sqlResponse);
+            Node document = parser.parse(summaryResults);
             final String renderedText = renderer.render(document);
 
             SynthesizeSpeechRequest request =
@@ -184,30 +178,31 @@ public class AudioToTextConverter {
             final byte[] audio = response.getAudioContent().toByteArray();
 
             log.info("Done processing text for session id: {}", sessionId);
-            return null;
-//            return getAudioResponse(sqlResponse, audio).toString();
+            log.info("summary Results {}", summaryResults);
+            log.info("audio {}", audio);
+            return getAudioResponse(sessionId, summaryResults, audio);
         } catch (Exception e) {
             log.error("Error processing text for session id: {}", sessionId, e);
             throw new RuntimeException(e);
         }
     }
 
-//    private static AudioResponse getAudioResponse( sqlResponse, byte[] audio) {
-//        final AudioResponse audioResponse = new AudioResponse();
-//        audioResponse.setSessionId(sqlResponse.getSessionId());
-//        audioResponse.setAudio(audio);
-//        audioResponse.setDescription(sqlResponse.getDescription());
-//        audioResponse.setExecutedQuery(sqlResponse.getExecutedQuery());
-//        audioResponse.setResponse(sqlResponse.getResponse());
-//        audioResponse.setQuery(sqlResponse.getQuery());
-//        audioResponse.setRenderedResult(sqlResponse.getRenderedResult());
-//        return audioResponse;
-//    }
+    private static AudioResponse getAudioResponse(String sessionId, String summaryResults, byte[] audio) {
+        final AudioResponse audioResponse = new AudioResponse();
+        audioResponse.setSessionId(sessionId.trim());
+        audioResponse.setAudio(audio);
+        audioResponse.setDescription("temp");
+        audioResponse.setExecutedQuery("temp");
+        audioResponse.setResponse(summaryResults.trim());
+        audioResponse.setQuery("temp");
+        audioResponse.setRenderedResult(summaryResults.trim());
+        return audioResponse;
+    }
 
     static Properties getStreamsConfiguration(final String bootstrapServers, final String key, final String secret) {
         final Properties streamsConfiguration = new Properties();
-        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "quickstart-build-query");
-        streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "quickstart-build-query");
+        streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "quickstart-text-audio-processor");
+        streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "quickstart-text-audio-processor");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         if (key != null && secret != null) {
             streamsConfiguration.put(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");

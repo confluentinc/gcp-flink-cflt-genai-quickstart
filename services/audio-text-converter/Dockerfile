@@ -33,6 +33,9 @@ USER root
 RUN groupadd $STREAMS_GROUP && useradd -r -g $STREAMS_GROUP $STREAMS_USER
 RUN mkdir /app && chown $STREAMS_USER:$STREAMS_GROUP /app
 
+COPY /service-account-key.json .
+ENV GOOGLE_APPLICATION_CREDENTIALS="service-account-key.json"
+
 COPY --chown=appuser:appuser target/$FAT_JAR /app/$FAT_JAR
 COPY --chown=appuser:appuser launch.sh /app/launch.sh
 

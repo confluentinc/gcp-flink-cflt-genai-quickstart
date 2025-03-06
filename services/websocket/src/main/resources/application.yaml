@@ -1,25 +1,25 @@
 spring:
   application:
-    name: "Quickstart-Websocket-Application"
+    name: "QuickstartApplication"
   config:
     activate.on-profile: default
 
   kafka:
-    bootstrap-servers: ${BOOTSTRAP_SERVER}
+    bootstrap-servers: pkc-619z3.us-east1.gcp.confluent.cloud:9092
     properties:
-      schema.registry.url: ${SR_URL}
+      schema.registry.url: https://psrc-09gzk9.us-east1.gcp.confluent.cloud
       basic.auth.credentials.source: USER_INFO
-      schema.registry.basic.auth.user.info: ${SR_API_KEY}:${SR_API_SECRET}
+      schema.registry.basic.auth.user.info: 2GXKIPA6Z3R7QOEH:5++/pVPmzx79GEBRijzBEW/jxuUFAik5HmarDfs21+nnjY4Q/dmEECUPOV9PMPnT
       security.protocol: SASL_SSL
       sasl.mechanism: PLAIN
-      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_API_KEY}" password="${KAFKA_API_SECRET}";
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="XD633LWWIH6PXCXN" password="HwEYfjWttd5U6EwUNS1u/24I2rtmr8rlNNlx85Gy02aW5WAX0mp4YwOsOmGGJL+6";
     producer:
-      client-id: ${CLIENT_ID}|producer|audio_request
+      client-id: pie_labs|flink-cflt-gcp-genai-quickstart|8iiqOLLe_|producer|audio_request
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.pie.quickstart.gcp.audio.model.serdes.query.AudioQuerySerializer
     consumer:
       client-id: ${CLIENT_ID}|consumer|audio_response
-      group-id: ${CLIENT_ID}_audio_response_reader
+      group-id: pie_labs|flink-cflt-gcp-genai-quickstart|8iiqOLLe_|audio_response_reader
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: io.confluent.pie.quickstart.gcp.audio.model.serdes.response.AudioResponseDeserializer
 
