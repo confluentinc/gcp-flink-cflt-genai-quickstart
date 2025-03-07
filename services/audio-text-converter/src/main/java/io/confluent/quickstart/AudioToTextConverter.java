@@ -37,18 +37,19 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import static io.confluent.quickstart.HealthCheckServer.startHealthCheckServer;
 
 @Slf4j
 public class AudioToTextConverter {
 
-        static final String inputTopic = System.getenv("TOPIC_IN");
-        static final String outputTopic = System.getenv("TOPIC_OUT");
-        static final String bootstrapServers = System.getenv("BOOTSTRAP");
-    static final String authKey = System.getenv("KEY");
-    static final String authSecret = System.getenv("SECRET");
+    static final String bootstrapServers = System.getenv("BOOTSTRAP_SERVER");
+    static final String authKey = System.getenv("KAFKA_API_KEY");
+    static final String authSecret = System.getenv("KAFKA_API_SECRET");
     static final String schemaRegistryUrl = System.getenv("SR_URL");
-    static final String schemaRegistryKey = System.getenv("SR_KEY");
-    static final String schemaRegistrySecret = System.getenv("SR_SECRET");
+    static final String schemaRegistryKey = System.getenv("SR_API_KEY");
+    static final String schemaRegistrySecret = System.getenv("SR_API_SECRET");
+
+    static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
 
     static final String audioRequestTopic = "audio_request";
     static final String inputRequestTopic = "input_request";
@@ -56,26 +57,30 @@ public class AudioToTextConverter {
     static final String summarisedResultsTopic = "summarised_results";
     static final String audioResponseTopic = "audio_response";
 
-    static final String projectId = System.getenv("PROJECT_ID");
-    static final String location = System.getenv("LOCATION");
+    public static void main(String[] args) throws IOException {
+            // Build and start the Kafka Streams application
 
-    public static void main(String[] args) {
+            System.out.println();
+            final Properties streamsConfiguration = getStreamsConfiguration();
 
-        // Build and start the Kafka Streams application
-        final Properties streamsConfiguration = getStreamsConfiguration(bootstrapServers, authKey, authSecret);
-        Map<String, String> kafkaConfig = (Map) streamsConfiguration;
+            Map kafkaConfig = streamsConfiguration;
 
-        // Configure Kafka Streams
-        StreamsBuilder builder = new StreamsBuilder();
+            // Configure Kafka Streams
+            StreamsBuilder builder = new StreamsBuilder();
 
-        buildAudioToTextStream(builder, kafkaConfig);
-        buildTextToAudioStream(builder, kafkaConfig);
+            if (healthCheckPort == null) { healthCheckPort = "8080"; }
+            startHealthCheckServer(Integer.parseInt(healthCheckPort));
 
-        final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
 
-        streams.cleanUp();
-        streams.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+            buildAudioToTextStream(builder, kafkaConfig);
+            buildTextToAudioStream(builder, kafkaConfig);
+
+            final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
+
+
+            streams.cleanUp();
+            streams.start();
+            Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 
     private static void buildAudioToTextStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
@@ -199,23 +204,23 @@ public class AudioToTextConverter {
         return audioResponse;
     }
 
-    static Properties getStreamsConfiguration(final String bootstrapServers, final String key, final String secret) {
+    static Properties getStreamsConfiguration() {
         final Properties streamsConfiguration = new Properties();
         streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "quickstart-text-audio-processor");
         streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "quickstart-text-audio-processor");
-        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        if (key != null && secret != null) {
+        streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, AudioToTextConverter.bootstrapServers);
+        if (AudioToTextConverter.authKey != null && AudioToTextConverter.authSecret != null) {
             streamsConfiguration.put(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
             streamsConfiguration.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
             final String jaasConfig = "org.apache.kafka.common.security.plain.PlainLoginModule required username=\""
-                    + key + "\" password=\"" + secret + "\";";
+                    + AudioToTextConverter.authKey + "\" password=\"" + AudioToTextConverter.authSecret + "\";";
             streamsConfiguration.put(SaslConfigs.SASL_JAAS_CONFIG, jaasConfig);
         }
 
-        streamsConfiguration.put("schema.registry.url", schemaRegistryUrl);
+        streamsConfiguration.put("schema.registry.url", AudioToTextConverter.schemaRegistryUrl);
         final String basicAuthCredentialsSource = "USER_INFO";
         streamsConfiguration.put("basic.auth.credentials.source", basicAuthCredentialsSource);
-        streamsConfiguration.put("schema.registry.basic.auth.user.info", schemaRegistryKey + ":" + schemaRegistrySecret);
+        streamsConfiguration.put("schema.registry.basic.auth.user.info", AudioToTextConverter.schemaRegistryKey + ":" + AudioToTextConverter.schemaRegistrySecret);
 
         streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
         streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
