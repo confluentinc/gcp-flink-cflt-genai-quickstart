@@ -35,10 +35,6 @@ public class ExecuteQuery {
     static final String authKey = System.getenv("KEY");
     static final String authSecret = System.getenv("SECRET");
 
-    static final String QUERY =
-            "select " +
-            "something";
-
     static BigQueryClient bigQueryClient;
 
     public static void main(final String[] args) {
@@ -49,7 +45,7 @@ public class ExecuteQuery {
 
         final Properties streamsConfiguration = getStreamsConfiguration(bootstrapServers, authKey, authSecret);
 
-        bigQueryClient = new BigQueryClient(QUERY);
+        bigQueryClient = new BigQueryClient();
 
         final StreamsBuilder builder = new StreamsBuilder();
         executeBQStream(builder);

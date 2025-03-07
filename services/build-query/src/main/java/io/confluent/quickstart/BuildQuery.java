@@ -102,8 +102,7 @@ public class BuildQuery {
     }
 
     static String getQuery(String text) throws IOException {
-        String completePrompt = PROMPT_CONST + text;
-        return vertexClient.callModel(completePrompt);
+        return vertexClient.callModel(BuildQuery.getPromptText() + text);
     }
 
     static void buildQueryStream(final StreamsBuilder builder) {

@@ -12,7 +12,8 @@ public class BigQueryClientTest {
     BigQueryClient client;
 
     final String QUERY =
-            "SELECT\n" +
+            "```sql\nSELECT\n" +
+
                     "    Appointments.AppointmentDate,\n" +
                     "    Appointments.Reason\n" +
                     "  FROM\n" +
@@ -22,22 +23,22 @@ public class BigQueryClientTest {
                     "  WHERE Patients.FirstName = 'Joseph'\n" +
                     "ORDER BY\n" +
                     "  Appointments.AppointmentDate DESC\n" +
-                    "LIMIT 3\n";
+                    "LIMIT 3\n```";
 
     @Before
     public void setup() {
-        client = new BigQueryClient(QUERY);
+        client = new BigQueryClient();
     }
 
     @Test
-    public void testSimple() throws IOException {
+    public void testSimple() throws IOException, InterruptedException {
         TableResult result = client.simpleQuery(QUERY);
         assertNotNull(result);
         result.iterateAll().forEach(rows -> rows.forEach(row -> System.out.println(row.getValue())));
     }
     @Test
     public void testFull() throws IOException {
-        String output = client.runQuery("");
+        String output = client.runQuery(QUERY);
         assertNotNull(output);
         System.out.println(output);
     }

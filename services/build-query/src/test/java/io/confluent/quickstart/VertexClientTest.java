@@ -32,7 +32,7 @@ public class VertexClientTest {
     @Test
     public void testResourcePrompt() throws IOException {
         String textPrompt = BuildQuery.getPromptText();
-        String query = "what was the medication taken by Gary White on their last 2 visits";
+        String query = "what was the medication taken by Joseph Burns on their last 2 visits";
         String output = client.callModel(textPrompt + query);
         System.out.println(output);
 
