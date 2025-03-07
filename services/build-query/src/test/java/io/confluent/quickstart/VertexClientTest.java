@@ -23,12 +23,24 @@ public class VertexClientTest {
     public void testOne() throws IOException {
         String textPrompt = "TODO";
 
-
         String output = client.callModel(textPrompt);
         System.out.println(output);
 
         assertNotNull(output);
     }
 
+    @Test
+    public void testResourcePrompt() throws IOException {
+        String textPrompt = BuildQuery.getPromptText();
+        String query = "what was the medication taken by Gary White on their last 2 visits";
+        String output = client.callModel(textPrompt + query);
+        System.out.println(output);
 
+        textPrompt = BuildQuery.getPromptText();
+        query = "Give me the latest 3 appointments for patient Joseph Burns and the reason for the visit";
+        output = client.callModel(textPrompt + query);
+        System.out.println(output);
+
+        assertNotNull(output);
+    }
 }

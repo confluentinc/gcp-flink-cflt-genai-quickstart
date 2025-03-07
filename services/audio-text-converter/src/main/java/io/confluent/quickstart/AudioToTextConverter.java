@@ -42,15 +42,28 @@ import java.util.Properties;
 @Slf4j
 public class AudioToTextConverter {
 
-    static final String inputTopic = System.getenv("TOPIC_IN");
-    static final String outputTopic = System.getenv("TOPIC_OUT");
-    static final String bootstrapServers = System.getenv("BOOTSTRAP");
+//    static final String inputTopic = System.getenv("TOPIC_IN");
+//    static final String outputTopic = System.getenv("TOPIC_OUT");
+//    static final String bootstrapServers = System.getenv("BOOTSTRAP");
 
-    static final String schemaRegistryUrl = "";
-    static final String schemaRegistryKey = "";
-    static final String schemaRegistrySecret = "";
-    static final String authKey = System.getenv("KEY");
-    static final String authSecret = System.getenv("SECRET");
+    static final String bootstrapServers = System.getenv("BOOTSTRAP_SERVER");
+    static final String authKey = System.getenv("KAFKA_API_KEY");
+    static final String authSecret = System.getenv("KAFKA_API_SECRET");
+    static final String schemaRegistryUrl = System.getenv("SR_URL");
+    static final String schemaRegistryKey = System.getenv("SR_API_KEY");
+    static final String schemaRegistrySecret = System.getenv("SR_API_SECRET");
+//    static final String bootstrapServers = "pkc-619z3.us-east1.gcp.confluent.cloud:9092";
+//    static final String authKey = "HL5EZLFK5GQJBK6Q";
+//    static final String authSecret = "enVmMVHVPUk0vGrX54535M0AU5LOq2Zd1MntPy3IE61Iv4WcV6ybHnemjOErez5T";
+//    static final String schemaRegistryUrl = "https://psrc-09gzk9.us-east1.gcp.confluent.cloud";
+//    static final String schemaRegistryKey = "QESOLWTTIBYDAB3R";
+//    static final String schemaRegistrySecret = "ywsav71F2/K8L0k4Qw7Y+rl13y5kAJ7Vfa2opsriMkUdH3CYfZS9QRajjgHfye0u";
+
+//    static final String schemaRegistryUrl = "";
+//    static final String schemaRegistryKey = "";
+//    static final String schemaRegistrySecret = "";
+//    static final String authKey = System.getenv("KEY");
+//    static final String authSecret = System.getenv("SECRET");
 
     static final String audioRequestTopic = "audio_request";
     static final String inputRequestTopic = "input_request";

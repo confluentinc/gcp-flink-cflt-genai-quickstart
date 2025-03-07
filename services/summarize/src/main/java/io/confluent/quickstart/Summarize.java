@@ -15,6 +15,9 @@
  */
 package io.confluent.quickstart;
 
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import io.confluent.common.utils.TestUtils;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
@@ -25,6 +28,8 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.util.Properties;
 
 public class Summarize {
@@ -39,11 +44,13 @@ public class Summarize {
     static final String location = System.getenv("LOCATION");
 
     static final String MODEL_NAME = "gemini-2.0-flash-001";
-    static final String PROMPT = "Summarize the following paragraphs in 2 sentences. \n\n";
+    static final String PROMPT =
+            "Summarize the following results of a SQL query in 3 sentences maximum. Use an " +
+            "informal style, like a conversation. Do not describe the rows or columns. \n\n";
 
     static VertexClient vertexClient;
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
             System.out.println("Unable to run: TOPIC_IN, TOPIC_OUT and BOOTSTRAP env vars must be set.");
             System.exit(1);
@@ -57,9 +64,32 @@ public class Summarize {
         summarizeStream(builder);
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
 
+        startHealthCheckServer(8080);
+
         streams.cleanUp();
         streams.start();
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+    }
+    public static void startHealthCheckServer(int port) throws IOException
+    {
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        server.createContext("/", new MyHandler());
+        server.setExecutor(null); // Use the default executor
+        server.start();
+        System.out.println("Server is running on port " + port);
+    }
+
+    // return UP for any request
+    static class MyHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException
+        {
+            String response = "{\"status\": \"UP\"}";
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
     }
 
     static Properties getStreamsConfiguration(final String bootstrapServers, final String key, final String secret) {

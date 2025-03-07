@@ -37,6 +37,8 @@ RUN mkdir /app && chown $STREAMS_USER:$STREAMS_GROUP /app
 COPY --chown=appuser:appuser target/$FAT_JAR /app/$FAT_JAR
 COPY --chown=appuser:appuser launch.sh /app/launch.sh
 
+EXPOSE 8080
+
 USER $STREAMS_USER
 
 CMD ["sh", "/app/launch.sh"]

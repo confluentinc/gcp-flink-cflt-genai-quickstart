@@ -37,5 +37,6 @@ COPY --chown=appuser:appuser target/$FAT_JAR /app/$FAT_JAR
 COPY --chown=appuser:appuser launch.sh /app/launch.sh
 
 USER $STREAMS_USER
+EXPOSE 8080
 
 CMD ["sh", "/app/launch.sh"]

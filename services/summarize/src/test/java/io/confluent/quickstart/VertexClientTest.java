@@ -46,5 +46,14 @@ public class VertexClientTest {
         assertNotNull(output);
     }
 
+    @Test
+    public void testResults() throws IOException {
+        String actualResult = "Summarize the following results of a SQL query in 3 sentences maximum. Do not describe the rows or columns. \n\n 2 results. AutoValue_TableResult{rows=[[FieldValue{attribute=PRIMITIVE, value=2025-02-20, useInt64Timestamps=false}, FieldValue{attribute=PRIMITIVE, value=Follow-up for Back Pain., useInt64Timestamps=false}], [FieldValue{attribute=PRIMITIVE, value=2024-06-22, useInt64Timestamps=false}, FieldValue{attribute=PRIMITIVE, value=Follow-up for Flu Symptoms., useInt64Timestamps=false}]], schema=Schema{fields=[Field{name=AppointmentDate, type=DATE, mode=NULLABLE, description=null, policyTags=null, maxLength=null, scale=null, precision=null, defaultValueExpression=null, collation=null, rangeElementType=null}, Field{name=Reason, type=STRING, mode=NULLABLE, description=null, policyTags=null, maxLength=null, scale=null, precision=null, defaultValueExpression=null, collation=null, rangeElementType=null}]}, totalRows=2, cursor=null, queryId=job_mx9DdI63sEgfkjNzpTmn199DW-pN}";
+        String output = client.callModel(actualResult);
+        System.out.println(output);
+
+        assertNotNull(output);
+    }
+
 
 }
