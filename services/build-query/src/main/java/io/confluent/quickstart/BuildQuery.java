@@ -26,6 +26,8 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class BuildQuery {
@@ -40,18 +42,29 @@ public class BuildQuery {
     static final String location = System.getenv("LOCATION");
 
     static final String MODEL_NAME = "gemini-2.0-flash-001";
-    static final String PROMPT = "Build a BigQuery SQL query with those characteristics.\n\n";
+    static final String PROMPT_CONST = "Build a BigQuery SQL query with those characteristics.\n\n";
+    static String prompt;
+    static final String PROMPT_FILENAME = "build_query_prompt.txt";
+    /*
+    You are an expert in SQL query generation. Generate an SQL query for the following request:
+
+    Database Schema: {schema}
+
+    User Query: "{user_query}"
+
+        Return only the SQL query without any explanation.
+     */
 
     static VertexClient vertexClient;
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
             System.out.println("Unable to run: TOPIC_IN, TOPIC_OUT and BOOTSTRAP env vars must be set.");
             System.exit(1);
         }
 
         final Properties streamsConfiguration = getStreamsConfiguration(bootstrapServers, authKey, authSecret);
-
+        prompt = getPromptText();
         vertexClient = new VertexClient(projectId, location, MODEL_NAME);
 
         final StreamsBuilder builder = new StreamsBuilder();
@@ -61,6 +74,12 @@ public class BuildQuery {
         streams.cleanUp();
         streams.start();
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+    }
+
+    static public String getPromptText() throws IOException {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream is = loader.getResourceAsStream(PROMPT_FILENAME);
+        return new String(is.readAllBytes(), StandardCharsets.UTF_8);
     }
 
     static Properties getStreamsConfiguration(final String bootstrapServers, final String key, final String secret) {
@@ -84,8 +103,7 @@ public class BuildQuery {
     }
 
     static String getQuery(String text) throws IOException {
-        String completePrompt = PROMPT + text;
-        return vertexClient.callModel(completePrompt);
+        return vertexClient.callModel(BuildQuery.getPromptText() + text);
     }
 
     static void buildQueryStream(final StreamsBuilder builder) {

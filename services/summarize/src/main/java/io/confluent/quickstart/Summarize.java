@@ -27,6 +27,8 @@ import org.apache.kafka.streams.kstream.Produced;
 import java.io.IOException;
 import java.util.Properties;
 
+import static io.confluent.quickstart.HeathCheckServer.startHealthCheckServer;
+
 public class Summarize {
 
     static final String inputTopic = System.getenv("TOPIC_IN");
@@ -38,12 +40,16 @@ public class Summarize {
     static final String projectId = System.getenv("PROJECT_ID");
     static final String location = System.getenv("LOCATION");
 
+    static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
+
     static final String MODEL_NAME = "gemini-2.0-flash-001";
-    static final String PROMPT = "Summarize the following paragraphs in 2 sentences. \n\n";
+    static final String PROMPT =
+            "Summarize the following results of a SQL query in 3 sentences maximum. Use an " +
+            "informal style, like a conversation. Do not describe the rows or columns. \n\n";
 
     static VertexClient vertexClient;
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
             System.out.println("Unable to run: TOPIC_IN, TOPIC_OUT and BOOTSTRAP env vars must be set.");
             System.exit(1);
@@ -56,6 +62,9 @@ public class Summarize {
         final StreamsBuilder builder = new StreamsBuilder();
         summarizeStream(builder);
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
+
+        if (healthCheckPort == null) { healthCheckPort = "8080"; }
+        startHealthCheckServer(Integer.parseInt(healthCheckPort));
 
         streams.cleanUp();
         streams.start();

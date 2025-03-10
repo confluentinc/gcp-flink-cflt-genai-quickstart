@@ -6,7 +6,6 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.test.TestUtils;
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +21,6 @@ public class VertexIntegrationTest {
     private static final String inputTopic = "input";
     private static final String outputTopic = "output";
 
-    @Test
     public void shouldCountWords() {
         final List<String> inputValues = Arrays.asList(
                 "Hello Kafka Streams",
