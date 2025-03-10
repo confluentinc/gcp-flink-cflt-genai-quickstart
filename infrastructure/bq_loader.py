@@ -7,10 +7,10 @@ from google.oauth2 import service_account
 credentials = service_account.Credentials.from_service_account_file("./modules/gcp/bq-service-account.json")
 client = bigquery.Client(credentials=credentials, project=credentials.project_id)
 
-# project = "csid-281116"
+
 DATASET_ID = os.getenv("DATASET_ID")
 DATA_DIR = "data"
-UUID_FIELDS = {"DoctorID", "PatientID"}  # Fields that must be stored as STRING
+UUID_FIELDS = {"DoctorID", "PatientID"}
 
 print(f"Using BigQuery Dataset: {DATASET_ID}")
 
