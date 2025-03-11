@@ -30,16 +30,19 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
+import static io.confluent.quickstart.HeathCheckServer.startHealthCheckServer;
+
 public class BuildQuery {
 
     static final String inputTopic = System.getenv("TOPIC_IN");
     static final String outputTopic = System.getenv("TOPIC_OUT");
-    static final String bootstrapServers = System.getenv("BOOTSTRAP");
-    static final String authKey = System.getenv("KEY");
-    static final String authSecret = System.getenv("SECRET");
+    static final String bootstrapServers = System.getenv("BOOTSTRAP_SERVER");
+    static final String authKey = System.getenv("KAFKA_API_KEY");
+    static final String authSecret = System.getenv("KAFKA_API_SECRET");
 
-    static final String projectId = System.getenv("PROJECT_ID");
-    static final String location = System.getenv("LOCATION");
+    static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
+    static final String projectId = ("GCP_PROJECT_ID");
+    static final String location = System.getenv("GCP_REGION");
 
     static final String MODEL_NAME = "gemini-2.0-flash-001";
     static final String PROMPT_CONST = "Build a BigQuery SQL query with those characteristics.\n\n";
@@ -70,6 +73,9 @@ public class BuildQuery {
         final StreamsBuilder builder = new StreamsBuilder();
         buildQueryStream(builder);
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
+
+        if (healthCheckPort == null) { healthCheckPort = "8080"; }
+        startHealthCheckServer(Integer.parseInt(healthCheckPort));
 
         streams.cleanUp();
         streams.start();

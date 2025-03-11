@@ -33,12 +33,16 @@ public class Summarize {
 
     static final String inputTopic = System.getenv("TOPIC_IN");
     static final String outputTopic = System.getenv("TOPIC_OUT");
-    static final String bootstrapServers = System.getenv("BOOTSTRAP");
-    static final String authKey = System.getenv("KEY");
-    static final String authSecret = System.getenv("SECRET");
+    static final String bootstrapServers = System.getenv("BOOTSTRAP_SERVER");
+    static final String authKey = System.getenv("KAFKA_API_KEY");
+    static final String authSecret = System.getenv("KAFKA_API_SECRET");
 
-    static final String projectId = System.getenv("PROJECT_ID");
-    static final String location = System.getenv("LOCATION");
+    //static final String projectId = System.getenv("GCP_PROJECT_ID");
+    static final String projectId = "csid-281116";
+    static final String location = System.getenv("GCP_REGION");
+
+    static final String schemaRegistryKey = System.getenv("SR_API_KEY");
+    static final String schemaRegistrySecret = System.getenv("SR_API_SECRET");
 
     static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
 
