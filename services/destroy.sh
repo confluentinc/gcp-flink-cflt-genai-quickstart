@@ -113,7 +113,7 @@ if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
   echo "[+] Audio Text Converter App destroyed successfully"
 fi
 
-SVC_NAME="quickstart-healthcare-ai-build-query-"$LOWER_UNIQUE_ID
+SVC_NAME="quickstart-healthcare-ai-summarise-"$LOWER_UNIQUE_ID
 #Check if the Summarise App exists
 if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
   echo "[+] Destroying Summarise App"
