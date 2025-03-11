@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.pie.quickstart.gcp.audio.model.Audio;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioResponse;
+import io.kcache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +24,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
-public class AudioQueryHandler {
+public class InputQueryHandler {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final KafkaTemplate<String, AudioQuery> kafkaTemplate;
+    private final KafkaTemplate<String, AudioQuery> kafkaAudioTemplate;
+    private final KafkaTemplate<String, String> kafkaTextTemplate;
     private final KafkaTopicConfig kafkaTopicConfig;
+    private final Cache<String, String> kcache;
 
-    public AudioQueryHandler(@Autowired KafkaTemplate<String, AudioQuery> kafkaTemplate,
-                             @Autowired KafkaTopicConfig kafkaTopicConfig) {
-        this.kafkaTemplate = kafkaTemplate;
+    public InputQueryHandler(@Autowired KafkaTemplate<String, AudioQuery> kafkaAudioTemplate,
+                             @Autowired KafkaTemplate<String, String> kafkaTextTemplate,
+                             @Autowired KafkaTopicConfig kafkaTopicConfig,
+                             @Autowired Cache<String, String> kcache) {
+        this.kafkaAudioTemplate = kafkaAudioTemplate;
+        this.kafkaTextTemplate = kafkaTextTemplate;
         this.kafkaTopicConfig = kafkaTopicConfig;
+        this.kcache = kcache;
     }
 
     /**
@@ -44,7 +51,6 @@ public class AudioQueryHandler {
     public void onNewSession(WebSocketSession session) {
         sessions.put(session.getId(), session);
         log.info("New session established: {}", session.getId());
-
     }
 
     /**
@@ -55,18 +61,34 @@ public class AudioQueryHandler {
     public void onSessionClose(WebSocketSession session) {
         sessions.remove(session.getId());
         log.info("Session closed: {}", session.getId());
-
     }
 
-    public void onNewMessage(AudioQuery audioQuery) {
+    public void onNewTextMessage(String sessionId, String messageId, String textQuery) {
+
+        final ProducerRecord<String, String> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
+                sessionId,
+                textQuery);
+
+        kcache.put(sessionId, textQuery);
+
+        kafkaTextTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
+            if (throwable != null) {
+                log.error("Failed to send text message to Confluent Cloud", throwable);
+            }
+        });
+    }
+
+    public void onNewAudioMessage(AudioQuery audioQuery) {
 
         final ProducerRecord<String, AudioQuery> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioRequestTopic(),
                 audioQuery.getSessionId(),
                 audioQuery);
 
-        kafkaTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
+        kcache.put(audioQuery.getSessionId(), null);
+
+        kafkaAudioTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
             if (throwable != null) {
-                log.error("Failed to send message to Confluent Cloud", throwable);
+                log.error("Failed to send audio message to Confluent Cloud", throwable);
             }
         });
     }
@@ -103,27 +125,29 @@ public class AudioQueryHandler {
 
         try {
             final String dataURL = encodeAudioAsDataURL(audioResponse.getAudio());
-            Audio audio = createAudioData(dataURL, audioResponse.getRenderedResult());
-            sendMessage(session, audio, sessionId);
+            Audio audio = createAudioData(dataURL, kcache.get(sessionId) ,audioResponse.getRenderedResult());
+            sendMessage(session, audio);
         } catch (IOException e) {
             log.error("Error sending message: {}", e.getMessage(), e);
         }
     }
 
+
     private String encodeAudioAsDataURL(byte[] audio) {
         return "data:audio/wav;base64," + Base64.getEncoder().encodeToString(audio);
     }
 
-    private Audio createAudioData(String dataURL, String renderedResult) {
+    private Audio createAudioData(String dataURL, String message, String renderedResult) {
         Audio audio = new Audio();
         audio.setData(dataURL);
+        audio.setQuestion(message);
         audio.setResult(renderedResult);
         return audio;
     }
 
-    private void sendMessage(WebSocketSession session, Audio audio, String sessionId) throws IOException {
+    private void sendMessage(WebSocketSession session, Audio audio) throws IOException {
         String audioJSON = OBJECT_MAPPER.writeValueAsString(audio);
         session.sendMessage(new TextMessage(audioJSON));
-        log.info("Sent audio response to session id {}", sessionId);
+        log.info("Sent audio response to session id {}", session.getId());
     }
 }

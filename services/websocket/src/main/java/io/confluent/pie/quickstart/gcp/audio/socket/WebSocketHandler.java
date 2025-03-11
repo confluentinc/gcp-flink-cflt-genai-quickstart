@@ -1,8 +1,12 @@
 package io.confluent.pie.quickstart.gcp.audio.socket;
 
-import io.confluent.pie.quickstart.gcp.audio.kafka.AudioQueryHandler;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.confluent.pie.quickstart.gcp.audio.kafka.InputQueryHandler;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
+import io.confluent.pie.quickstart.gcp.audio.model.Message;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -15,9 +19,11 @@ import java.util.Base64;
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
 
-    private final AudioQueryHandler audioHandler;
+    private static final String AUDIO = "audio";
+    private static final String TEXT = "text";
+    private final InputQueryHandler audioHandler;
 
-    public WebSocketHandler(@Autowired AudioQueryHandler audioHandler) {
+    public WebSocketHandler(@Autowired InputQueryHandler audioHandler) {
         this.audioHandler = audioHandler;
     }
 
@@ -48,19 +54,34 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * @param message Text message
      */
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-
+    protected void handleTextMessage(@NotNull WebSocketSession session, TextMessage message) {
         final String payload = message.getPayload();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            Message parsedMessage = objectMapper.readValue(payload, Message.class);
 
-        // Assuming the payload has additional data before the base64 audio, separated by a comma.
-        final String base64 = payload.substring(payload.indexOf(",") + 1);
-        final byte[] audio = Base64.getDecoder().decode(base64);
+            if (TEXT.equals(parsedMessage.getType())) {
 
-        AudioQuery audioQuery = new AudioQuery(session.getId(), audio);
+                String content = parsedMessage.getContent();
 
-        log.info("Received audio message from {} of length {}", session.getId() ,audioQuery.getAudio().length);
+                log.info("Received text message from {} of length {}", session.getId(), content.length());
 
-        audioHandler.onNewMessage(audioQuery);
+                audioHandler.onNewTextMessage(session.getId(), parsedMessage.getMessageId(), content);
+
+            } else if (AUDIO.equals(parsedMessage.getType())) {
+
+                // Assuming the payload has additional data before the base64 audio, separated by a comma.
+                final String base64 = parsedMessage.getContent().substring(parsedMessage.getContent().indexOf(",") + 1);
+                final byte[] audio = Base64.getDecoder().decode(base64);
+
+                AudioQuery audioQuery = new AudioQuery(session.getId(), audio);
+
+                log.info("Received audio message from session {} of length {}", session.getId(), audioQuery.getAudio().length);
+
+                audioHandler.onNewAudioMessage(audioQuery);
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 }
