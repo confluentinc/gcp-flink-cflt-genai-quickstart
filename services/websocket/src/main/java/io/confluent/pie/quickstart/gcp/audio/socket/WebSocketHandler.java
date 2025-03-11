@@ -66,7 +66,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                 log.info("Received text message from {} of length {}", session.getId(), content.length());
 
-                audioHandler.onNewTextMessage(session.getId(), parsedMessage.getMessageId(), content);
+                audioHandler.onNewTextMessage(session.getId(), content);
 
             } else if (AUDIO.equals(parsedMessage.getType())) {
 

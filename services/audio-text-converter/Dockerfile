@@ -17,6 +17,7 @@ FROM confluentinc/cp-base-new:latest-ubi8
 
 WORKDIR /build
 
+
 ENV STREAMS_USER="streams"
 ENV STREAMS_GROUP=$STREAMS_USER
 

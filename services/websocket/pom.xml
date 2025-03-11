@@ -26,7 +26,6 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kcache.version>5.1.0</kcache.version>
     </properties>
 
     <repositories>
@@ -66,11 +65,6 @@
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
             <version>${kstream.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.kcache</groupId>
-            <artifactId>kcache</artifactId>
-            <version>${kcache.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import static io.confluent.quickstart.HealthCheckServer.startHealthCheckServer;
 
 @Slf4j
 public class AudioToTextConverter {
@@ -57,30 +56,23 @@ public class AudioToTextConverter {
     static final String summarisedResultsTopic = "summarised_results";
     static final String audioResponseTopic = "audio_response";
 
-    public static void main(String[] args) throws IOException {
-            // Build and start the Kafka Streams application
+    public static void main(String[] args) {
 
-            System.out.println();
-            final Properties streamsConfiguration = getStreamsConfiguration();
+        // Build and start the Kafka Streams application
+        final Properties streamsConfiguration = getStreamsConfiguration();
+        Map<String, String> kafkaConfig = (Map) streamsConfiguration;
 
-            Map kafkaConfig = streamsConfiguration;
+        // Configure Kafka Streams
+        StreamsBuilder builder = new StreamsBuilder();
 
-            // Configure Kafka Streams
-            StreamsBuilder builder = new StreamsBuilder();
+        buildAudioToTextStream(builder, kafkaConfig);
+        buildTextToAudioStream(builder, kafkaConfig);
 
-            if (healthCheckPort == null) { healthCheckPort = "8080"; }
-            startHealthCheckServer(Integer.parseInt(healthCheckPort));
+        final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
 
-
-            buildAudioToTextStream(builder, kafkaConfig);
-            buildTextToAudioStream(builder, kafkaConfig);
-
-            final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
-
-
-            streams.cleanUp();
-            streams.start();
-            Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
+        streams.cleanUp();
+        streams.start();
+        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 
     private static void buildAudioToTextStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
@@ -101,7 +93,6 @@ public class AudioToTextConverter {
         // Call Google Text-to-Speech API and return audio bytes
         summarizedResults
                 .filter((sessionId, text) -> sessionId != null && text != null)
-//                .mapValues(AudioToTextConverter::synthesizeSpeech)
                 .map((sessionId, text) -> new KeyValue<>(sessionId, synthesizeSpeech(sessionId, text)))
                 .to(audioResponseTopic, Produced.with(Serdes.String(), new AudioResponseSerde(kafkaConfig, false)));
     }
@@ -115,7 +106,6 @@ public class AudioToTextConverter {
             // Builds the sync recognize request
             RecognitionConfig config = RecognitionConfig.newBuilder()
                     .setEncoding(RecognitionConfig.AudioEncoding.WEBM_OPUS)
-//                    .setSampleRateHertz(16000)
                     .setLanguageCode("en-US") // Set the language of the audio
                     .build();
 

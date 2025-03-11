@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.pie.quickstart.gcp.audio.model.Audio;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioResponse;
-import io.kcache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,16 +30,13 @@ public class InputQueryHandler {
     private final KafkaTemplate<String, AudioQuery> kafkaAudioTemplate;
     private final KafkaTemplate<String, String> kafkaTextTemplate;
     private final KafkaTopicConfig kafkaTopicConfig;
-    private final Cache<String, String> kcache;
 
     public InputQueryHandler(@Autowired KafkaTemplate<String, AudioQuery> kafkaAudioTemplate,
                              @Autowired KafkaTemplate<String, String> kafkaTextTemplate,
-                             @Autowired KafkaTopicConfig kafkaTopicConfig,
-                             @Autowired Cache<String, String> kcache) {
+                             @Autowired KafkaTopicConfig kafkaTopicConfig) {
         this.kafkaAudioTemplate = kafkaAudioTemplate;
         this.kafkaTextTemplate = kafkaTextTemplate;
         this.kafkaTopicConfig = kafkaTopicConfig;
-        this.kcache = kcache;
     }
 
     /**
@@ -63,13 +59,11 @@ public class InputQueryHandler {
         log.info("Session closed: {}", session.getId());
     }
 
-    public void onNewTextMessage(String sessionId, String messageId, String textQuery) {
+    public void onNewTextMessage(String sessionId, String textQuery) {
 
         final ProducerRecord<String, String> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
                 sessionId,
                 textQuery);
-
-        kcache.put(sessionId, textQuery);
 
         kafkaTextTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
             if (throwable != null) {
@@ -83,8 +77,6 @@ public class InputQueryHandler {
         final ProducerRecord<String, AudioQuery> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioRequestTopic(),
                 audioQuery.getSessionId(),
                 audioQuery);
-
-        kcache.put(audioQuery.getSessionId(), null);
 
         kafkaAudioTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
             if (throwable != null) {
@@ -125,7 +117,7 @@ public class InputQueryHandler {
 
         try {
             final String dataURL = encodeAudioAsDataURL(audioResponse.getAudio());
-            Audio audio = createAudioData(dataURL, kcache.get(sessionId) ,audioResponse.getRenderedResult());
+            Audio audio = createAudioData(dataURL, audioResponse.getQuery(), audioResponse.getRenderedResult());
             sendMessage(session, audio);
         } catch (IOException e) {
             log.error("Error sending message: {}", e.getMessage(), e);
@@ -137,10 +129,10 @@ public class InputQueryHandler {
         return "data:audio/wav;base64," + Base64.getEncoder().encodeToString(audio);
     }
 
-    private Audio createAudioData(String dataURL, String message, String renderedResult) {
+    private Audio createAudioData(String dataURL, String query, String renderedResult) {
         Audio audio = new Audio();
         audio.setData(dataURL);
-        audio.setQuestion(message);
+        audio.setQuestion(query);
         audio.setResult(renderedResult);
         return audio;
     }
