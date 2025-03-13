@@ -177,15 +177,21 @@ confluent_cloud_api_secret = "$CONFLUENT_CLOUD_API_SECRET"
 unique_id = "$unique_id"
 EOF
 
-# Check if .config folder exists
-if [ ! -d ./.config ]; then
-  echo "[+] Authenticating gcloud"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v ./.config:/root/.config/ -ti --rm --name gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud auth application-default login
+# Check if .config directory exists or is empty
+if [ ! -d ./.config ] || [ -z "$(find ./.config/ -mindepth 1)" ]; then
+  if [ ! -d ./.config ]; then
+    echo ".config directory does not exist. Authenticating gcloud."
+  else
+    echo ".config directory is empty. Authenticating gcloud."
+  fi
+  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$(pwd)/.config:/root/.config/" -ti --rm --name gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud auth application-default login
   if [ $? -ne 0 ]; then
-      echo "[-] Failed to authenticate gcloud"
-      exit 1
+    echo "[-] Failed to authenticate gcloud"
+    exit 1
   fi
   echo "[+] gcloud authentication complete"
+else
+  echo ".config directory exists and is not empty. Skipping authentication."
 fi
 
 echo "[+] Applying terraform"
