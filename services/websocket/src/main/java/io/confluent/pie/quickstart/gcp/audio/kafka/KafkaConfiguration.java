@@ -17,8 +17,38 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConfiguration {
 
+    /**
+     * Kafka Template for producing audio messages to topic
+     *
+     * @param kafkaProperties Kafka properties
+     * @return Kafka Template
+     */
     @Bean
-    public KafkaTemplate<String, AudioQuery> kafkaTemplate(KafkaProperties kafkaProperties) {
+    public KafkaTemplate<String, AudioQuery> kafkaAudioTemplate(KafkaProperties kafkaProperties) {
+        final Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(null);
+        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProperties));
+    }
+
+    /**
+     * Kafka Template for producing Text messages to topic
+     *
+     * @param kafkaProperties Kafka properties
+     * @return Kafka Template
+     */
+    @Bean
+    public KafkaTemplate<String, String> kafkaTextTemplate(KafkaProperties kafkaProperties) {
+        final Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(null);
+        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProperties));
+    }
+
+    /**
+     * Kafka Template for producing Audio Responses messages to topic
+     *
+     * @param kafkaProperties Kafka properties
+     * @return Kafka Template
+     */
+    @Bean
+    public KafkaTemplate<String, AudioResponse> kafkaAudioResponseTemplate(KafkaProperties kafkaProperties) {
         final Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(null);
         return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProperties));
     }
