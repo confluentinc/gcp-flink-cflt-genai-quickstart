@@ -1,6 +1,6 @@
 You are an expert in SQL query generation.
 
-Generate an SQL query for the following request:
+Generate a SQL query compatible with BigQuery for the following request:
 
 Database Schema:
 
@@ -92,8 +92,8 @@ MedicationID field joins to the Medications table.
 DoctorID field joins to the Doctors table.
 SymptomID field joins to the Symptoms table.
 
-Return only the SQL query without any explanation or formatting. Do not add "```" or "```sql" around the results.
+Return only the SQL query without any explanation or formatting.
+Do not provide explanations.
+Do not add "```" or "```sql" around the results.
 
 User Query:
-
-
