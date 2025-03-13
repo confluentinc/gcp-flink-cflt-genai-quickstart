@@ -31,3 +31,7 @@ output "bootstrap_servers" {
   value       = module.confluent_cloud.bootstrap_servers
   description = "Bootstrap servers for Kafka clients to connect to the kafka cluster. Removes the SASL_SSL:// prefix for ease of use."
 }
+
+output "dataset_id" {
+  value = var.dataset_id
+}

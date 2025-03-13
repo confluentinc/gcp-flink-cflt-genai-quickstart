@@ -6,3 +6,7 @@ output "gcp_service_account_key" {
 output "gcp_service_account_key_file" {
   value = "${path.root}/service-account-key.json"
 }
+
+ output "dataset_id" {
+   value = var.dataset_id
+ }

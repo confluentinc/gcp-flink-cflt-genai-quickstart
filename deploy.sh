@@ -135,6 +135,10 @@ if [[ -n "$DEFAULT_ENV_FILE" && "$DEFAULT_ENV_FILE" != "-h" && "$DEFAULT_ENV_FIL
     fi
 fi
 
+# Fetch dataset_id from Terraform and export it as an environment variable
+DATASET_ID=$(terraform output -raw dataset_id)
+export DATASET_ID
+
 # Prompt for GCP Information
 [ -z "$GCP_ACCOUNT" ] && prompt_for_input GCP_ACCOUNT "Enter your GCP Account to use:" false
 [ -z "$GCP_GEMINI_API_KEY" ] && prompt_for_input GCP_GEMINI_API_KEY "Enter your GCP_GEMINI_API_KEY:" false
@@ -145,6 +149,7 @@ fi
 [ -z "$CONFLUENT_CLOUD_API_KEY" ] && prompt_for_input CONFLUENT_CLOUD_API_KEY "Enter your Confluent Cloud API Key" false
 [ -z "$CONFLUENT_CLOUD_API_SECRET" ] && prompt_for_input CONFLUENT_CLOUD_API_SECRET "Enter your Confluent Cloud API Secret" true
 [ -z "$CONFLUENT_CLOUD_REGION" ] && prompt_for_input_with_default CONFLUENT_CLOUD_REGION "Enter Confluent Cloud Region" "us-east1"
+
 
 # Create .env file from variables set in this file
 echo "[+] Setting up .env file for docker-compose"

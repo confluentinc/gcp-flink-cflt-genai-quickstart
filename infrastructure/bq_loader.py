@@ -4,7 +4,7 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 
 # Load BigQuery credentials and initialize client
-credentials = service_account.Credentials.from_service_account_file("./modules/gcp/bq-service-account.json")
+credentials = service_account.Credentials.from_service_account_file("./infrastructure/service-account-key.json")
 client = bigquery.Client(credentials=credentials, project=credentials.project_id)
 
 
