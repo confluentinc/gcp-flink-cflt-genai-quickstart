@@ -182,8 +182,14 @@ confluent_cloud_api_secret = "$CONFLUENT_CLOUD_API_SECRET"
 unique_id = "$unique_id"
 EOF
 
+if find ./.config -mindepth 1 -maxdepth 1 | read; then
+   echo "dir not empty"
+else
+   echo "dir empty"
+fi
+
 # Check if .config folder exists
-if [ ! -d ./.config ]; then
+#if [ ! -d ./.config ]; then
   echo "[+] Authenticating gcloud"
   IMAGE_ARCH=$IMAGE_ARCH docker run -v ./.config:/root/.config/ -ti --rm --name gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud auth application-default login
   if [ $? -ne 0 ]; then
@@ -191,7 +197,7 @@ if [ ! -d ./.config ]; then
       exit 1
   fi
   echo "[+] gcloud authentication complete"
-fi
+#fi
 
 echo "[+] Applying terraform"
 IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform apply --auto-approve -var-file=variables.tfvars
