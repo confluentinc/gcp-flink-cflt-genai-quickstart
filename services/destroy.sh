@@ -100,6 +100,20 @@ if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
   echo "[+] WebSocket destroyed successfully"
 fi
 
+LOWER_UNIQUE_ID=$(to_lowercase "$UNIQUE_ID")
+SVC_NAME="quickstart-healthcare-ai-audio-text-converter-"$LOWER_UNIQUE_ID
+
+#Check is the service exists
+if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
+  echo "[+] Destroying Audio Text Converter service"
+  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-backend gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+  if [ $? -ne 0 ]; then
+      echo "[-] Failed to destroy Audio Text Converter"
+      exit 1
+  fi
+  echo "[+] Audio Text Converter destroyed successfully"
+fi
+
 echo "[+] Cleanup files"
 rm -rf "$SCRIPT_FOLDER"/websocket/frontend/node_modules
 rm -rf "$SCRIPT_FOLDER"/websocket/src/main/resources/static/
