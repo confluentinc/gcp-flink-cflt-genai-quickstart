@@ -71,3 +71,23 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "[+] WebSocket deployed successfully"
+
+echo "[+] Loading Data"
+
+# Create and activate a Python virtual environment inside a Docker container
+docker run --rm -v "$SERVICE_PATH":/root/source -w /root/source "$DOCKER_IMAGE" sh -c "
+    python3 -m venv venv &&
+    source venv/bin/activate &&
+    DATASET_ID='$DATASET_ID' python3 /root/source/bq_loader.py
+"
+
+# Check for failure
+if [ $? -ne 0 ]; then
+    echo "[-] Failed to load Data into BQ"
+    exit 1
+fi
+
+echo "[+] Data loaded successfully"
+
+
+
