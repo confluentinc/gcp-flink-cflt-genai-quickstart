@@ -37,8 +37,7 @@ public class Summarize {
     static final String authKey = System.getenv("KAFKA_API_KEY");
     static final String authSecret = System.getenv("KAFKA_API_SECRET");
 
-    //static final String projectId = System.getenv("GCP_PROJECT_ID");
-    static final String projectId = "csid-281116";
+    static final String projectId = System.getenv("GCP_PROJECT_ID");
     static final String location = System.getenv("GCP_REGION");
 
     static final String schemaRegistryKey = System.getenv("SR_API_KEY");
