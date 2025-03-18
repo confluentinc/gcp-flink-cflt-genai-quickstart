@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import static io.confluent.quickstart.HealthCheckServer.startHealthCheckServer;
 
 @Slf4j
@@ -51,19 +53,19 @@ public class AudioToTextConverter {
 
     static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
 
-    static final String inputTopic = System.getenv("TOPIC_IN");
-    static final String outputTopic = System.getenv("TOPIC_OUT");
+    static final String audioRequestTopic = "audio_request";
+    static final String inputRequestTopic = "input_request";
 
-    //static final String summarisedResultsTopic = "summarised_results";
-    //static final String audioResponseTopic = "audio_response";
+    static final String summarisedResultsTopic = "summarised_results";
+    static final String audioResponseTopic = "audio_response";
 
     public static void main(String[] args) throws IOException {
+
         // Build and start the Kafka Streams application
-
-        System.out.println();
         final Properties streamsConfiguration = getStreamsConfiguration();
-
-        Map kafkaConfig = streamsConfiguration;
+        // Using Java Streams to convert Properties to Map<String, String>
+        Map<String, String> kafkaConfig = streamsConfiguration.stringPropertyNames().stream()
+                .collect(Collectors.toMap(Function.identity(), streamsConfiguration::getProperty));
 
         // Configure Kafka Streams
         StreamsBuilder builder = new StreamsBuilder();
@@ -85,25 +87,25 @@ public class AudioToTextConverter {
 
     private static void buildAudioToTextStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
         // Define processing for the audio-to-text conversion
-        KStream<String, AudioQuery> inputRequests = builder.stream(inputTopic, Consumed.with(Serdes.String(), new AudioQuerySerde(kafkaConfig, false)));
+        KStream<String, AudioQuery> inputRequests = builder.stream(audioRequestTopic, Consumed.with(Serdes.String(), new AudioQuerySerde(kafkaConfig, false)));
         // Call Google Speech-to-Text API and return transcribed text
         inputRequests
                 .filter((sessionId, text) -> sessionId != null && text != null)
                 .mapValues(AudioToTextConverter::transcribeAudio)
-                .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+
+                .to(inputRequestTopic, Produced.with(Serdes.String(), Serdes.String()));
     }
 
     private static void buildTextToAudioStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
 
         // Define processing for the text-to-audio conversion
-        KStream<String, String> summarizedResults = builder.stream(inputTopic, Consumed.with(Serdes.String(), Serdes.String()));
+        KStream<String, String> summarizedResults = builder.stream(summarisedResultsTopic, Consumed.with(Serdes.String(), Serdes.String()));
 
         // Call Google Text-to-Speech API and return audio bytes
         summarizedResults
                 .filter((sessionId, text) -> sessionId != null && text != null)
-//                .mapValues(AudioToTextConverter::synthesizeSpeech)
                 .map((sessionId, text) -> new KeyValue<>(sessionId, synthesizeSpeech(sessionId, text)))
-                .to(outputTopic, Produced.with(Serdes.String(), new AudioResponseSerde(kafkaConfig, false)));
+                .to(audioResponseTopic, Produced.with(Serdes.String(), new AudioResponseSerde(kafkaConfig, false)));
     }
 
 
@@ -115,7 +117,6 @@ public class AudioToTextConverter {
             // Builds the sync recognize request
             RecognitionConfig config = RecognitionConfig.newBuilder()
                     .setEncoding(RecognitionConfig.AudioEncoding.WEBM_OPUS)
-//                    .setSampleRateHertz(16000)
                     .setLanguageCode("en-US") // Set the language of the audio
                     .build();
 
@@ -192,14 +193,15 @@ public class AudioToTextConverter {
         }
     }
 
+    // TODO: populate this accordingly once we have a summary topic message finalised
     private static AudioResponse getAudioResponse(String sessionId, String summaryResults, byte[] audio) {
         final AudioResponse audioResponse = new AudioResponse();
         audioResponse.setSessionId(sessionId.trim());
         audioResponse.setAudio(audio);
-        audioResponse.setDescription("temp");
-        audioResponse.setExecutedQuery("temp");
+        audioResponse.setDescription("");
+        audioResponse.setExecutedQuery("");
         audioResponse.setResponse(summaryResults.trim());
-        audioResponse.setQuery("temp");
+        audioResponse.setQuery("");
         audioResponse.setRenderedResult(summaryResults.trim());
         return audioResponse;
     }
@@ -229,5 +231,4 @@ public class AudioToTextConverter {
         streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getAbsolutePath());
         return streamsConfiguration;
     }
-
 }

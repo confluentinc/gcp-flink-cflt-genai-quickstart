@@ -100,6 +100,7 @@ if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
   echo "[+] WebSocket destroyed successfully"
 fi
 
+
 SVC_NAME="quickstart-healthcare-ai-audio-text-converter-"$LOWER_UNIQUE_ID
 
 #Check if the Audio Text Converter App exists
@@ -149,6 +150,7 @@ if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
       exit 1
   fi
   echo "[+] Execute Query App destroyed successfully"
+
 fi
 
 echo "[+] Cleanup files"
