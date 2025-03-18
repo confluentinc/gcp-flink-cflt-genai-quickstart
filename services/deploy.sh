@@ -157,23 +157,3 @@ if [ $? -ne 0 ]; then
 fi
 echo "[+] WebSocket deployed successfully"
 
-#Deploying Kstream App Audio Text Converter
-SERVICE_PATH="$SCRIPT_FOLDER/audio-text-converter"
-SVC_NAME="quickstart-healthcare-ai-audio-text-converter-"$LOWER_UNIQUE_ID
-
-echo "[+] Building Audio Text Converter App"
-IMAGE_ARCH=$IMAGE_ARCH docker run -v "$SERVICE_PATH":/root/source/ -ti --rm --name build-build-query maven:3.8.7-openjdk-18-slim sh -c "cd /root/source/ && mvn clean install -DskipTests=true"
-if [ $? -ne 0 ]; then
-    echo "[-] Failed to build Audio Text Converter App"
-    exit 1
-fi
-echo "[+] Build Query App built successfully"
-
-echo "[+] Deploying Audio-Text Converter App"
-IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-audio-text-converter gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
---set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID",TOPIC_IN="$AUDIO_REQUEST_TOPIC",TOPIC_OUT="$INPUT_REQUEST_TOPIC"
-if [ $? -ne 0 ]; then
-    echo "[-] Failed to deploy Audio Text Converter App"
-    exit 1
-fi
-echo "[+] Audio Text Converter App deployed successfully"
