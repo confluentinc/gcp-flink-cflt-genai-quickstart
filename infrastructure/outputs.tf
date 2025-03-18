@@ -31,3 +31,33 @@ output "bootstrap_servers" {
   value       = module.confluent_cloud.bootstrap_servers
   description = "Bootstrap servers for Kafka clients to connect to the kafka cluster. Removes the SASL_SSL:// prefix for ease of use."
 }
+
+output "audio_request_topic" {
+  value = module.confluent_cloud.audio_request_topic
+  description = "audio request topic"
+}
+
+output "audio_response_topic" {
+  value = module.confluent_cloud.audio_response_topic
+  description = "audio response topic"
+}
+
+output "input_request_topic" {
+  value = module.confluent_cloud.input_request_topic
+  description = "input request topic"
+}
+
+output "generated_sql_topic" {
+  value = module.confluent_cloud.generated_sql_topic
+  description = "generated sql topic"
+}
+
+output "sql_results_topic" {
+  value = module.confluent_cloud.sql_results_topic
+  description = "sql results topic"
+}
+
+output "summarised_results_topic" {
+  value = module.confluent_cloud.summarised_results_topic
+  description = "summarised results topic"
+}

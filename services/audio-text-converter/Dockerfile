@@ -17,7 +17,6 @@ FROM confluentinc/cp-base-new:latest-ubi8
 
 WORKDIR /build
 
-
 ENV STREAMS_USER="streams"
 ENV STREAMS_GROUP=$STREAMS_USER
 
@@ -33,7 +32,6 @@ USER root
 
 RUN groupadd $STREAMS_GROUP && useradd -r -g $STREAMS_GROUP $STREAMS_USER
 RUN mkdir /app && chown $STREAMS_USER:$STREAMS_GROUP /app
-
 
 COPY --chown=appuser:appuser target/$FAT_JAR /app/$FAT_JAR
 COPY --chown=appuser:appuser launch.sh /app/launch.sh

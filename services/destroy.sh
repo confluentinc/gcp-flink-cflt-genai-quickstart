@@ -89,7 +89,7 @@ fi
 LOWER_UNIQUE_ID=$(to_lowercase "$UNIQUE_ID")
 SVC_NAME="quickstart-healthcare-ai-websocket-"$LOWER_UNIQUE_ID
 
-#Check is the service exists
+#Check if the service exists
 if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
   echo "[+] Destroying WebSocket service"
   IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-backend gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
@@ -100,18 +100,57 @@ if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
   echo "[+] WebSocket destroyed successfully"
 fi
 
-LOWER_UNIQUE_ID=$(to_lowercase "$UNIQUE_ID")
+
 SVC_NAME="quickstart-healthcare-ai-audio-text-converter-"$LOWER_UNIQUE_ID
 
-#Check is the service exists
+#Check if the Audio Text Converter App exists
 if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
-  echo "[+] Destroying Audio Text Converter service"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-backend gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+  echo "[+] Destroying Audio Text Converter App"
+  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-audio-text gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
   if [ $? -ne 0 ]; then
-      echo "[-] Failed to destroy Audio Text Converter"
+      echo "[-] Failed to destroy Audio Text Converter App"
       exit 1
   fi
-  echo "[+] Audio Text Converter destroyed successfully"
+  echo "[+] Audio Text Converter App destroyed successfully"
+fi
+
+SVC_NAME="quickstart-healthcare-ai-summarise-"$LOWER_UNIQUE_ID
+#Check if the Summarise App exists
+if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
+  echo "[+] Destroying Summarise App"
+  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-summarise gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+  if [ $? -ne 0 ]; then
+      echo "[-] Failed to destroy Summarise App"
+      exit 1
+  fi
+  echo "[+] Summarise App destroyed successfully"
+fi
+
+SVC_NAME="quickstart-healthcare-ai-build-query-"$LOWER_UNIQUE_ID
+
+#Check is the Build Query exists
+if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
+  echo "[+] Destroying Build Query App"
+  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-build-query gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+  if [ $? -ne 0 ]; then
+      echo "[-] Failed to destroy Build Query App"
+      exit 1
+  fi
+  echo "[+] Build Query App destroyed successfully"
+fi
+
+SVC_NAME="quickstart-healthcare-ai-execute-query-"$LOWER_UNIQUE_ID
+
+#Check is the Execute Query exists
+if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
+  echo "[+] Destroying Execute Query App"
+  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-execute-query gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+  if [ $? -ne 0 ]; then
+      echo "[-] Failed to destroy Execute Query App"
+      exit 1
+  fi
+  echo "[+] Execute Query App destroyed successfully"
+
 fi
 
 echo "[+] Cleanup files"

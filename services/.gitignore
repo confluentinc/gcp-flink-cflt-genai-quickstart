@@ -64,7 +64,6 @@ out/
 
 # Local .terraform directories
 **/.terraform/*
-/infrastructure/service-account-key.json
 
 # .tfstate files
 *.tfstate

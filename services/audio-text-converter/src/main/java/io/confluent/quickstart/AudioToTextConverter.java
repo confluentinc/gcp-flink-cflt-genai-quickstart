@@ -70,7 +70,6 @@ public class AudioToTextConverter {
         // Configure Kafka Streams
         StreamsBuilder builder = new StreamsBuilder();
 
-
         if (healthCheckPort == null) { healthCheckPort = "8080"; }
         startHealthCheckServer(Integer.parseInt(healthCheckPort));
 
@@ -93,6 +92,7 @@ public class AudioToTextConverter {
         inputRequests
                 .filter((sessionId, text) -> sessionId != null && text != null)
                 .mapValues(AudioToTextConverter::transcribeAudio)
+
                 .to(inputRequestTopic, Produced.with(Serdes.String(), Serdes.String()));
     }
 
@@ -231,5 +231,4 @@ public class AudioToTextConverter {
         streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getAbsolutePath());
         return streamsConfiguration;
     }
-
 }

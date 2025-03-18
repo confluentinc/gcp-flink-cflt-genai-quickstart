@@ -40,6 +40,7 @@
         <kafka.version>3.8.0</kafka.version>
         <google.cloud.speech.version>4.54.0</google.cloud.speech.version>
         <google.cloud.texttospeech.version> 2.48.0</google.cloud.texttospeech.version>
+
         <confluent.version>7.9.0</confluent.version>
 
         <java.version>17</java.version>
@@ -155,8 +156,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
             </plugin>
         </plugins>

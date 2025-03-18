@@ -26,18 +26,21 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.IOException;
 import java.util.Properties;
+import static io.confluent.quickstart.HeathCheckServer.startHealthCheckServer;
 
 public class ExecuteQuery {
 
     static final String inputTopic = System.getenv("TOPIC_IN");
     static final String outputTopic = System.getenv("TOPIC_OUT");
-    static final String bootstrapServers = System.getenv("BOOTSTRAP");
-    static final String authKey = System.getenv("KEY");
-    static final String authSecret = System.getenv("SECRET");
+    static final String bootstrapServers = System.getenv("BOOTSTRAP_SERVER");
+    static final String authKey = System.getenv("KAFKA_API_KEY");
+    static final String authSecret = System.getenv("KAFKA_API_SECRET");
+
+    static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
 
     static BigQueryClient bigQueryClient;
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
             System.out.println("Unable to run: TOPIC_IN, TOPIC_OUT and BOOTSTRAP env vars must be set.");
             System.exit(1);
@@ -50,6 +53,10 @@ public class ExecuteQuery {
         final StreamsBuilder builder = new StreamsBuilder();
         executeBQStream(builder);
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
+
+        if (healthCheckPort == null) { healthCheckPort = "8080"; }
+        startHealthCheckServer(Integer.parseInt(healthCheckPort));
+
         streams.cleanUp();
         streams.start();
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));

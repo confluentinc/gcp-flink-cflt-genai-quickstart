@@ -43,6 +43,8 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <io.confluent.kafka-streams-examples.version>8.0.0-0</io.confluent.kafka-streams-examples.version>
+        <maven.compiler.source>19</maven.compiler.source>
+        <maven.compiler.target>19</maven.compiler.target>
     </properties>
 
     <dependencies>

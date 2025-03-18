@@ -1,6 +1,6 @@
 spring:
   application:
-    name: "QuickstartApplication"
+    name: "Quickstart-Websocket-Application"
   config:
     activate.on-profile: default
 

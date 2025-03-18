@@ -180,6 +180,23 @@ resource "confluent_api_key" "clients-schema-registry-api-key" {
 # ------------------------------------------------------
 # ACLs
 # ------------------------------------------------------
+resource "confluent_kafka_acl" "app-client-describe-on-cluster" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "CLUSTER"
+  resource_name = "kafka-cluster"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.app-manager.id}"
+  host          = "*"
+  operation     = "DESCRIBE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
 
 resource "confluent_kafka_acl" "app-manager-read-on-target-topic" {
   kafka_cluster {
@@ -202,6 +219,23 @@ resource "confluent_kafka_acl" "app-manager-read-on-target-topic" {
   ]
 }
 
+resource "confluent_kafka_acl" "app-client-write-to-data-topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "*"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.app-manager.id}"
+  host          = "*"
+  operation     = "WRITE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
 resource "confluent_kafka_acl" "app-manager-delete-on-target-topic" {
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
@@ -228,7 +262,7 @@ resource "confluent_kafka_acl" "app-manager-delete-on-target-topic" {
 # ------------------------------------------------------
 
 resource "confluent_service_account" "app-manager" {
-  display_name = "cflt-health-app-manager"
+  display_name = "cflt-health-app-manager-${var.env_display_id_postfix}"
   description  = "Service Account for Kafka Cluster"
 }
 
