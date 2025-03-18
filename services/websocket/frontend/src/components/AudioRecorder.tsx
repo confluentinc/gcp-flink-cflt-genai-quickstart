@@ -1,213 +1,234 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Mic, Square, Play, Pause, X } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { RecordingResults } from "@/components/RecordingResults";
-import { bytesToBase64DataUrl } from "@/components/utils";
-import { useWebSocket } from "@/components/WebSocketProvider"; 
 
-interface RecordingResult {
-    timestamp: string;
-    transcript: string;
-    response: string;
-    result: string;
-}
+import { useState, useEffect, useRef } from "react";
+import { Card } from "@/components/ui/card";
+import { RecordingResults } from "./RecordingResults";
+import { InputModeSelector } from "./InputModeSelector";
+import { AudioRecorderControls } from "./AudioRecorderControls";
+import { TextInputForm } from "./TextInputForm";
+import { AudioDisplay } from "./AudioDisplay";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { useMessageProcessor } from "@/hooks/useMessageProcessor";
+import { useConversationHistory } from "@/hooks/useConversationHistory";
+import { Button } from "./ui/button";
+import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export const AudioRecorder = () => {
+  const [inputMode, setInputMode] = useState<"audio" | "text">("audio");
+  const { toast } = useToast();
+  // For tracking processed responses to avoid duplicates
+  // Track the current conversation exchange with a unique ID
+  const currentConversationIdRef = useRef<string | null>(null);
 
-    const [isRecording, setIsRecording] = useState(false);
-    const [isPaused, setIsPaused] = useState(false);
-    const [duration, setDuration] = useState(0);
-    const [audioURL, setAudioURL] = useState<string | null>(null);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const chunksRef = useRef<Blob[]>([]);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const { toast } = useToast();
-    const { sendData, isProcessing, results } = useWebSocket();
+  // Keep track of processed responses to avoid duplicates
+  const processedResponsesRef = useRef<Set<string>>(new Set());
+
+  // Flag to indicate if we're expecting a response
+  const isAwaitingResponseRef = useRef<boolean>(false);
+
+  const {
+    isRecording,
+    isPaused,
+    audioURL,
+    duration,
+    formatDuration,
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    cancelRecording,
+    maxDuration
+  } = useAudioRecorder();
+
+  const {
+    result,
+    isProcessing,
+    responseAudioUrl,
+    processAudioRecording,
+    processTextMessage,
+    clearConversationId
+  } = useMessageProcessor();
+
+  const {
+    conversation,
+    addUserMessage,
+    addAIResponse,
+    clearHistory
+  } = useConversationHistory();
 
 
-    useEffect(() => {
-        // This cleanup will handle the part relevant to audio and recording state
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-        };
-    }, []);
+  // Update conversation history when result changes
+  useEffect(() => {
+    if (result && !isProcessing && isAwaitingResponseRef.current) {
+      console.log('Processing result with conversation ID:', result.timestamp);
 
-    const startTimer = () => {
-        timerRef.current = setInterval(() => {
-            setDuration((prevDuration) => prevDuration + 1);
-        }, 1000);
-    };
+      // Only proceed if the result has a valid conversation ID
+      if (result.timestamp && result.timestamp === currentConversationIdRef.current) {
+        console.log('Result matches current conversation ID');
 
-    const stopTimer = () => {
-        if (timerRef.current) clearInterval(timerRef.current);
-        timerRef.current = null;
-    };
+        // Only add the AI response if there's actual content and we haven't processed it yet
+        if (result.response && !processedResponsesRef.current.has(result.timestamp)) {
+          console.log('Adding new AI response for conversation:', result.timestamp);
 
-    const formatDuration = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    };
+          // Mark this conversation as processed
+          processedResponsesRef.current.add(result.timestamp);
 
-    const startRecording = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const options = { mimeType: 'audio/webm; codecs=opus' };
-            mediaRecorderRef.current = new MediaRecorder(stream, options);
+          // Add the AI response
+          addAIResponse(result.response, responseAudioUrl);
 
-            mediaRecorderRef.current.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    chunksRef.current.push(e.data);
-                  }
-            };
-            mediaRecorderRef.current.start();
-            setIsRecording(true);
-            setIsPaused(false);
-            startTimer();
-            toast({
-                title: "Recording started",
-                description: "Speak clearly into your microphone",
-            });
-        } catch (err) {
-            console.error("Error accessing microphone:", err);
-            toast({
-                title: "Error",
-                description: "Could not access microphone",
-                variant: "destructive",
-            });
+          // Reset flags after successfully processing
+          isAwaitingResponseRef.current = false;
+
+          // Tell the message processor we're done with this conversation
+          clearConversationId();
+        } else {
+          console.log('Skipping empty or already processed response');
         }
-    };
+      } else {
+        console.log('Result conversation ID does not match current conversation ID');
+      }
+    }
+  }, [result, isProcessing, responseAudioUrl, addAIResponse, clearConversationId]);
 
-    const stopRecording = async () => {
-        if (mediaRecorderRef.current) {
-            await new Promise((resolve) => {
-                mediaRecorderRef.current.onstop = resolve;
-                mediaRecorderRef.current.stop();
-                mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-            });
+  const handleStopRecording = async () => {
+    const audioBlob = await stopRecording();
+    if (audioBlob) {
 
-            setIsRecording(false);
-            setIsPaused(false);
-            stopTimer();
-            setDuration(0); // Resetting the duration
+      // Generate a unique conversation ID
+      const conversationId = `audio-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      currentConversationIdRef.current = conversationId;
 
-            const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-            const audioUrl = URL.createObjectURL(blob);
-            setAudioURL(audioUrl);
+      // Reset last response reference for new conversation turn
+      isAwaitingResponseRef.current = true;
 
-            // Resetting chunks for the next recording
-            chunksRef.current = [];
+      // Set flag that we're now awaiting a response
+      isAwaitingResponseRef.current = true;
 
-            // Prepare and send the data over WebSocket
-            const buffer = await blob.arrayBuffer();
-            const base64DataUrl = await bytesToBase64DataUrl(new Uint8Array(buffer), 'audio/webm');
-            sendData(base64DataUrl as string);
+      // Add user message with transcript (empty for now) and audio URL
+      addUserMessage(result?.transcript || "Audio message", audioBlob);
 
-            // Acknowledge the end of recording
-            toast({
-                title: "Recording stopped",
-                description: "Your message has been recorded",
-            });
-        }
-    };
+      // Process the recording with the conversation ID
+      processAudioRecording(audioBlob, conversationId);
+    }
+  };
 
-    const pauseRecording = () => {
-        if (mediaRecorderRef.current && isRecording && !isPaused) {
-            mediaRecorderRef.current.pause();
-            setIsPaused(true);
-            stopTimer();
-            toast({
-                title: "Recording paused",
-                description: "Click resume to continue recording",
-            });
-        } else if (mediaRecorderRef.current && isRecording && isPaused) {
-            mediaRecorderRef.current.resume();
-            setIsPaused(false);
-            startTimer();
-            toast({
-                title: "Recording resumed",
-                description: "Continue speaking into your microphone",
-            });
-        }
-    };
+  const handleTextSubmit = (text: string) => {
+    // Add user text message
+    addUserMessage(text);
 
-    const cancelRecording = () => {
-        if (mediaRecorderRef.current && isRecording) {
-            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-            setIsRecording(false);
-            setIsPaused(false);
-            setDuration(0);
-            stopTimer();
-            chunksRef.current = [];
-            toast({
-                title: "Recording cancelled",
-                description: "The recording has been discarded",
-            });
-        }
-    };
+    // Generate a unique conversation ID
+    const conversationId = `text-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    currentConversationIdRef.current = conversationId;
 
-    return (
-        <div className="space-y-8 w-full max-w-2xl mx-auto">
-            <Card className="w-full p-6 space-y-6 animate-fadeIn">
-                <div className="space-y-2 text-center">
-                    <h2 className="text-2xl font-semibold tracking-tight">AI Health Assistant</h2>
-                    <p className="text-sm text-muted-foreground">Record your health-related questions</p>
-                    {isRecording && (
-                        <p className="text-lg font-semibold text-primary">{formatDuration(duration)}</p>
-                    )}
-                    {isProcessing && (
-                        <p className="text-sm text-muted-foreground animate-pulse">Processing your recording...</p>
-                    )}
-                </div>
+    // Reset last response reference for new conversation turn
+    isAwaitingResponseRef.current = true;
 
-                <div className="flex flex-col items-center gap-4">
-                    <div className="relative w-32 h-32 flex items-center justify-center">
-                        <div
-                            className={`absolute inset-0 bg-primary/10 rounded-full ${isRecording ? 'animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]' : ''
-                                }`}
-                        />
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className={`w-20 h-20 rounded-full transform active:scale-95 transition-all duration-200
- 
-            ${isRecording
-                                    ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-                                    : 'bg-primary hover:bg-primary/90'
-                                }`} onClick={isRecording ? stopRecording : startRecording}
-                        >
-                            {isRecording ? (
-                                <Square className="w-8 h-8 text-white" />
-                            ) : (
-                                <Mic className="w-8 h-8 text-white" />
-                            )}
-                        </Button>
-                    </div>
-                    {isRecording && (
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={pauseRecording}
-                                className="rounded-full"
-                            >
-                                {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={cancelRecording}
-                                className="rounded-full"
-                            >
-                                <X className="w-4 h-4" />
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </Card>
-            <RecordingResults newResult={results} audioUrl={audioURL} />
+    // Set flag that we're now awaiting a response
+    isAwaitingResponseRef.current = true;
+
+    // Process the text message with the conversation ID
+    processTextMessage(text, conversationId);
+  };
+
+  const handleClearHistory = () => {
+    clearHistory();
+    // Reset the last response tracker when clearing history
+    currentConversationIdRef.current = null;
+    isAwaitingResponseRef.current = false;
+    processedResponsesRef.current.clear();
+    clearConversationId();
+    toast({
+      title: "History cleared",
+      description: "Your conversation history has been deleted",
+    });
+  };
+
+  const handleConversationReset = () => {
+    clearHistory();
+    // Reset the last response tracker when clearing history
+    currentConversationIdRef.current = null;
+    isAwaitingResponseRef.current = false;
+    processedResponsesRef.current.clear();
+    clearConversationId();
+    window.location.reload();
+    isProcessing
+    toast({
+      title: "Conversation Reset",
+      description: "Your conversation has been reset",
+    });
+  };
+
+  return (
+    <div className="space-y-8 w-full max-w-2xl mx-auto">
+      <Card className="w-full p-6 space-y-6 animate-fadeIn">
+        <div className="space-y-2 text-center">
+          <h2 className="text-2xl font-semibold tracking-tight">AI Health Assistant</h2>
+          <p className="text-sm text-muted-foreground">Record or type your health-related questions</p>
+          {isProcessing && (
+            <p className="text-sm text-muted-foreground animate-pulse">Processing your request...</p>
+          )}
         </div>
-    );
+
+        <InputModeSelector
+          mode={inputMode}
+          onChange={setInputMode}
+        />
+
+        {inputMode === "audio" ? (
+          <>
+            <AudioRecorderControls
+              isRecording={isRecording}
+              isPaused={isPaused}
+              duration={duration}
+              formatDuration={formatDuration}
+              startRecording={startRecording}
+              stopRecording={handleStopRecording}
+              pauseRecording={pauseRecording}
+              cancelRecording={cancelRecording}
+            />
+            {!isRecording && (
+              <div className="text-center text-xs text-muted-foreground">
+                Maximum recording time: {maxDuration} seconds
+              </div>
+            )}
+            {/* <AudioDisplay audioURL={audioURL} /> */}
+          </>
+        ) : (
+          <TextInputForm
+            onSubmit={handleTextSubmit}
+            isProcessing={isProcessing}
+          />
+        )}
+      </Card>
+
+      {conversation.messages.length > 0 && (
+        <div className="flex justify-center mt-4">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleClearHistory}
+            className="flex items-center gap-2 m-8"
+          >
+            <Trash2 className="h-4 w-4" />
+            Clear History
+          </Button>
+
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleConversationReset}
+            className="flex items-center gap-2 m-8"
+          >
+            <Trash2 className="h-4 w-4" />
+            Reset
+          </Button>
+
+        </div>
+      )}
+
+      <RecordingResults
+        messages={conversation.messages}
+        isProcessing={isProcessing}
+      />
+    </div>
+  );
 };
