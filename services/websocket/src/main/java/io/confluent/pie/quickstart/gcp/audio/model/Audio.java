@@ -8,6 +8,7 @@ import lombok.Setter;
 public class Audio {
 
     private String data;
+    private String question;
     private String result;
 
 }

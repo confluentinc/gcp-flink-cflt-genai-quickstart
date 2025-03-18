@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 public class AudioResponse extends SQLResponse {
 
+    private String messageId;
     private byte[] audio;
 
 }
