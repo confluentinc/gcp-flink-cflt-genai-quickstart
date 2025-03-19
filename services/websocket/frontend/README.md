@@ -54,11 +54,12 @@ Visit http://localhost:8080 to view your React application.
 The application relies on the environment variable `VITE_WS_URL`, you can pass it at runtime using the `-e` flag with docker run. Here's an example:
 
 ```bash
-docker run -e VITE_WS_URL=ws://your-websocket-url/ws -p 8080:80 my-react-app
+docker run -e VITE_WS_URL=ws://your-websocket-url -p 8080:80 my-react-app
 ```
 
-Replace `ws://your-websocket-url/ws` with the actual WebSocket URL
+Replace `ws://your-websocket-url` with the actual WebSocket URL
 
+You can also add `.env` with the `VITE_WS_URL` to do local development
 #### Debugging and Logs
 
 If you need to troubleshoot or debug your application, viewing Docker container logs can be extremely helpful. Use the following command to view the logs of your running container:

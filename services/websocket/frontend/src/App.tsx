@@ -7,6 +7,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Assistant from "./pages/Assistant";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/assistant" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
