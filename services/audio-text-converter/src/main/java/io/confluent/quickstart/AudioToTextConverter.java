@@ -92,7 +92,6 @@ public class AudioToTextConverter {
         inputRequests
                 .filter((sessionId, text) -> sessionId != null && text != null)
                 .mapValues(AudioToTextConverter::transcribeAudio)
-
                 .to(inputRequestTopic, Produced.with(Serdes.String(), Serdes.String()));
     }
 
