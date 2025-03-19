@@ -7,9 +7,10 @@ set -oe pipefail
 
 # Required environment variables
 REQUIRED_ENV_VARS=(
-  "FLINK_API_KEY" "FLINK_API_SECRET" "FLINK_ENV_ID" "FLINK_ORG_ID"
-  "FLINK_REST_ENDPOINT" "GOOGLE_API_KEY" "GOOGLE_REGION"
+  "FLINK_API_KEY" "FLINK_API_SECRET" "FLINK_ENV_ID" "FLINK_ORG_ID" "FLINK_REGION" "GOOGLE_API_KEY"
 )
+
+# "GOOGLE_REGION"
 
 # Check if required environment variables are set
 for env_var in "${REQUIRED_ENV_VARS[@]}"; do
@@ -21,6 +22,8 @@ done
 
 # Encode API key and secret for basic authentication
 BASIC_AUTH=$(echo -n "$FLINK_API_KEY:$FLINK_API_SECRET" | base64 -w 0)
+AUTH_DATA=$(jq -n -r --arg google_api_key "$GOOGLE_API_KEY" '{API_KEY: $google_api_key}' | jq '.|tostring')
+FLINK_REST_ENDPOINT="https://flink.$FLINK_REGION.gcp.confluent.cloud"
 
 # Create connection in Confluent Cloud cluster
 echo
@@ -31,14 +34,11 @@ curl --request POST \
   --data '{
     "name": "gemini15pro2",
     "spec": {
-      "connection_type": "googleai",
+      "connection_type": "GOOGLEAI",
       "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent",
       "auth_data": {
         "kind": "PlaintextProvider",
-        "data": '"$GOOGLE_API_KEY"'
+      "data": '"$AUTH_DATA"'
       }
     }
-  }' | jq . > titan-embed-connection-result.json
-
-#  confluent flink connection create gemini15pro2 --cloud gcp --region europe-west1
-#  --api-key <api-key>> --environment <cc-env>
+  }' | jq . > gemini-connection-result.json
