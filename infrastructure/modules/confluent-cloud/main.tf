@@ -31,6 +31,159 @@ resource "confluent_kafka_cluster" "standard" {
   }
 }
 
+# ------------------------------------------------------
+# FLINK
+# ------------------------------------------------------
+
+resource "confluent_flink_compute_pool" "main" {
+  display_name = "genai-quickstart-flink-compute-pool-${var.env_display_id_postfix}"
+  cloud        = var.confluent_cloud_service_provider
+  region       = var.confluent_cloud_region
+  max_cfu      = 30
+  environment {
+    id = confluent_environment.staging.id
+  }
+  depends_on = [
+    confluent_role_binding.statements-runner-environment-admin,
+    confluent_role_binding.app-manager-assigner,
+    confluent_role_binding.app-manager-flink-developer,
+    confluent_api_key.app-manager-flink-api-key,
+  ]
+}
+
+data "confluent_flink_region" "main" {
+  cloud  = var.confluent_cloud_service_provider
+  region = var.confluent_cloud_region
+}
+
+resource "confluent_flink_statement" "create-tables" {
+  for_each = var.create_table_sql_files
+  organization {
+    id = data.confluent_organization.main.id
+  }
+  environment {
+    id = confluent_environment.staging.id
+  }
+  compute_pool {
+    id = confluent_flink_compute_pool.main.id
+  }
+  principal {
+    id = confluent_service_account.statements-runner.id
+  }
+
+  properties = {
+    "sql.current-catalog"  = confluent_environment.staging.display_name
+    "sql.current-database" = confluent_kafka_cluster.standard.display_name
+  }
+  rest_endpoint = data.confluent_flink_region.main.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-flink-api-key.id
+    secret = confluent_api_key.app-manager-flink-api-key.secret
+  }
+  statement = file(abspath(each.value))
+  lifecycle {
+    ignore_changes = [rest_endpoint, organization[0].id]
+  }
+}
+
+# registers flink sql connections with bedrock. should be replaced when
+# terraform provider supports managing flink sql connections
+resource "null_resource" "create-flink-bedrock-connections" {
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/flink-connection-create.sh"
+    environment = {
+      FLINK_API_KEY       = confluent_api_key.app-manager-flink-api-key.id
+      FLINK_API_SECRET    = confluent_api_key.app-manager-flink-api-key.secret
+      FLINK_ENV_ID        = confluent_flink_compute_pool.main.environment[0].id
+      FLINK_ORG_ID        = data.confluent_organization.main.id
+      FLINK_REST_ENDPOINT = data.confluent_flink_region.main.rest_endpoint
+      # the rest should be set by deploy.sh
+    }
+  }
+
+  triggers = {
+    # changes to the flink sql cluster will trigger the bedrock connections to be created
+    flink_sql_cluster_id = confluent_flink_compute_pool.main.id
+    # change if the script changes
+    script = filesha256("${path.module}/scripts/flink-connection-create.sh")
+  }
+}
+
+resource "confluent_flink_statement" "create-models" {
+  for_each = var.create_model_sql_files
+  organization {
+    id = data.confluent_organization.main.id
+  }
+  environment {
+    id = confluent_environment.staging.id
+  }
+  compute_pool {
+    id = confluent_flink_compute_pool.main.id
+  }
+  principal {
+    id = confluent_service_account.statements-runner.id
+  }
+
+  properties = {
+    "sql.current-catalog"  = confluent_environment.staging.display_name
+    "sql.current-database" = confluent_kafka_cluster.standard.display_name
+  }
+  rest_endpoint = data.confluent_flink_region.main.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-flink-api-key.id
+    secret = confluent_api_key.app-manager-flink-api-key.secret
+  }
+  statement = file(abspath(each.value))
+  depends_on = [
+    null_resource.create-flink-bedrock-connections
+  ]
+  lifecycle {
+    ignore_changes = [rest_endpoint, organization[0].id]
+  }
+}
+
+resource "confluent_flink_statement" "insert-data" {
+  for_each = var.insert_data_sql_files
+  organization {
+    id = data.confluent_organization.main.id
+  }
+  environment {
+    id = confluent_environment.staging.id
+  }
+  compute_pool {
+    id = confluent_flink_compute_pool.main.id
+  }
+  principal {
+    id = confluent_service_account.statements-runner.id
+  }
+
+  properties = {
+    "sql.current-catalog"  = confluent_environment.staging.display_name
+    "sql.current-database" = confluent_kafka_cluster.standard.display_name
+  }
+  rest_endpoint = data.confluent_flink_region.main.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-flink-api-key.id
+    secret = confluent_api_key.app-manager-flink-api-key.secret
+  }
+
+  stopped   = false
+  statement = file(abspath(each.value))
+
+  depends_on = [
+    confluent_flink_statement.create-tables,
+    confluent_flink_statement.create-models
+  ]
+  lifecycle {
+    ignore_changes = [rest_endpoint, organization[0].id]
+  }
+}
+
+# ------------------------------------------------------
+# TOPICS
+# ------------------------------------------------------
+
+
 //topic that captures and stores audio request
 resource "confluent_kafka_topic" "audio_request" {
   topic_name         = "audio_request"
@@ -177,6 +330,24 @@ resource "confluent_api_key" "clients-schema-registry-api-key" {
   }
 }
 
+resource "confluent_api_key" "app-manager-flink-api-key" {
+  display_name = "app-manager-flink-api-key"
+  description  = "Flink API Key that is owned by 'app-manager' service account"
+  owner {
+    id          = confluent_service_account.app-manager.id
+    api_version = confluent_service_account.app-manager.api_version
+    kind        = confluent_service_account.app-manager.kind
+  }
+  managed_resource {
+    id          = data.confluent_flink_region.main.id
+    api_version = data.confluent_flink_region.main.api_version
+    kind        = data.confluent_flink_region.main.kind
+    environment {
+      id = confluent_environment.staging.id
+    }
+  }
+}
+
 # ------------------------------------------------------
 # ACLs
 # ------------------------------------------------------
@@ -285,6 +456,25 @@ resource "confluent_role_binding" "client-schema-registry-developer-write" {
   crn_pattern = "${data.confluent_schema_registry_cluster.essentials.resource_name}/subject=*"
   role_name   = "DeveloperWrite"
 }
+
+resource "confluent_role_binding" "statements-runner-environment-admin" {
+  principal   = "User:${confluent_service_account.statements-runner.id}"
+  role_name   = "EnvironmentAdmin"
+  crn_pattern = confluent_environment.staging.resource_name
+}
+
+resource "confluent_role_binding" "app-manager-flink-developer" {
+  principal   = "User:${confluent_service_account.app-manager.id}"
+  role_name   = "FlinkDeveloper"
+  crn_pattern = confluent_environment.staging.resource_name
+}
+
+resource "confluent_role_binding" "app-manager-flink-admin" {
+  principal   = "User:${confluent_service_account.app-manager.id}"
+  role_name   = "FlinkAdmin"
+  crn_pattern = confluent_environment.staging.resource_name
+}
+
 
 # ------------------------------------------------------
 # SCHEMA REGISTRY

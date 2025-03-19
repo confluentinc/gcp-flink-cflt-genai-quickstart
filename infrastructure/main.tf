@@ -20,6 +20,9 @@ module "confluent_cloud" {
   confluent_cloud_environment = {
     name = var.confluent_cloud_environment_name
   }
+  create_model_sql_files = local.create_model_sql_files
+  insert_data_sql_files  = local.insert_data_sql_files
+  create_table_sql_files = local.create_table_sql_files
 
   depends_on = [
      module.gcp
