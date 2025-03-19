@@ -88,7 +88,7 @@ resource "confluent_flink_statement" "create-tables" {
 
 # registers flink sql connections with bedrock. should be replaced when
 # terraform provider supports managing flink sql connections
-resource "null_resource" "create-flink-bedrock-connections" {
+resource "null_resource" "create-flink-connection" {
   provisioner "local-exec" {
     command = "${path.module}/scripts/flink-connection-create.sh"
     environment = {
@@ -111,6 +111,7 @@ resource "null_resource" "create-flink-bedrock-connections" {
 
 resource "confluent_flink_statement" "create-models" {
   for_each = var.create_model_sql_files
+
   organization {
     id = data.confluent_organization.main.id
   }
@@ -133,9 +134,16 @@ resource "confluent_flink_statement" "create-models" {
     key    = confluent_api_key.app-manager-flink-api-key.id
     secret = confluent_api_key.app-manager-flink-api-key.secret
   }
-  statement = file(abspath(each.value))
+
+  statement = templatefile(each.value, {
+    gcloud-project = var.gcloud_project
+    bigquery-db = var.bigquery_db
+  })
+
+  # statement = file(abspath(each.value))
+
   depends_on = [
-    null_resource.create-flink-bedrock-connections
+    null_resource.create-flink-connection
   ]
   lifecycle {
     ignore_changes = [rest_endpoint, organization[0].id]

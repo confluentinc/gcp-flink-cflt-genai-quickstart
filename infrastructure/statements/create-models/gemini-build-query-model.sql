@@ -14,7 +14,7 @@ Generate an SQL query for the following request:
 
 Database Schema:
 
-CREATE TABLE `csid-281116.doctors_practice.Visits`
+CREATE TABLE `${gcloud-project}.${bigquery-db}.visits`
 (
   Notes STRING,
   VisitID STRING,
@@ -24,7 +24,7 @@ CREATE TABLE `csid-281116.doctors_practice.Visits`
   VisitDate DATE
 );
 
-CREATE TABLE `csid-281116.doctors_practice.Patients`
+CREATE TABLE `${gcloud-project}.${bigquery-db}.patients`
 (
   ContactInfo STRING,
   LastName STRING,
@@ -34,7 +34,7 @@ CREATE TABLE `csid-281116.doctors_practice.Patients`
   PatientID STRING
 );
 
-CREATE TABLE `csid-281116.doctors_practice.GeneratedSummaries`
+CREATE TABLE `${gcloud-project}.${bigquery-db}.generatedsummaries`
 (
   GeneratedDate DATE,
   EndDate DATE,
@@ -44,7 +44,7 @@ CREATE TABLE `csid-281116.doctors_practice.GeneratedSummaries`
   SummaryID STRING
 );
 
-CREATE TABLE `csid-281116.doctors_practice.MedicalRecords`
+CREATE TABLE `${gcloud-project}.${bigquery-db}.medicalrecords`
 (
   Details STRING,
   RecordType STRING,
@@ -53,7 +53,7 @@ CREATE TABLE `csid-281116.doctors_practice.MedicalRecords`
   RecordID STRING
 );
 
-CREATE TABLE `csid-281116.doctors_practice.Appointments`
+CREATE TABLE `${gcloud-project}.${bigquery-db}.appointments`
 (
   Reason STRING,
   AppointmentDate DATE,
@@ -62,7 +62,7 @@ CREATE TABLE `csid-281116.doctors_practice.Appointments`
   AppointmentID STRING
 );
 
-CREATE TABLE `csid-281116.doctors_practice.Medications`
+CREATE TABLE `${gcloud-project}.${bigquery-db}.medications`
 (
   MedicationName STRING,
   Frequency STRING,
@@ -72,7 +72,7 @@ CREATE TABLE `csid-281116.doctors_practice.Medications`
   MedicationID STRING
 );
 
-CREATE TABLE `csid-281116.doctors_practice.Doctors`
+CREATE TABLE `${gcloud-project}.${bigquery-db}.doctors`
 (
   ContactInfo STRING,
   LastName STRING,
@@ -81,7 +81,7 @@ CREATE TABLE `csid-281116.doctors_practice.Doctors`
   DoctorID STRING
 );
 
-CREATE TABLE `csid-281116.doctors_practice.Symptoms`
+CREATE TABLE `${gcloud-project}.${bigquery-db}.symptoms`
 (
   Severity INT64,
   DateReported DATE,
@@ -93,14 +93,14 @@ CREATE TABLE `csid-281116.doctors_practice.Symptoms`
 Make sure to join the main table with all the tables providing details on the different foreign keys.
 Fields ending with "ID" are foreign keys joining to other tables.
 
-VisitID field joins to the Visits table.
-PatientID field joins to the Patients table.
-SummaryID field joins to the GeneratedSummaries table.
-RecordID field joins to the MedicalRecords table.
-AppointmentID field joins to the Appointments table.
-MedicationID field joins to the Medications table.
-DoctorID field joins to the Doctors table.
-SymptomID field joins to the Symptoms table.
+VisitID field joins to the visits table.
+PatientID field joins to the patients table.
+SummaryID field joins to the generatedsummaries table.
+RecordID field joins to the medicalrecords table.
+AppointmentID field joins to the appointments table.
+MedicationID field joins to the medications table.
+DoctorID field joins to the doctors table.
+SymptomID field joins to the symptoms table.
 
 Return only the SQL query without any explanation or formatting. Do not add "```" or "```sql" around the results.
 

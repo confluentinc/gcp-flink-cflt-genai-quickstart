@@ -58,3 +58,14 @@ variable "env_display_id_postfix" {
   default     = null
   nullable    = true
 }
+
+variable "gcloud_project" {
+  description = "Google Cloud Project ID"
+  type        = string
+  default     = "csid-281116"
+}
+
+variable "bigquery_db" {
+  description = "BigQuery DB name"
+  type        = string
+}
