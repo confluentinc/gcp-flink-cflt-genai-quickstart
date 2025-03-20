@@ -153,6 +153,24 @@ if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
 
 fi
 
+# Delete BigQuery Dataset if exists
+if [ -n "${DATASET_ID-}" ]; then
+    echo "[+] Checking if BigQuery dataset exists: $GCP_PROJECT_ID:$DATASET_ID"
+
+    if IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm \
+        gcr.io/google.com/cloudsdktool/google-cloud-cli:stable \
+        bq show --format=prettyjson "$GCP_PROJECT_ID:$DATASET_ID" > /dev/null 2>&1; then
+
+        echo "[+] Deleting BigQuery dataset: $GCP_PROJECT_ID:$DATASET_ID"
+        IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm \
+            gcr.io/google.com/cloudsdktool/google-cloud-cli:stable \
+            bq rm -r -f -d "$GCP_PROJECT_ID:$DATASET_ID"
+        echo "[+] BigQuery dataset deleted successfully"
+    else
+        echo "[+] Dataset does not exist. Skipping deletion."
+    fi
+fi
+
 echo "[+] Cleanup files"
 rm -rf "$SCRIPT_FOLDER"/websocket/frontend/node_modules
 rm -rf "$SCRIPT_FOLDER"/websocket/src/main/resources/static/
