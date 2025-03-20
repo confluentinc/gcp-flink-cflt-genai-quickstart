@@ -10,6 +10,7 @@ module "gcp" {
   gcp_region     = var.gcp_region
   gcp_project_id = var.gcp_project_id
   unique_id      = var.unique_id
+  dataset_id     = var.dataset_id
 }
 
 module "confluent_cloud" {
@@ -43,3 +44,4 @@ resource "null_resource" "run_python_script" {
     always_run = timestamp()  # Forces execution on each `apply`
   }
 }
+
