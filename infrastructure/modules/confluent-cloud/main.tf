@@ -56,36 +56,6 @@ data "confluent_flink_region" "main" {
   region = var.confluent_cloud_region
 }
 
-resource "confluent_flink_statement" "create-tables" {
-  for_each = var.create_table_sql_files
-  organization {
-    id = data.confluent_organization.main.id
-  }
-  environment {
-    id = confluent_environment.staging.id
-  }
-  compute_pool {
-    id = confluent_flink_compute_pool.main.id
-  }
-  principal {
-    id = confluent_service_account.statements-runner.id
-  }
-
-  properties = {
-    "sql.current-catalog"  = confluent_environment.staging.display_name
-    "sql.current-database" = confluent_kafka_cluster.standard.display_name
-  }
-  rest_endpoint = data.confluent_flink_region.main.rest_endpoint
-  credentials {
-    key    = confluent_api_key.app-manager-flink-api-key.id
-    secret = confluent_api_key.app-manager-flink-api-key.secret
-  }
-  statement = file(abspath(each.value))
-  lifecycle {
-    ignore_changes = [rest_endpoint, organization[0].id]
-  }
-}
-
 # registers flink sql connections with bedrock. should be replaced when
 # terraform provider supports managing flink sql connections
 resource "null_resource" "create-flink-connection" {
@@ -141,11 +111,39 @@ resource "confluent_flink_statement" "create-models" {
     bigquery-db = var.bigquery_db
   })
 
-  # statement = file(abspath(each.value))
-
   depends_on = [
     null_resource.create-flink-connection
   ]
+  lifecycle {
+    ignore_changes = [rest_endpoint, organization[0].id]
+  }
+}
+
+resource "confluent_flink_statement" "create-tables" {
+  for_each = var.create_table_sql_files
+  organization {
+    id = data.confluent_organization.main.id
+  }
+  environment {
+    id = confluent_environment.staging.id
+  }
+  compute_pool {
+    id = confluent_flink_compute_pool.main.id
+  }
+  principal {
+    id = confluent_service_account.statements-runner.id
+  }
+
+  properties = {
+    "sql.current-catalog"  = confluent_environment.staging.display_name
+    "sql.current-database" = confluent_kafka_cluster.standard.display_name
+  }
+  rest_endpoint = data.confluent_flink_region.main.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-flink-api-key.id
+    secret = confluent_api_key.app-manager-flink-api-key.secret
+  }
+  statement = file(abspath(each.value))
   lifecycle {
     ignore_changes = [rest_endpoint, organization[0].id]
   }
