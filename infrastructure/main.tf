@@ -27,6 +27,8 @@ module "confluent_cloud" {
   insert_data_sql_files  = local.insert_data_sql_files
   create_table_sql_files = local.create_table_sql_files
 
+  gcp_gemini_api_key = var.gcp_gemini_api_key
+
   depends_on = [
      module.gcp
   ]

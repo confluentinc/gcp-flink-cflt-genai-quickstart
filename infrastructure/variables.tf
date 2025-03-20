@@ -69,3 +69,24 @@ variable "bigquery_db" {
   description = "BigQuery DB name"
   type        = string
 }
+
+variable "path_to_flink_sql_create_table_statements" {
+  description = "The path to the SQL statements that will be used to create tables in Flink"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "path_to_flink_sql_create_model_statements" {
+  description = "The path to the SQL statements that will be used to create model in Flink"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "path_to_flink_sql_insert_statements" {
+  description = "The path to the SQL statements that will be used to insert data in Flink"
+  type        = string
+  default     = null
+  nullable    = true
+}

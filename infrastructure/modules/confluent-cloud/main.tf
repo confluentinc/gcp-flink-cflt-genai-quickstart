@@ -446,6 +446,12 @@ resource "confluent_service_account" "app-manager" {
   description  = "Service Account for Kafka Cluster"
 }
 
+// Service account to perform a task within Confluent Cloud, such as executing a Flink statement
+resource "confluent_service_account" "statements-runner" {
+  display_name = "statements-runner-sa-${var.env_display_id_postfix}"
+  description  = "Service account for running Flink Statements in the Kafka cluster"
+}
+
 # ------------------------------------------------------
 # ROLE BINDINGS
 # ------------------------------------------------------
@@ -484,6 +490,11 @@ resource "confluent_role_binding" "app-manager-flink-admin" {
   crn_pattern = confluent_environment.staging.resource_name
 }
 
+resource "confluent_role_binding" "app-manager-assigner" {
+  principal   = "User:${confluent_service_account.app-manager.id}"
+  role_name   = "Assigner"
+  crn_pattern = "${data.confluent_organization.main.resource_name}/service-account=${confluent_service_account.statements-runner.id}"
+}
 
 # ------------------------------------------------------
 # SCHEMA REGISTRY
