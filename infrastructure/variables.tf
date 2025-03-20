@@ -58,3 +58,9 @@ variable "env_display_id_postfix" {
   default     = null
   nullable    = true
 }
+
+variable "dataset_id" {
+  description = "The BigQuery dataset ID"
+  type        = string
+  default     = "doctors_practice_quickstart_jb_kkk"
+}
