@@ -96,7 +96,8 @@ resource "null_resource" "create-flink-connection" {
       FLINK_API_SECRET    = confluent_api_key.app-manager-flink-api-key.secret
       FLINK_ENV_ID        = confluent_flink_compute_pool.main.environment[0].id
       FLINK_ORG_ID        = data.confluent_organization.main.id
-      FLINK_REST_ENDPOINT = data.confluent_flink_region.main.rest_endpoint
+      FLINK_REGION        = var.confluent_cloud_region
+      GOOGLE_API_KEY      = var.gcp_gemini_api_key
       # the rest should be set by deploy.sh
     }
   }
