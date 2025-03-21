@@ -127,9 +127,9 @@ GCP_PROJECT_ID = "<project id of your GCP - you have retrieved above>"
 GCP_GEMINI_API_KEY = "<GCP Gemini API Key - you have retrieved above>"
 GCP_ACCOUNT = "<email on your GCP account>"
 
-CONFLUENT_CLOUD_API_KEY = "Confluent Cloud API Key - you have retrieved above"
-CONFLUENT_CLOUD_API_SECRET = "Confluent Cloud API Secret - you have retrieved above"
-CONFLUENT_CLOUD_REGION = "Confluent Cloud region - default:us-east1"
+CONFLUENT_CLOUD_API_KEY = "<Confluent Cloud API Key - you have retrieved above>"
+CONFLUENT_CLOUD_API_SECRET = "<Confluent Cloud API Secret - you have retrieved above>"
+CONFLUENT_CLOUD_REGION = "<Confluent Cloud region - default:us-east1>"
 ```
 
 ### 2. Have a conversation!
@@ -142,8 +142,8 @@ For example, if the Terraform output is:
 Service URL: "https://quickstart-healthcare-ai-websocket-zsvndjdv4-666664333300.us-east1.run.app"
 ```
 
-For the purposes of this quickstart, any username and password will be accepted, and after you log in to have a conversation hit the big record button.
-# TODO add image or gif of this
+For the purposes of this quickstart, any email and password will be accepted, and after you log in to have a conversation hit the record button.
+![Username:Password](./assets/username:password.gif)
 
 
 #### 2a. Example Conversations
