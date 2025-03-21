@@ -12,7 +12,7 @@ experience.
   event-driven architecture.
 * **Intelligent Conversations**: Integrated with GCP Gemini AI models for natural and accurate conversational
   responses.
-* **Efficient Information Retrieval**:
+* **Efficient Information Retrieval**: Leverages BigQuery with vector search capabilities for quick and accurate document indexing and retrieval.
 * **Scalable and Cloud-Native**:
 * **Seamless Deployment**: Follow step-by-step instructions to deploy the entire solution with minimal effort.
 
@@ -55,8 +55,11 @@ results.
 
 ## Architecture
 
-[//]: <> (add a arch pic if possible)
-Architecture for handling document indexing and chatbot functionality using a combination of GCP and Confluent Cloud. Below is a breakdown of the architecture and its components:
+Future modifications to this Architecture diagram will be made.
+
+Architecture for handling audio, summarizing, building & executing query and chatbot functionality using a combination of Flink, Kafka Streams and Google APIs . Below is a breakdown of the architecture and its components:
+![Architecture Diagram](./assets/arch.png)
+
 ### Audio Chatbot
 This section demonstrates how the system interacts with user queries in real time.
 1. **Frontend:** The frontend handles interactions with users. User audios are sent to a topic for further processing.
@@ -117,6 +120,16 @@ Save this API Key to use when it is asked by the application when you run your d
 ./deploy.sh
 # Follow the prompts to enter your API keys and other credentials
 ```
+```sh
+GCP_REGION="<region of your GCP project>"
+GCP_PROJECT_ID="<project id of your GCP - you have retrieved above>"
+GCP_GEMINI_API_KEY="<GCP Gemini API Key - you have retrieved above>"
+GCP_ACCOUNT="<email on your GCP account>"
+
+CONFLUENT_CLOUD_API_KEY="Confluent CLoud API Key - you have retrieved above"
+CONFLUENT_CLOUD_API_SECRET="Confluent Cloud API Secret - you have retrieved above"
+CONFLUENT_CLOUD_REGION="<Confluent Cloud region - default:us-east1>"
+```
 
 ### 2. Have a conversation
 
@@ -128,12 +141,16 @@ For example, if the terraform output is:
 ```sh
 ...
 
-frontend_url = "<add url here>" 
+Service URL: "https://quickstart-healthcare-ai-websocket-zsvndjdv4-666664333300.us-east1.run.app"
 ...
 ```
 
-
 For the purposes of this quickstart, any username and password will be accepted, and after you log in to have a conversation hit the big record button.
+#### 2a. Example Conversations
+Let's assume the patient's name we have an appointment is Sheila. Here are some example questions to ask:
+- What are the summaries of recent appointments with Sheila?
+- What type of medicine Sheila uses currently?
+- What is the last diagnosis at the latest appointment of Sheila?
 
 
 ### 3. Bring down the infrastructure
