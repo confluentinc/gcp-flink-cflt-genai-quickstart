@@ -58,3 +58,35 @@ variable "env_display_id_postfix" {
   default     = null
   nullable    = true
 }
+
+variable "gcloud_project" {
+  description = "Google Cloud Project ID"
+  type        = string
+  default     = "csid-281116"
+}
+
+variable "bigquery_db" {
+  description = "BigQuery DB name"
+  type        = string
+}
+
+variable "path_to_flink_sql_create_table_statements" {
+  description = "The path to the SQL statements that will be used to create tables in Flink"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "path_to_flink_sql_create_model_statements" {
+  description = "The path to the SQL statements that will be used to create model in Flink"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "path_to_flink_sql_insert_statements" {
+  description = "The path to the SQL statements that will be used to insert data in Flink"
+  type        = string
+  default     = null
+  nullable    = true
+}

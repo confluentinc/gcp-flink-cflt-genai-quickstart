@@ -175,6 +175,9 @@ confluent_cloud_region = "$GCP_REGION"
 confluent_cloud_api_key = "$CONFLUENT_CLOUD_API_KEY"
 confluent_cloud_api_secret = "$CONFLUENT_CLOUD_API_SECRET"
 unique_id = "$unique_id"
+path_to_flink_sql_create_table_statements = "statements/create-tables"
+path_to_flink_sql_create_model_statements = "statements/create-models"
+path_to_flink_sql_insert_statements = "statements/insert"
 EOF
 
 # Check if .config directory exists or is empty
