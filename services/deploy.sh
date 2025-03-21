@@ -50,27 +50,6 @@ fi
 
 LOWER_UNIQUE_ID=$(to_lowercase "$UNIQUE_ID")
 
-#Deploying Summarise Kstream App
-SERVICE_PATH="$SCRIPT_FOLDER/summarize"
-SVC_NAME="quickstart-healthcare-ai-summarise-"$LOWER_UNIQUE_ID
-
-echo "[+] Building Summarise App"
-IMAGE_ARCH=$IMAGE_ARCH docker run -v "$SERVICE_PATH":/root/source/ -ti --rm --name build-summarize maven:3.8.7-openjdk-18-slim sh -c "cd /root/source/ && mvn clean install -DskipTests=true"
-if [ $? -ne 0 ]; then
-    echo "[-] Failed to build Summarise App"
-    exit 1
-fi
-echo "[+] Summarize App built successfully"
-
-echo "[+] Deploying Summarise App"
-IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-summarise gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
---set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID",TOPIC_IN="$SQL_RESULTS_TOPIC",TOPIC_OUT="$SUMMARISED_RESULTS_TOPIC"
-if [ $? -ne 0 ]; then
-    echo "[-] Failed to deploy Summarise App"
-    exit 1
-fi
-echo "[+] Summarise App deployed successfully"
-
 #Deploying Audio-Text-Converter Kstream App
 SERVICE_PATH="$SCRIPT_FOLDER/audio-text-converter"
 SVC_NAME="quickstart-healthcare-ai-audio-text-converter-"$LOWER_UNIQUE_ID
@@ -92,27 +71,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "[+] Audio Text Converter App deployed successfully"
 
-
-#Deploying Build-Query Kstream App
-SERVICE_PATH="$SCRIPT_FOLDER/build-query"
-SVC_NAME="quickstart-healthcare-ai-build-query-"$LOWER_UNIQUE_ID
-
-echo "[+] Building Build Query App"
-IMAGE_ARCH=$IMAGE_ARCH docker run -v "$SERVICE_PATH":/root/source/ -ti --rm --name build-build-query maven:3.8.7-openjdk-18-slim sh -c "cd /root/source/ && mvn clean install -DskipTests=true"
-if [ $? -ne 0 ]; then
-    echo "[-] Failed to build Build Query App"
-    exit 1
-fi
-echo "[+] Build Query App built successfully"
-
-echo "[+] Deploying Build Query App"
-IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-build-query gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
---set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID",TOPIC_IN="$INPUT_REQUEST_TOPIC",TOPIC_OUT="$GENERATED_SQL_TOPIC"
-if [ $? -ne 0 ]; then
-    echo "[-] Failed to deploy Build Query App"
-    exit 1
-fi
-echo "[+] Build Query App deployed successfully"
 
 #Deploying Kstream App Execute Query
 SERVICE_PATH="$SCRIPT_FOLDER/execute_query"

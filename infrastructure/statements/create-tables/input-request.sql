@@ -1,7 +1,7 @@
 CREATE TABLE
-sql_request (
+input_request (
 session_id STRING PRIMARY KEY NOT ENFORCED,
-sql_request STRING
+request STRING
 ) DISTRIBUTED INTO 1 BUCKETS
 WITH
 (

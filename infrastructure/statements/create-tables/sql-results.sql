@@ -1,7 +1,7 @@
 CREATE TABLE
-text_request (
+sql_results (
 session_id STRING PRIMARY KEY NOT ENFORCED,
-request STRING
+results STRING
 ) DISTRIBUTED INTO 1 BUCKETS
 WITH
 (
