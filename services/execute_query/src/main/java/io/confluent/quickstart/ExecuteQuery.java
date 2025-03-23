@@ -16,16 +16,23 @@
 package io.confluent.quickstart;
 
 import io.confluent.common.utils.TestUtils;
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
+import io.confluent.kafka.streams.serdes.json.KafkaJsonSchemaSerde;
 import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+
 import static io.confluent.quickstart.HeathCheckServer.startHealthCheckServer;
 
 public class ExecuteQuery {
@@ -38,7 +45,24 @@ public class ExecuteQuery {
 
     static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
 
+    static String schemaRegistryUrl = System.getenv("SR_URL");
+    static String schemaRegistryKey = System.getenv("SR_KEY");
+    static String schemaRegistrySecret = System.getenv("SR_SECRET");
+
+
     static BigQueryClient bigQueryClient;
+
+    // POJO classes
+    public static class SqlRequest {
+        public String sessionId;
+        public String sqlRequest;
+    }
+
+    public static class RawResults {
+        public String sessionId;
+        public String rawResults;
+    }
+
 
     public static void main(final String[] args) throws IOException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
@@ -48,10 +72,23 @@ public class ExecuteQuery {
 
         final Properties streamsConfiguration = getStreamsConfiguration(bootstrapServers, authKey, authSecret);
 
+        final Map<String, String> serdeConfig = new HashMap<>() {{
+            put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+            put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
+            put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_USER_INFO_CONFIG,
+                    schemaRegistryKey + ":" + schemaRegistrySecret);
+        }};
+
+        final KafkaJsonSchemaSerde<SqlRequest> reqSerde = new KafkaJsonSchemaSerde<>();
+        reqSerde.configure(serdeConfig, false);
+
+        final KafkaJsonSchemaSerde<RawResults> resSerde = new KafkaJsonSchemaSerde<>();
+        resSerde.configure(serdeConfig, false);
+
         bigQueryClient = new BigQueryClient();
 
         final StreamsBuilder builder = new StreamsBuilder();
-        executeBQStream(builder);
+        executeBQStream(builder, reqSerde, resSerde);
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
 
         if (healthCheckPort == null) { healthCheckPort = "8080"; }
@@ -76,29 +113,40 @@ public class ExecuteQuery {
         }
 
         streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
-        streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class);
+        streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, KafkaJsonSchemaSerde.class);
         streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
         streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getAbsolutePath());
+        if (schemaRegistryUrl != null) {
+            streamsConfiguration.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+            streamsConfiguration.put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
+            streamsConfiguration.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_USER_INFO_CONFIG,
+                    schemaRegistryKey + ":" + schemaRegistrySecret);
+        }
         return streamsConfiguration;
     }
 
-    static String getQueryResults(String text) throws IOException {
-        return bigQueryClient.runQuery(text);
+    static RawResults getQueryResults(SqlRequest req) throws IOException {
+        RawResults res = new RawResults();
+        res.sessionId = req.sessionId;
+        res.rawResults = bigQueryClient.runQuery(req.sqlRequest);
+        return res;
     }
 
-    static void executeBQStream(final StreamsBuilder builder) {
-        builder.stream(inputTopic)
+    static void executeBQStream(final StreamsBuilder builder,
+                                final Serde<SqlRequest> reqSerde, final Serde<RawResults> resSerde) {
+
+        builder.stream(inputTopic, Consumed.with(Serdes.String(), reqSerde))
             // sanitize the output by removing null record values
-            .filter((sessionId, text) -> sessionId != null && text != null)
-            .map((sessionId, text) ->
+            .filter((sessionId, req) -> sessionId != null && req != null)
+            .map((sessionId, req) ->
             {
                 try {
-                    return new KeyValue<>(sessionId.toString(), getQueryResults(text.toString()));
+                    return new KeyValue<>(sessionId.toString(), getQueryResults(req));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             })
-            .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+            .to(outputTopic, Produced.with(Serdes.String(), resSerde));
     }
 
 }
