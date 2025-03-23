@@ -1,7 +1,7 @@
 CREATE TABLE
-results_summarized (
+generated_sql (
 session_id STRING PRIMARY KEY NOT ENFORCED,
-summary STRING
+sql_request STRING
 ) DISTRIBUTED INTO 1 BUCKETS
 WITH
 (

@@ -1,7 +1,7 @@
 CREATE TABLE
-raw_results (
+summarised_results (
 session_id STRING PRIMARY KEY NOT ENFORCED,
-results STRING
+summary STRING
 ) DISTRIBUTED INTO 1 BUCKETS
 WITH
 (
