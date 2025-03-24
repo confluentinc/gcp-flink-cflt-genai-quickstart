@@ -10,6 +10,7 @@ module "gcp" {
   gcp_region     = var.gcp_region
   gcp_project_id = var.gcp_project_id
   unique_id      = var.unique_id
+  dataset_id     = var.dataset_id
 }
 
 module "confluent_cloud" {
@@ -33,3 +34,22 @@ module "confluent_cloud" {
      module.gcp
   ]
 }
+
+resource "null_resource" "run_python_script" {
+  depends_on = [module.gcp]  # Ensure GCP module is created first
+
+  provisioner "local-exec" {
+    command = <<EOT
+      echo "[+] Running Python script: bq_loader.py with DATASET_ID=${var.dataset_id}" && \
+      python3 -m venv venv && \
+      source venv/bin/activate && \
+      pip install -r requirements.txt && \
+      DATASET_ID=${var.dataset_id} python3 ${path.module}/bq_loader.py
+    EOT
+  }
+
+  triggers = {
+    always_run = timestamp()  # Forces execution on each `apply`
+  }
+}
+
