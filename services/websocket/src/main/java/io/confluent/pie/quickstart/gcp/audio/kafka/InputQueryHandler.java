@@ -78,23 +78,23 @@ public class InputQueryHandler {
         });
 
         //TODO: Below is for testing
-//        AudioResponse audioResponse = new AudioResponse();
-//        String randomText = generateRandomString(10);
-//        audioResponse.setQuery(textQuery);
-//        audioResponse.setDescription("test description" + randomText);
-//        audioResponse.setRenderedResult("test rendered results-" + randomText);
-//        audioResponse.setAudio(returnAudioBytes());
-//        audioResponse.setSessionId(sessionId);
-//
-//        final ProducerRecord<String, AudioResponse> producerTestRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioResponseTopic(),
-//                sessionId,
-//                audioResponse);
-//
-//        kafkaAudioResponseTemplate.send(producerTestRecord).whenComplete((recordMetadata, throwable) -> {
-//            if (throwable != null) {
-//                log.error("Failed to send audio message to Confluent Cloud", throwable);
-//            }
-//        });
+        AudioResponse audioResponse = new AudioResponse();
+        String randomText = generateRandomString(10);
+        audioResponse.setQuery(textQuery);
+        audioResponse.setDescription("test description" + randomText);
+        audioResponse.setRenderedResult("test rendered results-" + randomText);
+        audioResponse.setAudio(returnAudioBytes());
+        audioResponse.setSessionId(sessionId);
+
+        final ProducerRecord<String, AudioResponse> producerTestRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioResponseTopic(),
+                sessionId,
+                audioResponse);
+
+        kafkaAudioResponseTemplate.send(producerTestRecord).whenComplete((recordMetadata, throwable) -> {
+            if (throwable != null) {
+                log.error("Failed to send audio message to Confluent Cloud", throwable);
+            }
+        });
     }
 
     public void onNewAudioMessage(AudioQuery audioQuery) {
@@ -110,23 +110,23 @@ public class InputQueryHandler {
         });
 
         //TODO: Below is for testing
-//        AudioResponse audioResponse = new AudioResponse();
-//        String randomText = generateRandomString(10);
-//        audioResponse.setQuery("test query-" + randomText);
-//        audioResponse.setDescription("test description" + randomText);
-//        audioResponse.setRenderedResult("test rendered results-" + randomText);
-//        audioResponse.setAudio(audioQuery.getAudio());
-//        audioResponse.setSessionId(audioQuery.getSessionId());
-//
-//        final ProducerRecord<String, AudioResponse> producerTestRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioResponseTopic(),
-//                audioQuery.getSessionId(),
-//                audioResponse);
-//
-//        kafkaAudioResponseTemplate.send(producerTestRecord).whenComplete((recordMetadata, throwable) -> {
-//            if (throwable != null) {
-//                log.error("Failed to send audio message to Confluent Cloud", throwable);
-//            }
-//        });
+        AudioResponse audioResponse = new AudioResponse();
+        String randomText = generateRandomString(10);
+        audioResponse.setQuery("test query-" + randomText);
+        audioResponse.setDescription("test description" + randomText);
+        audioResponse.setRenderedResult("test rendered results-" + randomText);
+        audioResponse.setAudio(audioQuery.getAudio());
+        audioResponse.setSessionId(audioQuery.getSessionId());
+
+        final ProducerRecord<String, AudioResponse> producerTestRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioResponseTopic(),
+                audioQuery.getSessionId(),
+                audioResponse);
+
+        kafkaAudioResponseTemplate.send(producerTestRecord).whenComplete((recordMetadata, throwable) -> {
+            if (throwable != null) {
+                log.error("Failed to send audio message to Confluent Cloud", throwable);
+            }
+        });
     }
 
     /**

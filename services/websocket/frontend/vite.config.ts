@@ -4,13 +4,13 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  build: {
-    outDir: "../src/main/resources/static",
-    emptyOutDir: true,
-  },
+//   build: {
+//     outDir: "../src/main/resources/static",
+//     emptyOutDir: true,
+//   },
   server: {
     host: "::",
-    port: 8080,
+    port: 8081,
   },
  plugins: [
         react(),
