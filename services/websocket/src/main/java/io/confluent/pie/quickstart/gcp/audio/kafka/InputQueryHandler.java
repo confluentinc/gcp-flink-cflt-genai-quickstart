@@ -172,6 +172,7 @@ public class InputQueryHandler {
         return "data:audio/wav;base64," + Base64.getEncoder().encodeToString(audio);
     }
 
+
     private Audio createAudioData(String dataURL, String query, String renderedResult) {
         Audio audio = new Audio();
         audio.setData(dataURL);
@@ -186,83 +187,86 @@ public class InputQueryHandler {
         log.info("Sent audio response to session id {}", session.getId());
     }
 
-    public static String generateRandomString(int length) {
-        // Initialize a StringBuilder to hold the result
-        StringBuilder sb = new StringBuilder(length);
+    //TODO: Below is for testing
+//    public static String generateRandomString(int length) {
+//        // Initialize a StringBuilder to hold the result
+//        StringBuilder sb = new StringBuilder(length);
+//
+//        // Characters will be chosen from this string
+//        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+//
+//        // Create an instance of Random
+//        Random random = new Random();
+//
+//        // Generate random indexes and append the corresponding character to the StringBuilder
+//        for (int i = 0; i < length; i++) {
+//            int randomIndex = random.nextInt(charSet.length());
+//            sb.append(charSet.charAt(randomIndex));
+//        }
+//
+//        return sb.toString();
+//    }
 
-        // Characters will be chosen from this string
-        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    //TODO: Below is for testing
+//    private static byte[] generateSineWave(int frequency, int durationSeconds, int sampleRate, int bitsPerSample) {
+//        double amplitude = 32760; // Max amplitude for 16-bit
+//        int samples = durationSeconds * sampleRate;
+//        byte[] output = new byte[samples * 2]; // 2 bytes per sample (16-bit)
+//
+//        for (int i = 0; i < samples; i++) {
+//            short value = (short) (amplitude * Math.sin(2 * Math.PI * frequency * i / sampleRate));
+//            // Little endian
+//            output[2 * i] = (byte) (value & 0xFF);
+//            output[2 * i + 1] = (byte) ((value >> 8) & 0xFF);
+//        }
+//
+//        return output;
+//    }
 
-        // Create an instance of Random
-        Random random = new Random();
+    //TODO: Below is for testing
+//    private static byte[] addWavHeader(byte[] audioBytes) {
+//        final int SAMPLE_RATE = 44100;
+//        final int NUM_CHANNELS = 1;
+//        final int BITS_PER_SAMPLE = 16;
+//
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        ByteBuffer buffer = ByteBuffer.allocate(44);
+//
+//        int totalLength = audioBytes.length + 36;
+//        int byteRate = SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8;
+//
+//        buffer.put("RIFF".getBytes());
+//        buffer.putInt(totalLength);
+//        buffer.put("WAVE".getBytes());
+//        buffer.put("fmt ".getBytes());
+//        buffer.putInt(16);
+//        buffer.putShort((short) 1); // PCM
+//        buffer.putShort((short) NUM_CHANNELS);
+//        buffer.putInt(SAMPLE_RATE);
+//        buffer.putInt(byteRate);
+//        buffer.putShort((short) (NUM_CHANNELS * BITS_PER_SAMPLE / 8));
+//        buffer.putShort((short) BITS_PER_SAMPLE);
+//        buffer.put("data".getBytes());
+//        buffer.putInt(audioBytes.length);
+//
+//        baos.write(buffer.array(), 0, buffer.position());
+//        try {
+//            baos.write(audioBytes);
+//        } catch (IOException e) {
+//            System.out.println("Error writing WAV data: " + e.getMessage());
+//        }
+//
+//        return baos.toByteArray();
+//    }
 
-        // Generate random indexes and append the corresponding character to the StringBuilder
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(charSet.length());
-            sb.append(charSet.charAt(randomIndex));
-        }
-
-        return sb.toString();
-    }
-
-    private static byte[] generateSineWave(int frequency, int durationSeconds, int sampleRate, int bitsPerSample) {
-        double amplitude = 32760; // Max amplitude for 16-bit
-        int samples = durationSeconds * sampleRate;
-        byte[] output = new byte[samples * 2]; // 2 bytes per sample (16-bit)
-
-        for (int i = 0; i < samples; i++) {
-            short value = (short) (amplitude * Math.sin(2 * Math.PI * frequency * i / sampleRate));
-            // Little endian
-            output[2 * i] = (byte) (value & 0xFF);
-            output[2 * i + 1] = (byte) ((value >> 8) & 0xFF);
-        }
-
-        return output;
-    }
-
-    private static byte[] addWavHeader(byte[] audioBytes) {
-        final int SAMPLE_RATE = 44100;
-        final int NUM_CHANNELS = 1;
-        final int BITS_PER_SAMPLE = 16;
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteBuffer buffer = ByteBuffer.allocate(44);
-
-        int totalLength = audioBytes.length + 36;
-        int byteRate = SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8;
-
-        buffer.put("RIFF".getBytes());
-        buffer.putInt(totalLength);
-        buffer.put("WAVE".getBytes());
-        buffer.put("fmt ".getBytes());
-        buffer.putInt(16);
-        buffer.putShort((short) 1); // PCM
-        buffer.putShort((short) NUM_CHANNELS);
-        buffer.putInt(SAMPLE_RATE);
-        buffer.putInt(byteRate);
-        buffer.putShort((short) (NUM_CHANNELS * BITS_PER_SAMPLE / 8));
-        buffer.putShort((short) BITS_PER_SAMPLE);
-        buffer.put("data".getBytes());
-        buffer.putInt(audioBytes.length);
-
-        baos.write(buffer.array(), 0, buffer.position());
-        try {
-            baos.write(audioBytes);
-        } catch (IOException e) {
-            System.out.println("Error writing WAV data: " + e.getMessage());
-        }
-
-        return baos.toByteArray();
-    }
-
-
-    private static byte[] returnAudioBytes() {
-        final int SAMPLE_RATE = 44100;
-        final int BITS_PER_SAMPLE = 16;
-        final int DURATION_SECONDS = 2;
-        final int FREQUENCY = 440;
-        byte[] rawAudioBytes = generateSineWave(FREQUENCY, DURATION_SECONDS, SAMPLE_RATE, BITS_PER_SAMPLE);
-        byte[] wavBytes = addWavHeader(rawAudioBytes);
-        return wavBytes;
-    }
+    //TODO: Below is for testing
+//    private static byte[] returnAudioBytes() {
+//        final int SAMPLE_RATE = 44100;
+//        final int BITS_PER_SAMPLE = 16;
+//        final int DURATION_SECONDS = 2;
+//        final int FREQUENCY = 440;
+//        byte[] rawAudioBytes = generateSineWave(FREQUENCY, DURATION_SECONDS, SAMPLE_RATE, BITS_PER_SAMPLE);
+//        byte[] wavBytes = addWavHeader(rawAudioBytes);
+//        return wavBytes;
+//    }
 }
