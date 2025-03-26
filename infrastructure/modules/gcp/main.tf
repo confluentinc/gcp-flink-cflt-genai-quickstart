@@ -46,3 +46,18 @@ resource "local_file" "service_account_key_file" {
   content = base64decode(google_service_account_key.service_account_key.private_key)
   filename = "${path.root}/service-account-key.json"
 }
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id  = var.dataset_id
+  project     = var.gcp_project_id
+  friendly_name = "Doctors Practice"
+  description   = "Dataset for storing medical data"
+  location      = var.gcp_region
+
+  # Forces deletion of all dataset contents before Terraform destroys the dataset
+  delete_contents_on_destroy = true
+
+  labels = {
+    goog-terraform-provisioned = "true"
+  }
+}

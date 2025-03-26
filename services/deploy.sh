@@ -92,7 +92,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "[+] Audio Text Converter App deployed successfully"
 
-
 #Deploying Build-Query Kstream App
 SERVICE_PATH="$SCRIPT_FOLDER/build-query"
 SVC_NAME="quickstart-healthcare-ai-build-query-"$LOWER_UNIQUE_ID
@@ -156,4 +155,3 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "[+] WebSocket deployed successfully"
-
