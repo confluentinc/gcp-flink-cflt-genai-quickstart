@@ -1,10 +1,10 @@
 insert into
-`sql_request`
+`generated_sql`
 select
 session_id,
 output
 from
-`text_request`,
+`input_request`,
 LATERAL TABLE(ML_PREDICT('gemini15buildquery', request))
 where session_id is not null;
 

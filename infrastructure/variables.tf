@@ -68,6 +68,7 @@ variable "gcloud_project" {
 variable "bigquery_db" {
   description = "BigQuery DB name"
   type        = string
+  default     = "patients"
 }
 
 variable "path_to_flink_sql_create_table_statements" {
