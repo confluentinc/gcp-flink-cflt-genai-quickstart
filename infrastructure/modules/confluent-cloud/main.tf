@@ -107,7 +107,7 @@ resource "confluent_flink_statement" "create-models" {
   }
 
   statement = templatefile(each.value, {
-    gcloud-project = var.gcloud_project
+    gcp-project-id = var.gcp_project_id
     bigquery-db = var.bigquery_db
   })
 

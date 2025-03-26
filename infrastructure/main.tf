@@ -21,7 +21,7 @@ module "confluent_cloud" {
   confluent_cloud_environment = {
     name = var.confluent_cloud_environment_name
   }
-  gcloud_project = var.gcloud_project
+  gcp_project_id = var.gcp_project_id
   bigquery_db = var.bigquery_db
 
   create_model_sql_files = local.create_model_sql_files
