@@ -34,23 +34,3 @@ output "audio_response_topic" {
   value = confluent_kafka_topic.audio_response.topic_name
   description = "audio response topic"
 }
-
-output "input_request_topic" {
-  value = confluent_kafka_topic.input_request.topic_name
-  description = "input request topic"
-}
-
-output "generated_sql_topic" {
-  value = confluent_kafka_topic.generated_sql.topic_name
-  description = "generated sql topic"
-}
-
-output "sql_results_topic" {
-  value = confluent_kafka_topic.sql_results.topic_name
-  description = "sql results topic"
-}
-
-output "summarised_results_topic" {
-  value = confluent_kafka_topic.summarised_results.topic_name
-  description = "summarised topic"
-}
