@@ -65,11 +65,6 @@ variable "dataset_id" {
   default     = "doctors_practice_quickstart123"
 }
 
-variable "bigquery_db" {
-  description = "BigQuery DB name"
-  type        = string
-}
-
 variable "path_to_flink_sql_create_table_statements" {
   description = "The path to the SQL statements that will be used to create tables in Flink"
   type        = string
