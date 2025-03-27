@@ -59,12 +59,6 @@ variable "env_display_id_postfix" {
   nullable    = true
 }
 
-variable "dataset_id" {
-  description = "The BigQuery dataset ID"
-  type        = string
-  default     = "doctors_practice_quickstart123"
-}
-
 variable "path_to_flink_sql_create_table_statements" {
   description = "The path to the SQL statements that will be used to create tables in Flink"
   type        = string
@@ -86,8 +80,3 @@ variable "path_to_flink_sql_insert_statements" {
   nullable    = true
 }
 
-variable "bigquery_db" {
-  description = "BigQuery DB name"
-  type        = string
-  default     = "doctors_practice_quickstart123"
-}
