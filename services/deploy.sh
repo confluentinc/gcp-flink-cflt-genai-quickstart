@@ -106,7 +106,7 @@ echo "[+] Build Query App built successfully"
 
 echo "[+] Deploying Build Query App"
 IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-build-query gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" \
---set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID",TOPIC_IN="$INPUT_REQUEST_TOPIC",TOPIC_OUT="$GENERATED_SQL_TOPIC"
+--set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID"
 if [ $? -ne 0 ]; then
     echo "[-] Failed to deploy Build Query App"
     exit 1

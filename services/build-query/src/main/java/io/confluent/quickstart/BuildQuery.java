@@ -34,8 +34,8 @@ import static io.confluent.quickstart.HeathCheckServer.startHealthCheckServer;
 
 public class BuildQuery {
 
-    static final String inputTopic = System.getenv("TOPIC_IN");
-    static final String outputTopic = System.getenv("TOPIC_OUT");
+    static final String inputTopic = "input_request";
+    static final String outputTopic = "generated_sql";
     static final String bootstrapServers = System.getenv("BOOTSTRAP_SERVER");
     static final String authKey = System.getenv("KAFKA_API_KEY");
     static final String authSecret = System.getenv("KAFKA_API_SECRET");
