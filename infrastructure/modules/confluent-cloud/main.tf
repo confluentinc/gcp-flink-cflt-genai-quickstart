@@ -108,6 +108,7 @@ resource "confluent_flink_statement" "create-models" {
 
   statement = templatefile(each.value, {
     gcp-project-id = var.gcp_project_id
+    bigquery-db = var.bigquery_db
   })
 
   depends_on = [

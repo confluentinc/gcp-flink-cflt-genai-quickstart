@@ -85,3 +85,9 @@ variable "path_to_flink_sql_insert_statements" {
   default     = null
   nullable    = true
 }
+
+variable "bigquery_db" {
+  description = "BigQuery DB name"
+  type        = string
+  default     = "doctors_practice_quickstart123"
+}

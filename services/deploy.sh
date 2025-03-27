@@ -50,11 +50,11 @@ fi
 
 # Lower case the UNIQUE_ID and set service names
 LOWER_UNIQUE_ID=$(echo "$UNIQUE_ID" | tr '[:upper:]' '[:lower:]')
-# AUDIO_TEXT_CONVERTER_SVC_NAME="quickstart-healthcare-ai-audio-text-converter-$LOWER_UNIQUE_ID"
-# BUILD_QUERY_SVC_NAME="quickstart-healthcare-ai-build-query-$LOWER_UNIQUE_ID"
-# EXECUTE_QUERY_SVC_NAME="quickstart-healthcare-ai-execute-query-$LOWER_UNIQUE_ID"
+AUDIO_TEXT_CONVERTER_SVC_NAME="quickstart-healthcare-ai-audio-text-converter-$LOWER_UNIQUE_ID"
+BUILD_QUERY_SVC_NAME="quickstart-healthcare-ai-build-query-$LOWER_UNIQUE_ID"
+EXECUTE_QUERY_SVC_NAME="quickstart-healthcare-ai-execute-query-$LOWER_UNIQUE_ID"
 SUMMARISE_SVC_NAME="quickstart-healthcare-ai-summarise-$LOWER_UNIQUE_ID"
-# WEBSOCKET_SVC_NAME="quickstart-healthcare-ai-websocket-$LOWER_UNIQUE_ID"
+WEBSOCKET_SVC_NAME="quickstart-healthcare-ai-websocket-$LOWER_UNIQUE_ID"
 
 # Function to build Maven projects
 build_maven_project() {
@@ -95,11 +95,11 @@ deploy_gcloud() {
 }
 
 # Parallel build process for Maven and Node projects
-# build_maven_project "$SCRIPT_FOLDER/audio-text-converter" &
-# build_maven_project "$SCRIPT_FOLDER/build-query" &
-# build_maven_project "$SCRIPT_FOLDER/execute_query" &
+build_maven_project "$SCRIPT_FOLDER/audio-text-converter" &
+build_maven_project "$SCRIPT_FOLDER/build-query" &
+build_maven_project "$SCRIPT_FOLDER/execute_query" &
 build_maven_project "$SCRIPT_FOLDER/summarize" &
-# build_node_project "$SCRIPT_FOLDER/websocket" &
+build_node_project "$SCRIPT_FOLDER/websocket" &
 wait
 
 # Set environment variable string for gcloud deployments
@@ -110,9 +110,9 @@ execute_query_env_vars="$common_env_vars,TOPIC_IN=generated_sql,TOPIC_OUT=sql_re
 summarise_env_vars="$common_env_vars,TOPIC_IN=sql_results,TOPIC_OUT=summarised_results"
 
 # Parallel deployment process
-# deploy_gcloud "$AUDIO_TEXT_CONVERTER_SVC_NAME" "$SCRIPT_FOLDER/audio-text-converter" "$audio_text_converter_env_vars" &
-# deploy_gcloud "$BUILD_QUERY_SVC_NAME" "$SCRIPT_FOLDER/build-query" "$build_query_env_vars" &
-# deploy_gcloud "$EXECUTE_QUERY_SVC_NAME" "$SCRIPT_FOLDER/execute_query" "$execute_query_env_vars" &
+deploy_gcloud "$AUDIO_TEXT_CONVERTER_SVC_NAME" "$SCRIPT_FOLDER/audio-text-converter" "$audio_text_converter_env_vars" &
+deploy_gcloud "$BUILD_QUERY_SVC_NAME" "$SCRIPT_FOLDER/build-query" "$build_query_env_vars" &
+deploy_gcloud "$EXECUTE_QUERY_SVC_NAME" "$SCRIPT_FOLDER/execute_query" "$execute_query_env_vars" &
 deploy_gcloud "$SUMMARISE_SVC_NAME" "$SCRIPT_FOLDER/summarize" "$summarise_env_vars" &
-# deploy_gcloud "$WEBSOCKET_SVC_NAME" "$SCRIPT_FOLDER/websocket" "$common_env_vars" &
+deploy_gcloud "$WEBSOCKET_SVC_NAME" "$SCRIPT_FOLDER/websocket" "$common_env_vars" &
 wait
