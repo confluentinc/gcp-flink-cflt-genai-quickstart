@@ -85,7 +85,7 @@ echo "[+] Audio Text Converter App built successfully"
 
 echo "[+] Deploying Audio-Text Converter App"
 IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-audio-text-converter gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" --min-instances 1 \
---set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID",TOPIC_IN="$AUDIO_REQUEST_TOPIC",TOPIC_OUT="$INPUT_REQUEST_TOPIC"
+--set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID"
 if [ $? -ne 0 ]; then
     echo "[-] Failed to deploy Audio Text Converter App"
     exit 1
@@ -113,7 +113,7 @@ if [ $? -ne 0 ]; then
 fi
 echo "[+] Build Query App deployed successfully"
 
-#Deploying Kstream App Execute Query
+#Deploying Execute Query Kstream App
 SERVICE_PATH="$SCRIPT_FOLDER/execute_query"
 SVC_NAME="quickstart-healthcare-ai-execute-query-"$LOWER_UNIQUE_ID
 
@@ -127,7 +127,7 @@ echo "[+] Execute Query App built successfully"
 
 echo "[+] Deploying Execute Query Kstreams App"
 IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/  -v "$SERVICE_PATH":/root/source -ti --rm --name quickstart-deploy-kstream-execute-query gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$SVC_NAME" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" --min-instances 1 \
---set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID",TOPIC_IN="$GENERATED_SQL_TOPIC",TOPIC_OUT="$SQL_RESULTS_TOPIC"
+--set-env-vars BOOTSTRAP_SERVER="$BOOTSTRAP_SERVER",KAFKA_API_KEY="$KAFKA_API_KEY",KAFKA_API_SECRET="$KAFKA_API_SECRET",SR_API_KEY="$SR_API_KEY",SR_API_SECRET="$SR_API_SECRET",SR_URL="$SR_URL",CLIENT_ID="$CLIENT_ID"
 if [ $? -ne 0 ]; then
     echo "[-] Failed to deploy Execute Query App"
     exit 1

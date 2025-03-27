@@ -206,70 +206,8 @@ resource "confluent_kafka_topic" "audio_request" {
     confluent_kafka_acl.app-manager-delete-on-target-topic
   ]
 }
-
-//topic that stores input request as text
-resource "confluent_kafka_topic" "input_request" {
-  topic_name         = "input_request"
-  kafka_cluster {
-    id = confluent_kafka_cluster.standard.id
-  }
-  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
-  credentials {
-    key    = confluent_api_key.app-manager-kafka-api-key.id
-    secret = confluent_api_key.app-manager-kafka-api-key.secret
-  }
-  depends_on = [
-    confluent_api_key.app-manager-kafka-api-key
-  ]
-}
-
-//topic that stores generated sql wrt the input
-resource "confluent_kafka_topic" "generated_sql" {
-  topic_name         = "generated_sql"
-  kafka_cluster {
-    id = confluent_kafka_cluster.standard.id
-  }
-  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
-  credentials {
-    key    = confluent_api_key.app-manager-kafka-api-key.id
-    secret = confluent_api_key.app-manager-kafka-api-key.secret
-  }
-  depends_on = [
-    confluent_api_key.app-manager-kafka-api-key
-  ]
-}
-
-//topic that stores sql results executed by KStreams app
-resource "confluent_kafka_topic" "sql_results" {
-  topic_name         = "sql_results"
-  kafka_cluster {
-    id = confluent_kafka_cluster.standard.id
-  }
-  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
-  credentials {
-    key    = confluent_api_key.app-manager-kafka-api-key.id
-    secret = confluent_api_key.app-manager-kafka-api-key.secret
-  }
-  depends_on = [
-    confluent_api_key.app-manager-kafka-api-key
-  ]
-}
-
-//topic that stores the summary of the response returned
-resource "confluent_kafka_topic" "summarised_results" {
-  topic_name         = "summarised_results"
-  kafka_cluster {
-    id = confluent_kafka_cluster.standard.id
-  }
-  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
-  credentials {
-    key    = confluent_api_key.app-manager-kafka-api-key.id
-    secret = confluent_api_key.app-manager-kafka-api-key.secret
-  }
-  depends_on = [
-    confluent_api_key.app-manager-kafka-api-key
-  ]
-}
+// input_request, generated_sql, sql_results and summarised_results
+// handled by the Flink create table statements
 
 //topic that stores the audio response as text
 resource "confluent_kafka_topic" "audio_response" {
