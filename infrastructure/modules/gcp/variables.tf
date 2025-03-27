@@ -12,8 +12,3 @@ variable "unique_id" {
   description = "Unique ID for the deployment"
   type        = string
 }
-
-variable "dataset_id" {
-  description = "The BigQuery dataset ID"
-  type        = string
-}
