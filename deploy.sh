@@ -205,6 +205,17 @@ if [ $? -ne 0 ]; then
 fi
 echo "[+] Terraform apply complete"
 
+echo "[+] Extracting dataset_id from Terraform outputs"
+
+DATASET_ID=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw dataset_id 2>/dev/null || echo "")
+
+if [ -z "$DATASET_ID" ]; then
+    echo "[-] ERROR: dataset_id not found in Terraform outputs"
+    exit 1
+fi
+
+echo "[+] DATASET_ID retrieved: $DATASET_ID"
+
 source .env
 
 echo "[+] Deploying backend"
