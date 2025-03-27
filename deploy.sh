@@ -93,7 +93,7 @@ prompt_for_yes_no() {
 if [ -f .unique_id ]; then
   unique_id=$(cat .unique_id)
 else
-  unique_id=$(generate_random_string 8)
+  unique_id="qsid$$"
   echo $unique_id > .unique_id
 fi
 

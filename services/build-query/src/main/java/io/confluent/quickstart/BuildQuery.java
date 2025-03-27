@@ -41,7 +41,7 @@ public class BuildQuery {
     static final String authSecret = System.getenv("KAFKA_API_SECRET");
 
     static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
-    static final String projectId = ("GCP_PROJECT_ID");
+    static final String projectId = System.getenv("GCP_PROJECT_ID");
     static final String location = System.getenv("GCP_REGION");
 
     static final String MODEL_NAME = "gemini-2.0-flash-001";

@@ -19,8 +19,8 @@ variable "env_display_id_postfix" {
   type        = string
 }
 
-variable "gcloud_project" {
-  description = "Google Cloud Project ID"
+variable "gcp_project_id" {
+  description = "GCP project ID"
   type        = string
 }
 
