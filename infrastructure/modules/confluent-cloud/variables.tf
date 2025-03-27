@@ -24,11 +24,6 @@ variable "gcp_project_id" {
   type        = string
 }
 
-variable "bigquery_db" {
-  description = "BigQuery DB Name"
-  type        = string
-}
-
 variable "create_table_sql_files" {
   description = "The set of SQL files that contain the create table statements"
   type        = set(string)
