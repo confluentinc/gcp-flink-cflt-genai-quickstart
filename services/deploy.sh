@@ -86,7 +86,7 @@ deploy_gcloud() {
     local service_path=$2
     local extra_vars=$3
     echo "[+] Deploying $svc_name"
-    IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -v "$service_path":/root/source/ --rm --name quickstart-deploy-$svc_name gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$svc_name" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" --set-env-vars "$extra_vars"
+    IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -v "$service_path":/root/source/ --rm --name quickstart-deploy-$svc_name gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run deploy "$svc_name" --no-cpu-throttling --source "/root/source/" --region "$GCP_REGION" --allow-unauthenticated --cpu 2 --memory 1Gi --project "$GCP_PROJECT_ID" --min-instances 1 --set-env-vars "$extra_vars"
     if [ $? -ne 0 ]; then
         echo "[-] Failed to deploy $svc_name"
         exit 1
