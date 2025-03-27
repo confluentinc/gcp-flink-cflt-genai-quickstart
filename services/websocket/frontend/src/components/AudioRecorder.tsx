@@ -134,21 +134,6 @@ export const AudioRecorder = () => {
     })
   }
 
-  const handleConversationReset = () => {
-    clearHistory()
-    // Reset the last response tracker when clearing history
-    currentConversationIdRef.current = null
-    isAwaitingResponseRef.current = false
-    processedResponsesRef.current.clear()
-    clearConversationId()
-    window.location.reload()
-    isProcessing
-    toast({
-      title: 'Conversation Reset',
-      description: 'Your conversation has been reset',
-    })
-  }
-
   return (
     <div className="space-y-0 w-full max-w-2xl mx-auto bg-[#DCF7FB] p-10 rounded-lg">
       <Card className="w-full p-6 space-y-6 animate-fadeIn">
@@ -213,16 +198,6 @@ export const AudioRecorder = () => {
           >
             <Trash2 className="h-4 w-4" />
             Clear History
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleConversationReset}
-            className="flex items-center gap-2 "
-          >
-            <Trash2 className="h-4 w-4" />
-            Reset
           </Button>
         </div>
       )}
