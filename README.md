@@ -1,9 +1,27 @@
 # GenAI Healthcare Quickstart
-Welcome to the GCP Healthcare QuickStart! This repository provides a comprehensive guide to quickly deploy a fully functional Natural Language Voice Assistant
- for healthcare. The solution leverages **Confluent
-Cloud** and **GCP** to deliver a scalable, intelligent, and real-time conversational
-experience.
+Welcome to the GenAI Healthcare Quickstart! This repository provides a step-by-step guide for deploying a fully functional Natural Language Voice Assistant in the healthcare domain. 
 
+Leveraging Confluent Cloud for real-time data streaming and Google Cloud Platform for advanced AI (via “Gemini” models) and data warehousing (BigQuery), this solution demonstrates how to build an intelligent, scalable, and cloud-native conversational experience.
+
+## Table of Contents
+
+- [GenAI Healthcare Quickstart](#genai-healthcare-quickstart)
+    - [Key Features](#key-features)
+    - [Use Case](#use-case)
+    - [Table of Contents](#table-of-contents)
+    - [Architecture](#architecture)
+        - [Natural Language Voice Assistantt](# Natural Language Voice Assistant)
+        - [Key Concepts](#key-concepts)
+    - [Requirements](#requirements)
+        - [Docker](#docker)
+        - [Access Keys to Cloud Services Providers](#access-keys-to-cloud-services-providers)
+            - [Confluent Cloud](#confluent-cloud)
+            - [GCP](#gcp)
+    - [Run the Quickstart](#run-the-quickstart)
+        - [1. Bring up the infrastructure](#1-bring-up-the-infrastructure)
+        - [2. Have a conversation](#2-have-a-conversation)
+        - [3. Bring down the infrastructure](#3-bring-down-the-infrastructure)
+    - [Next Steps - Improving the Results](#next-steps---improving-the-results)
 
 
 ## Key Features
@@ -19,39 +37,18 @@ experience.
 ## Use Case
 
 This Natural Language Voice Assistant is tailored for healthcare workers as a patient pre-screening application.
-Some use cases are:
+Possible uses cases are:
 
 * Enable doctors to request a comprehensive summary of a patient's medical records before their scheduled appointment. The generated summary will provide the doctor with all relevant and essential information needed to facilitate informed decision-making during the consultation.
 * Ensuring that critical patient data—such as past diagnoses, medications, allergies, and recent test results—is readily available in a concise and accessible format.
 * Streamline the pre-appointment review process.
 
 
-
 👉 Please note that this quick start builds a working AI infrastructure for you, but it's fueled by a small quantity of
-fake data, so the results won't be at the level that you're accustomed to with AI applications such as Chat-GPT. Read the Next
+fake data, so the results won't be at the level that you're accustomed to with AI applications such as ChatGPT. Read the Next
 Steps section at the end of this document to find out how you can tweak the architecture and improve or alter the AI
 results.
 
-
-## Table of Contents
-
-- [GenAI Healthcare Quickstart](#genai-healthcare-quickstart)
-    - [Key Features](#key-features)
-    - [Use Case](#use-case)
-    - [Table of Contents](#table-of-contents)
-    - [Architecture](#architecture)
-        - [Audio Chatbot](#audio-chatbot)
-        - [Key Concepts](#key-concepts)
-    - [Requirements](#requirements)
-        - [Docker](#docker)
-        - [Access Keys to Cloud Services Providers](#access-keys-to-cloud-services-providers)
-            - [Confluent Cloud](#confluent-cloud)
-            - [GCP](#gcp)
-    - [Run the Quickstart](#run-the-quickstart)
-        - [1. Bring up the infrastructure](#1-bring-up-the-infrastructure)
-        - [2. Have a conversation](#2-have-a-conversation)
-        - [3. Bring down the infrastructure](#3-bring-down-the-infrastructure)
-    - [Next Steps - Improving the Results](#next-steps---improving-the-results)
 
 ## Architecture
 
@@ -78,7 +75,7 @@ This section demonstrates how the system interacts with user queries in real tim
 
 ## Requirements
 
-### Docker
+#### Docker
 
 The `deploy` script automates the entire build process; the only required software is Docker.
 Docker can be installed by following the official instructions - [Get Docker](https://docs.docker.com/get-docker/).
@@ -154,6 +151,8 @@ Let's assume the patient's name we have an appointment is Sheila Smith. Here are
 
 
 ### 3. Bring down the infrastructure
+
+Please note: Running this script will remove all previously deployed resources, including cloud infrastructure, data platform assets, and streaming applications, ensuring a clean state for subsequent use.
 
 ```
 ./destroy.sh
