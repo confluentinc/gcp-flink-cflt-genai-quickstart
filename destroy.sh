@@ -28,9 +28,6 @@ if [ ! -f .env ]; then
 fi
 source .env
 
-# destroy backend
-./services/destroy.sh
-
 # Check if .config folder exists
 if [ ! -d ./.config ]; then
   echo "[+] Authenticating gcloud"
@@ -41,6 +38,9 @@ if [ ! -d ./.config ]; then
   fi
   echo "[+] gcloud authentication complete"
 fi
+
+# destroy backend
+./services/destroy.sh
 
 # destroy infrastructure
 # Check if terraform is initialized
