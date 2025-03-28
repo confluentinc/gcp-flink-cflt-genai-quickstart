@@ -2,6 +2,15 @@
 
 echo "[+] Deploying services"
 
+# Cleanup function
+cleanup() {
+    echo "Caught SIGINT, terminating build/deploy processes..."
+    kill $(jobs -p) 2>/dev/null || true
+    docker stop "$(docker ps -aq --filter "name=quickstart-deploy-")"
+    docker stop "$(docker ps -aq --filter "name=quickstart-build-")"
+    exit 1
+}
+
 get_full_path() {
     local path=$1
     realpath "$path"
@@ -21,6 +30,9 @@ to_lowercase() {
     local input_string=$1
     echo "$input_string" | tr '[:upper:]' '[:lower:]'
 }
+
+# Set trap
+trap cleanup SIGINT
 
 #List of mandatory environment variables
 mandatory_vars=("GCP_REGION" "GCP_PROJECT_ID" "BOOTSTRAP_SERVER" "KAFKA_API_KEY" "KAFKA_API_SECRET" "SR_API_KEY" "SR_API_SECRET" "SR_URL" "UNIQUE_ID" "CLIENT_ID")
