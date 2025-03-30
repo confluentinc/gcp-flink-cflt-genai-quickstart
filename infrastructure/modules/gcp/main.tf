@@ -61,3 +61,31 @@ resource "google_bigquery_dataset" "dataset" {
     goog-terraform-provisioned = "true"
   }
 }
+
+resource "google_storage_bucket" "data_bucket" {
+  name          = "doctors-practice-data-${var.unique_id}"
+  location      = var.gcp_region
+  force_destroy = true
+
+  uniform_bucket_level_access = true
+
+  labels = {
+    goog-terraform-provisioned = "true"
+  }
+}
+
+# Grant the service account access to the bucket
+resource "google_storage_bucket_iam_member" "bucket_access" {
+  bucket = google_storage_bucket.data_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.service_account.email}"
+}
+
+# Upload all JSON files from the data directory
+resource "google_storage_bucket_object" "json_files" {
+  for_each = fileset("${path.root}/data", "*.json")
+  
+  name   = each.value
+  bucket = google_storage_bucket.data_bucket.name
+  source = "${path.root}/data/${each.value}"
+}
