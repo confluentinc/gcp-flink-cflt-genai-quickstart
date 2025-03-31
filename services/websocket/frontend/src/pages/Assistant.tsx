@@ -9,7 +9,7 @@ const Assistant = () => {
       <main className="mx-auto px-4 pt-32 pb-16 flex">
         <AudioRecorder />
       </main>
-      {/* <Toaster /> */}
+      <Toaster />
     </div>
   )
 }
