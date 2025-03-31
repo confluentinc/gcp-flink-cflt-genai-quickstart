@@ -51,3 +51,13 @@ variable "gcp_gemini_api_key" {
   description = "GCP Gemini API Key"
   type        = string
 }
+
+variable "gcp_service_account_key" {
+  description = "The GCP service account key JSON for GCS access"
+  type        = string
+}
+
+variable "gcs_bucket_name" {
+  description = "The name of the GCS bucket containing the JSON files"
+  type        = string
+}

@@ -288,6 +288,174 @@ resource "confluent_kafka_topic" "audio_response" {
 }
 
 # ------------------------------------------------------
+# DATA TOPICS
+# ------------------------------------------------------
+
+resource "confluent_kafka_topic" "medical_records" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "medical_records"
+  partitions_count   = 6
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  config = {
+    "cleanup.policy"      = "delete"
+    "retention.ms"        = "604800000"  # 7 days
+    "min.insync.replicas" = "2"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+
+  lifecycle {
+    prevent_destroy = false
+    create_before_destroy = false
+  }
+}
+
+resource "confluent_kafka_topic" "medications" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "medications"
+  partitions_count   = 6
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  config = {
+    "cleanup.policy"      = "delete"
+    "retention.ms"        = "604800000"  # 7 days
+    "min.insync.replicas" = "2"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+
+  lifecycle {
+    prevent_destroy = false
+    create_before_destroy = false
+  }
+}
+
+resource "confluent_kafka_topic" "patients" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "patients"
+  partitions_count   = 6
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  config = {
+    "cleanup.policy"      = "delete"
+    "retention.ms"        = "604800000"  # 7 days
+    "min.insync.replicas" = "2"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+
+  lifecycle {
+    prevent_destroy = false
+    create_before_destroy = false
+  }
+}
+
+resource "confluent_kafka_topic" "summaries" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "summaries"
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "symptoms" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "symptoms"
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "visits" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "visits"
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "appointments" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "appointments"
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "doctors" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "doctors"
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+# Create dead letter queue topics for each data type
+resource "confluent_kafka_topic" "dlq" {
+  for_each = toset([
+    "medical_records",
+    "medications",
+    "patients"
+  ])
+
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = "dlq_${each.key}"
+  partitions_count   = 1  # DLQ topics typically need fewer partitions
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  config = {
+    "cleanup.policy"      = "compact"  # Keep the latest record for each key
+    "retention.ms"        = "1209600000"  # 14 days for DLQ
+    "min.insync.replicas" = "2"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+
+  depends_on = [
+    confluent_kafka_acl.app-manager-delete-on-target-topic,
+    confluent_role_binding.cluster-admin
+  ]
+
+  lifecycle {
+    prevent_destroy = false
+    create_before_destroy = false
+  }
+}
+
+# ------------------------------------------------------
 # API KEYs
 # ------------------------------------------------------
 
@@ -435,6 +603,101 @@ resource "confluent_kafka_acl" "app-manager-delete-on-target-topic" {
   ]
 }
 
+# Add DELETE permission for the GCS Source connector service account
+resource "confluent_kafka_acl" "gcs_source_delete_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "*"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "DELETE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+# Add DESCRIBE permission for the GCS Source connector service account
+resource "confluent_kafka_acl" "gcs_source_describe_cluster" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "CLUSTER"
+  resource_name = "kafka-cluster"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "DESCRIBE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.gcs_source_kafka_api_key.id
+    secret = confluent_api_key.gcs_source_kafka_api_key.secret
+  }
+}
+
+# Add READ permission for topics
+resource "confluent_kafka_acl" "gcs_source_read_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "gcs-"
+  pattern_type  = "PREFIXED"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "READ"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.gcs_source_kafka_api_key.id
+    secret = confluent_api_key.gcs_source_kafka_api_key.secret
+  }
+}
+
+# Add WRITE permission for topics
+resource "confluent_kafka_acl" "gcs_source_write_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "gcs-"
+  pattern_type  = "PREFIXED"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "WRITE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.gcs_source_kafka_api_key.id
+    secret = confluent_api_key.gcs_source_kafka_api_key.secret
+  }
+}
+
+# Add CREATE permission for topics
+resource "confluent_kafka_acl" "gcs_source_create_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "gcs-"
+  pattern_type  = "PREFIXED"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "CREATE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.gcs_source_kafka_api_key.id
+    secret = confluent_api_key.gcs_source_kafka_api_key.secret
+  }
+}
+
 # ------------------------------------------------------
 # SERVICE ACCOUNT
 # ------------------------------------------------------
@@ -495,13 +758,136 @@ resource "confluent_role_binding" "app-manager-assigner" {
 }
 
 # ------------------------------------------------------
-# SCHEMA REGISTRY
+# Schema Registry
 # ------------------------------------------------------
 data "confluent_schema_registry_cluster" "essentials" {
   environment {
     id = confluent_environment.staging.id
   }
   depends_on = [
-    confluent_kafka_cluster.standard
+    confluent_kafka_cluster.standard,
+  ]
+}
+
+# ------------------------------------------------------
+# GCS SOURCE CONNECTOR
+# ------------------------------------------------------
+
+# Service account for GCS Source connector
+resource "confluent_service_account" "gcs_source" {
+  display_name = "gcs-source-${var.env_display_id_postfix}"
+  description  = "Service account for GCS Source connector"
+}
+
+# Grant the service account the ConnectorAdmin role
+resource "confluent_role_binding" "gcs_source_kafka_cluster_admin" {
+  principal   = "User:${confluent_service_account.gcs_source.id}"
+  role_name   = "CloudClusterAdmin"
+  crn_pattern = confluent_kafka_cluster.standard.rbac_crn
+}
+
+# Create an API key for the service account
+resource "confluent_api_key" "gcs_source_kafka_api_key" {
+  display_name = "gcs-source-${var.env_display_id_postfix}-key"
+  description  = "Kafka API Key that is owned by 'gcs-source' service account"
+  owner {
+    id          = confluent_service_account.gcs_source.id
+    api_version = confluent_service_account.gcs_source.api_version
+    kind        = confluent_service_account.gcs_source.kind
+  }
+
+  managed_resource {
+    id          = confluent_kafka_cluster.standard.id
+    api_version = confluent_kafka_cluster.standard.api_version
+    kind        = confluent_kafka_cluster.standard.kind
+    environment {
+      id = confluent_environment.staging.id
+    }
+  }
+
+  depends_on = [
+    confluent_role_binding.gcs_source_kafka_cluster_admin
+  ]
+}
+
+# Upload data files to GCS
+locals {
+  data_files = fileset("${path.module}/data", "**/*")
+  avro_files = [for f in local.data_files : f if endswith(f, ".avro")]
+  avro_topics = [for f in local.avro_files : "gcs_${replace(basename(f), ".avro", "")}"]
+}
+
+# Create topics for each AVRO file
+resource "confluent_kafka_topic" "gcs_topics" {
+  for_each = toset(local.avro_topics)
+
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = each.value
+  partitions_count   = 6
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  config = {
+    "cleanup.policy"      = "delete"
+    "retention.ms"        = "604800000"  # 7 days
+    "min.insync.replicas" = "2"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+
+  lifecycle {
+    prevent_destroy = false
+    create_before_destroy = false
+  }
+}
+
+resource "google_storage_bucket_object" "data" {
+  for_each = local.data_files
+
+  name         = "data/${each.value}"
+  source       = "${path.module}/data/${each.value}"
+  content_type = "application/octet-stream"
+  bucket       = var.gcs_bucket_name
+}
+
+# Create GCS Source connector
+resource "confluent_connector" "gcs_source" {
+  environment {
+    id = confluent_environment.staging.id
+  }
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+
+  config_sensitive = {
+    "gcs.credentials.json" = var.gcp_service_account_key
+  }
+
+  config_nonsensitive = {
+    "connector.class"          = "GcsSource"
+    "name"                     = "confluent-gcs-source"
+    "topic.regex.list"         = join(",", [for topic in local.avro_topics : "${topic}:.*\\.avro"])
+    "kafka.auth.mode"          = "SERVICE_ACCOUNT"
+    "kafka.service.account.id" = confluent_service_account.gcs_source.id
+    "input.data.format"        = "AVRO"
+    "output.data.format"       = "JSON_SR"
+    "tasks.max"                = "1"
+    "gcs.bucket.name"          = var.gcs_bucket_name
+    "topics.dir"               = "data"
+    "behavior.on.error"        = "IGNORE"
+    "schema.registry.url"      = data.confluent_schema_registry_cluster.essentials.rest_endpoint
+    "schema.registry.basic.auth.credentials.source" = "USER_INFO"
+    "schema.registry.basic.auth.user.info"          = "${confluent_api_key.clients-schema-registry-api-key.id}:${confluent_api_key.clients-schema-registry-api-key.secret}"
+  }
+
+  depends_on = [
+    confluent_kafka_acl.gcs_source_read_topics,
+    confluent_kafka_acl.gcs_source_write_topics,
+    confluent_kafka_acl.gcs_source_create_topics,
+    confluent_kafka_acl.gcs_source_describe_cluster,
+    google_storage_bucket_object.data,
+    confluent_kafka_topic.gcs_topics
   ]
 }
