@@ -16,14 +16,13 @@ const Index = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              New AI Assistant Now Available
+              New AI Patient Assistant Now Available
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-secondary tracking-tight">
-              <span>Your Health,</span> <span className="text-[#00c1e8]">Our Priority</span>
+              <span>Your Patients,</span> <span className="text-[#00c1e8]">Our Priority</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Experience healthcare reimagined with our AI-powered platform. Get instant answers to
-              your health questions.
+              Experience healthcare reimagined through our AI-powered platform, where instant insights into your patients' health are at your fingertips.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/assistant">
@@ -56,19 +55,19 @@ const Index = () => {
           {[
             {
               icon: <Heart className="w-6 h-6 text-white" />,
-              title: 'Personalized Care',
+              title: 'Personalized Assistance',
               description:
-                'Get healthcare tailored to your unique needs with our AI-powered platform.',
+                'Receive assistance tailored to each patient\'s medical history through our AI-driven system.',
             },
             {
               icon: <Shield className="w-6 h-6 text-white" />,
-              title: 'Secure & Private',
-              description: 'Your health data is protected with enterprise-grade security measures.',
+              title: 'Evidence-Based Recommendations',
+              description: 'Access AI-driven medical suggestions based on the latest evidence to support clinical decisions.',
             },
             {
               icon: <MessageCircle className="w-6 h-6 text-white" />,
               title: '24/7 Support',
-              description: 'Access our AI health assistant anytime, anywhere for instant support.',
+              description: 'Our AI medical assistant is available 24/7 to provide immediate aid with patient inquiries.',
             },
           ].map((feature, index) => (
             <div
