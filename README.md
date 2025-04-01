@@ -109,6 +109,10 @@ Next, open the top-left menu and select **APIs & Services**.
 Click the **Credentials** tab on the left, then click **+ Create Credentials** and choose **API Key**.  
 Save this API key, as it will be required by the application when running the `deploy.sh` script.
 
+If not enabled yet please navigate to the **+Enable APIs and Services** tab to enable  APIs below.
+- Artifact Registry API
+- Cloud Build API
+- Cloud Run Admin API
 ---
 ## Run the Quickstart
 
@@ -144,11 +148,18 @@ For the purposes of this quickstart, any email and password will be accepted, an
 
 
 #### 2a. Example Conversations
-Let's assume the patient's name we have an appointment is Sheila Smith. Here are some example questions to ask:
-- What are the summaries of recent appointments with Sheila Smith?
-- What type of medicine Sheila Smith uses currently?
-- What is the last diagnosis at the latest appointment of Sheila Smith?
 
+> [!IMPORTANT]
+>Please keep in mind that for the sake of this quickstart you are the healthcare worker who would like to get the appointment related information
+of your patient.
+
+
+Let's assume the patient's name we have an appointment is Justin Evans. Here are some example questions to ask:
+- What are the summaries of recent appointments with Justin Evans?
+- What type of medicine Justin Evans uses currently?
+- What is the last diagnosis at the latest appointment of Justin Evans?
+
+[//]: <> (#### 2b. Queries)
 
 ### 3. Bring down the infrastructure
 
@@ -157,5 +168,24 @@ Please note: Running this script will remove all previously deployed resources, 
 ```
 ./destroy.sh
 ```
+
+## FAQ
+### When I run destroy.sh I encounter **gcp reauth needed** error. How can I solve this problem?
+Because of the timeout of your credentials gcloud needs to be reauthenticated.
+This function is not enabled while you have an existing .config file.
+Try both .config files under **root** and **/services** directory.
+
+
+### Where can I see my deployed kstreams apps?
+Deployments can be found under GCP Cloud Run. Along with your kstream apps you can find your websocket app here as well.
+That way for later use you can find you UI url under deployed websocket app in Cloud Run.
+
+
+### Which deploy.sh and destroy.sh I should run?
+The root directory script files are enough to run when deploying and destroying the project.
+
+
+### Is there a shortcut to pass environment variables once instead providing them every time I deploy?
+Yes, after your first deploy you can find all of them under your .env file. Be sure to export those before your next deploy.
 
 ## Next Steps - Improving the Results
