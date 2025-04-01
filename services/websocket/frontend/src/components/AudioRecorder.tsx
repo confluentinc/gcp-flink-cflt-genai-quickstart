@@ -138,15 +138,10 @@ export const AudioRecorder = () => {
     <div className="space-y-0 w-full max-w-2xl mx-auto bg-[#DCF7FB] p-10 rounded-lg">
       <Card className="w-full p-6 space-y-6 animate-fadeIn">
         <div className="space-y-2 text-center">
-          <h2 className="text-3xl font-semibold tracking-tight">AI Health Assistant</h2>
+          <h2 className="text-3xl font-semibold tracking-tight">AI Patient Health Assistant</h2>
           <p className="text-base text-muted-foreground">
-            Record or type your health-related questions
+            Record or type your patient-related questions
           </p>
-          {/* {isProcessing && (
-            <p className="text-sm text-muted-foreground animate-pulse">
-              Processing your request...
-            </p>
-          )} */}
         </div>
 
         <InputModeSelector
@@ -171,7 +166,6 @@ export const AudioRecorder = () => {
                 Maximum recording time: {maxDuration} seconds
               </div>
             )}
-            {/* <AudioDisplay audioURL={audioURL} /> */}
           </>
         ) : (
           <TextInputForm
