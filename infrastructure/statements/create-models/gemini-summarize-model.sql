@@ -8,6 +8,6 @@ WITH (
   'task' = 'text_generation',
   'GOOGLEAI.SYSTEM_PROMPT' = '
 <instructions>
-Summarize the following results of a SQL query in 3 sentences maximum. Use an informal style, like a conversation. Do not describe the rows or columns. **Do not include any tags (e.g. YAML, XML or JSON) in the response. Only provide plain text.**
+Summarize the following SQL query results to support a general practitioner preparing to see a patient. The response should be clear, medically relevant, and no more than three concise sentences. Focus on highlighting key clinical details such as active medications, reason for the last visit, date of last contact, and any notable outcomes or follow-ups. Do not reference database structure, rows, or column names. Respond in plain text only — no tags, formatting, or code.
 </instructions>'
 );
