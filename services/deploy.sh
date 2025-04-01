@@ -62,6 +62,10 @@ fi
 
 # Lower case the UNIQUE_ID and set service names
 LOWER_UNIQUE_ID=$(echo "$UNIQUE_ID" | tr '[:upper:]' '[:lower:]')
+
+build_failed=0
+deploy_failed=0
+
 AUDIO_TEXT_CONVERTER_SVC_NAME="quickstart-healthcare-ai-audio-text-converter-$LOWER_UNIQUE_ID"
 BUILD_QUERY_SVC_NAME="quickstart-healthcare-ai-build-query-$LOWER_UNIQUE_ID"
 EXECUTE_QUERY_SVC_NAME="quickstart-healthcare-ai-execute-query-$LOWER_UNIQUE_ID"
@@ -75,6 +79,7 @@ build_maven_project() {
     IMAGE_ARCH=$IMAGE_ARCH docker run -v "$service_path":/root/source/ --rm --name build-$(basename "$service_path") maven:3.8.7-openjdk-18-slim sh -c "cd /root/source/ && mvn -T 1C clean install -Dmaven.test.skip -DskipTests -Dmaven.javadoc.skip=true"
     if [ $? -ne 0 ]; then
         echo "[-] Failed to build $service_path"
+        build_failed=1
         exit 1
     fi
     echo "[+] $service_path built successfully"
@@ -87,6 +92,7 @@ build_node_project() {
     IMAGE_ARCH=$IMAGE_ARCH docker run -v "$service_path":/root/source/ --rm --name build-frontend node:current-alpine3.20 sh -c "cd /root/source/frontend && npm i && npm run build"
     if [ $? -ne 0 ]; then
         echo "[-] Failed to build $service_path/frontend"
+        deploy_failed=1
         exit 1
     fi
     echo "[+] $service_path/frontend built successfully"
@@ -114,6 +120,15 @@ build_maven_project "$SCRIPT_FOLDER/summarize" &
 build_node_project "$SCRIPT_FOLDER/websocket" &
 wait
 
+# Check if any build failed
+if [ $build_failed -ne 0 ]; then
+    echo "[-] One or more builds failed. Cancelling deployment and starting cleanup....."
+    ../../destroy.sh
+    exit 1
+else
+    echo "[+] All builds succeeded. Proceeding with deployment."
+fi
+
 # Set environment variable string for gcloud deployments
 common_env_vars="BOOTSTRAP_SERVER=$BOOTSTRAP_SERVER,KAFKA_API_KEY=$KAFKA_API_KEY,KAFKA_API_SECRET=$KAFKA_API_SECRET,SR_API_KEY=$SR_API_KEY,SR_API_SECRET=$SR_API_SECRET,SR_URL=$SR_URL,CLIENT_ID=$CLIENT_ID,GCP_PROJECT_ID=$GCP_PROJECT_ID"
 audio_text_converter_env_vars="$common_env_vars,TOPIC_IN=audio_request,TOPIC_OUT=input_request"
@@ -128,3 +143,12 @@ deploy_gcloud "$EXECUTE_QUERY_SVC_NAME" "$SCRIPT_FOLDER/execute_query" "$execute
 deploy_gcloud "$SUMMARISE_SVC_NAME" "$SCRIPT_FOLDER/summarize" "$summarise_env_vars" &
 deploy_gcloud "$WEBSOCKET_SVC_NAME" "$SCRIPT_FOLDER/websocket" "$common_env_vars" &
 wait
+
+# After deployment process, check if any deployments failed
+if [ $deploy_failed -ne 0 ]; then
+    echo "[-] One or more deployments failed. Initiating cleanup of quickstart...."
+    ./../destroy.sh
+    exit 1
+else
+    echo "[+] All deployments completed successfully."
+fi
