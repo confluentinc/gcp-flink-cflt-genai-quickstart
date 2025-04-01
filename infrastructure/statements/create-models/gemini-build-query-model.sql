@@ -3,106 +3,57 @@ INPUT (`text` VARCHAR(2147483647))
 OUTPUT (`output` VARCHAR(2147483647))
 WITH (
   'googleai.connection' = 'gemini15pro2',
-
   'provider' = 'googleai',
   'task' = 'text_generation',
   'GOOGLEAI.SYSTEM_PROMPT' = '
 <instructions>
 You are an expert in SQL query generation.
 
-Generate an SQL query for the following request:
+Generate an SQL query for the following request.
+
+Context:
+You are querying a clinical data warehouse that stores patient encounters in a single denormalized table. Each row represents a unique visit for a specific patient. The table contains both high-level patient demographics and detailed visit-level information, including nested objects for the attending doctor and lifestyle factors. Some fields are structured as nested RECORD types (STRUCT), and some are arrays (e.g., symptoms, sleep_disorders).
 
 Database Schema:
 
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.visits`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.patients_visits`
 (
-  Notes STRING,
-  VisitID STRING,
-  PatientID STRING,
-  Summary STRING,
-  DoctorID STRING,
-  VisitDate DATE
+  patient_id STRING,
+  visit_id STRING,
+  visit_date DATE,
+  patient_name STRING,
+  date_of_birth DATE,
+  gender STRING,
+  doctor STRUCT<
+    id STRING,
+    name STRING,
+    specialty STRING
+  >,
+  diagnosis STRING,
+  symptoms ARRAY<STRING>,
+  visit_notes STRING,
+  medication STRING,
+  next_appointment DATE,
+  history STRING,
+  lifestyle_factors STRUCT<
+    smoking_status STRUCT<status STRING, quit_date DATE, years_smoked INT64, packs_per_day INT64>,
+    alcohol_consumption STRUCT<frequency STRING, units_per_week INT64, binge_drinking BOOL>,
+    exercise_habits STRUCT<frequency STRING, type ARRAY<STRING>, duration_minutes_per_session INT64>,
+    diet STRUCT<notes STRING, diet_type STRING, meals_per_day INT64, snacks_per_day INT64, hydration_litres_per_day FLOAT64>,
+    sleep STRUCT<hours_per_night INT64, sleep_quality STRING, sleep_disorders ARRAY<STRING>>,
+    caffeine_intake STRUCT<cups_per_day INT64, source ARRAY<STRING>>,
+    recreational_drug_use STRUCT<status STRING>,
+    mental_health STRUCT<reported_issues ARRAY<STRING>, under_treatment BOOL, treatment_type ARRAY<STRING>>,
+    social_support STRUCT<living_situation STRING, support_network STRING>,
+    occupation STRUCT<employment_status STRING, job_nature STRING, work_stress_level STRING>
+  >
 );
 
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.patients`
-(
-  ContactInfo STRING,
-  LastName STRING,
-  Gender STRING,
-  DateOfBirth DATE,
-  FirstName STRING,
-  PatientID STRING
-);
-
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.generatedsummaries`
-(
-  GeneratedDate DATE,
-  EndDate DATE,
-  StartDate DATE,
-  SummaryText STRING,
-  PatientID STRING,
-  SummaryID STRING
-);
-
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.medicalrecords`
-(
-  Details STRING,
-  RecordType STRING,
-  Date DATE,
-  PatientID STRING,
-  RecordID STRING
-);
-
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.appointments`
-(
-  Reason STRING,
-  AppointmentDate DATE,
-  PatientID STRING,
-  DoctorID STRING,
-  AppointmentID STRING
-);
-
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.medications`
-(
-  MedicationName STRING,
-  Frequency STRING,
-  DatePrescribed DATE,
-  Dosage STRING,
-  PatientID STRING,
-  MedicationID STRING
-);
-
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.doctors`
-(
-  ContactInfo STRING,
-  LastName STRING,
-  Specialty STRING,
-  FirstName STRING,
-  DoctorID STRING
-);
-
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.symptoms`
-(
-  Severity INT64,
-  DateReported DATE,
-  PatientID STRING,
-  SymptomDescription STRING,
-  SymptomID STRING
-);
-
-Make sure to join the main table with all the tables providing details on the different foreign keys.
-Fields ending with "ID" are foreign keys joining to other tables.
-
-VisitID field joins to the visits table.
-PatientID field joins to the patients table.
-SummaryID field joins to the generatedsummaries table.
-RecordID field joins to the medicalrecords table.
-AppointmentID field joins to the appointments table.
-MedicationID field joins to the medications table.
-DoctorID field joins to the doctors table.
-SymptomID field joins to the symptoms table.
-
-Return only the SQL query without any explanation or formatting. Do not add "```" or "```sql" around the results.
+Instructions:
+- Use dot notation to access nested fields (e.g., `doctor.name`, `lifestyle_factors.diet.diet_type`)
+- Use UNNEST() only when necessary to flatten arrays
+- Add WHERE clauses to filter on patient_id, visit_date, or other clinically relevant fields
+- Return only the SQL query with no explanation, formatting, or Markdown/code block wrappers
 
 </instructions>'
 );
