@@ -29,15 +29,24 @@ export const Navbar = () => {
         </Link>
         <div className="flex items-center gap-4">
           {location.pathname !== '/login' && (
-            <>
-              <Button
-                size="sm"
-                className="bg-[#59a9ce] hover:bg-[#59a9ce]/90 text-[#fff] transition-colors"
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </>
+           <>
+             <a href="https://github.com/confluentinc/gcp-flink-cflt-genai-quickstart/blob/main/README.md"
+             target="_blank" rel="noopener noreferrer">
+                 <Button
+                        size="sm"
+                        className="bg-[#59a9ce] hover:bg-[#59a9ce]/90 text-[#fff] transition-colors"
+                     >
+                       💡 Help
+                 </Button>
+             </a>
+                 <Button
+                    size="sm"
+                    className="bg-[#59a9ce] hover:bg-[#59a9ce]/90 text-[#fff] transition-colors"
+                    onClick={handleLogout}
+                 >
+                    Logout
+                 </Button>
+           </>
           )}
         </div>
       </div>
