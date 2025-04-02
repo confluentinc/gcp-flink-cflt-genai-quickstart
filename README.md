@@ -74,11 +74,11 @@ This section demonstrates how the system interacts with user queries in real tim
 2. **Google Gemini:** Used for both summarization and generating responses in natural language.
 
 ## Requirements
-
 #### Docker
 
 The `deploy` script automates the entire build process; the only required software is Docker.
 Docker can be installed by following the official instructions - [Get Docker](https://docs.docker.com/get-docker/).
+
 ---
 ## Access Keys to Cloud Services Providers
 
@@ -171,9 +171,9 @@ Please note: Running this script will remove all previously deployed resources, 
 
 ## FAQ
 ### When I run destroy.sh I encounter **gcp reauth needed** error. How can I solve this problem?
-Because of the timeout of your credentials gcloud needs to be reauthenticated.
-This function is not enabled while you have an existing .config file.
-Try both .config files under **root** and **/services** directory.
+The credentials associated with the session have expired due to a timeout.
+Reauthentication is not enabled while you have an existing **.config** file.
+Try deleting both **.config** files under `root` and `/services` directory.
 
 
 ### Where can I see my deployed kstreams apps?
@@ -187,5 +187,11 @@ The root directory script files are enough to run when deploying and destroying 
 
 ### Is there a shortcut to pass environment variables once instead providing them every time I deploy?
 Yes, after your first deploy you can find all of them under your .env file. Be sure to export those before your next deploy.
+
+### I am hitting this "Error: error reading Kafka Topic: 401 API-key based authentication failed.: API-key based authentication failed." error while rotating my keys. How can I fix this?
+Kindly check if this is a key propagation issue and if the enough time has passed after creation. Check if all permissions, ACLs, etc are correctly set. 
+If everything looks in place then most probably the revoked API values were cached in the credentials section of the terraform resource confluent_kafka_topic. 
+A `terraform apply -refresh=false` under `/infrastructure` directory should correct the issue.
+
 
 ## Next Steps - Improving the Results
