@@ -36,7 +36,7 @@ export const RecordingResults = ({ messages, isProcessing = false }: RecordingRe
                 className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <Card
-                  className={`max-w-[80%] ${
+                  className={`max-w-[100%] ${
                     message.type === 'user' ? 'bg-[#F1F0FB]' : 'bg-[#0EA5E9]'
                   }`}
                 >
@@ -47,7 +47,6 @@ export const RecordingResults = ({ messages, isProcessing = false }: RecordingRe
                     {message.audioUrl && (
                       <audio
                         controls
-                        className="w-full max-w-[300px]"
                       >
                         <source
                           src={message.audioUrl}
