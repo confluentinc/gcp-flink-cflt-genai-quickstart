@@ -10,7 +10,7 @@ Leveraging Confluent Cloud for real-time data streaming and Google Cloud Platfor
     - [Use Case](#use-case)
     - [Table of Contents](#table-of-contents)
     - [Architecture](#architecture)
-        - [Natural Language Voice Assistantt](# Natural Language Voice Assistant)
+        - [Natural Language Voice Assistant](#natural-language-voice-assistant)
         - [Key Concepts](#key-concepts)
     - [Requirements](#requirements)
         - [Docker](#docker)
@@ -20,12 +20,14 @@ Leveraging Confluent Cloud for real-time data streaming and Google Cloud Platfor
     - [Run the Quickstart](#run-the-quickstart)
         - [1. Bring up the infrastructure](#1-bring-up-the-infrastructure)
         - [2. Have a conversation](#2-have-a-conversation)
+          - [2a. Example Conversations](#2a-example-conversations)
         - [3. Bring down the infrastructure](#3-bring-down-the-infrastructure)
-    - [Next Steps - Improving the Results](#next-steps---improving-the-results)
+  - [FAQ](#faq)
+  - [Next Steps - Improving the Results](#next-steps---improving-the-results)
+  
 
 
 ## Key Features
-[//]: <> (change the key concepts accordingly)
 * **Real-Time Data Processing**: Powered by Confluent Cloud and Kstreams App, ensuring low-latency communication and
   event-driven architecture.
 * **Intelligent Conversations**: Integrated with GCP Gemini AI models for natural and accurate conversational
@@ -65,7 +67,7 @@ This section demonstrates how the system interacts with user queries in real tim
 3. **Model Inference:** Google Gemini is used for model inference to generate responses.
 4. **Output to User:** The system sends the processed results back to the user via the websocket.
 
-[//]: <> (change the key concepts accordingly - kept the embeddings since we will be using them)
+
 
 ### Key Concepts
 
@@ -192,7 +194,7 @@ When deploying and destroying the project please run the root directory script f
 ### Is there a shortcut to pass environment variables once instead providing them every time I deploy?
 Yes, after your first deploy you can find all of them under your .env file. Be sure to export these variables before your next deploy.
 
-### I am hitting this "Error: error reading Kafka Topic: 401 API-key based authentication failed.: API-key based authentication failed." error while rotating my keys. How can I fix this?
+### I am hitting "Error: error reading Kafka Topic: 401 API-key based authentication failed.: API-key based authentication failed." error while rotating my keys. How can I fix this?
 Kindly check if this is a key propagation issue and if the enough time has passed after creation. Check if all permissions, ACLs, etc are correctly set. 
 If everything looks in place then most probably the revoked API values were cached in the credentials section of the terraform resource confluent_kafka_topic. 
 A `terraform apply -refresh=false` under `/infrastructure` directory should correct the issue.
