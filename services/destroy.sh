@@ -23,7 +23,7 @@ check_env_var() {
 }
 
 # List of mandatory environment variables
-mandatory_vars=("GCP_REGION" "GCP_PROJECT_ID" )
+mandatory_vars=("GCP_REGION" "GCP_PROJECT_ID")
 
 # Check each mandatory environment variable
 for var in "${mandatory_vars[@]}"; do
@@ -37,48 +37,13 @@ CONFIG_FOLDER="$SCRIPT_FOLDER"/.config
 
 echo "[+] SCRIPT_FOLDER: $SCRIPT_FOLDER"
 
-# Function to prompt for input until a non-empty value is provided
-prompt_for_input() {
-    local var_name=$1
-    local prompt_message=$2
-    local is_secret=$3
-
-    while true; do
-        if [ "$is_secret" = true ]; then
-            read -r -s -p "$prompt_message: " input_value
-            echo ""
-        else
-            read -r -p "$prompt_message: " input_value
-        fi
-
-        if [ -z "$input_value" ]; then
-            echo "[-] $var_name cannot be empty"
-        else
-            eval "$var_name='$input_value'"
-            break
-        fi
-    done
-}
-
-# Function to check if a GCP Cloud Run service exists
-check_service_exists() {
-    local service_name=$1
-    local region=$2
-    local project_id=$3
-
-    if IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud run services describe "$service_name" --region "$region" --project "$project_id" > /dev/null 2>&1; then
-        echo "Service $service_name exists."
-        return 0
-    else
-        echo "Service $service_name does not exist."
-        return 1
-    fi
-}
-
-# Check if the the .config folder does not exists
+# -------------------------------
+# AUTHENTICATE GCLOUD
+# -------------------------------
 if [ ! -d "$CONFIG_FOLDER" ]; then
-  echo "[+] Authenticating gcloud for cli"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud auth login
+  echo "[+] Authenticating gcloud for CLI"
+  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name gcloud-config \
+      gcr.io/google.com/cloudsdktool/google-cloud-cli:stable gcloud auth login
   if [ $? -ne 0 ]; then
       echo "[-] Failed to authenticate gcloud"
       exit 1
@@ -87,74 +52,79 @@ if [ ! -d "$CONFIG_FOLDER" ]; then
 fi
 
 LOWER_UNIQUE_ID=$(to_lowercase "$UNIQUE_ID")
-SVC_NAME="quickstart-healthcare-ai-websocket-"$LOWER_UNIQUE_ID
 
-#Check if the service exists
-if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
-  echo "[+] Destroying WebSocket service"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-backend gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
-  if [ $? -ne 0 ]; then
-      echo "[-] Failed to destroy backend"
-      exit 1
-  fi
-  echo "[+] WebSocket destroyed successfully"
+
+
+# -------------------------------
+# DELETE BIGQUERY DATASET FIRST
+# -------------------------------
+
+echo "[+] Retrieving BigQuery Dataset ID from Terraform"
+
+# Navigate to Terraform directory
+cd "$(dirname "$0")/../infrastructure" || { echo "[-] ERROR: Cannot access infrastructure directory"; exit 1; }
+
+# Ensure Terraform is initialized and retrieve DATASET_ID
+terraform init -input=false -backend=false > /dev/null 2>&1
+DATASET_ID=$(terraform output -raw dataset_id 2>/dev/null || echo "")
+
+# Validate DATASET_ID
+if [ -z "$DATASET_ID" ]; then
+    echo "[-] ERROR: Could not retrieve DATASET_ID from Terraform. Run 'terraform apply'."
+    exit 1
 fi
 
+echo "[+] Using DATASET_ID: $DATASET_ID"
 
-SVC_NAME="quickstart-healthcare-ai-audio-text-converter-"$LOWER_UNIQUE_ID
+# Return to original directory
+cd - > /dev/null
 
-#Check if the Audio Text Converter App exists
-if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
-  echo "[+] Destroying Audio Text Converter App"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-audio-text gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
-  if [ $? -ne 0 ]; then
-      echo "[-] Failed to destroy Audio Text Converter App"
-      exit 1
-  fi
-  echo "[+] Audio Text Converter App destroyed successfully"
-fi
+# Delete BigQuery dataset
+echo "[+] Deleting BigQuery dataset: $GCP_PROJECT_ID:$DATASET_ID"
+bq rm -r -f -d "$GCP_PROJECT_ID:$DATASET_ID" && echo "[+] Dataset deleted" || {
+    echo "[-] ERROR: Failed to delete dataset $GCP_PROJECT_ID:$DATASET_ID"; exit 1;
+}
 
-SVC_NAME="quickstart-healthcare-ai-summarise-"$LOWER_UNIQUE_ID
-#Check if the Summarise App exists
-if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
-  echo "[+] Destroying Summarise App"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-summarise gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
-  if [ $? -ne 0 ]; then
-      echo "[-] Failed to destroy Summarise App"
-      exit 1
-  fi
-  echo "[+] Summarise App destroyed successfully"
-fi
 
-SVC_NAME="quickstart-healthcare-ai-build-query-"$LOWER_UNIQUE_ID
+# -------------------------------
+# DESTROY CLOUD RUN SERVICES
+# -------------------------------
+SERVICES=(
+    "quickstart-healthcare-ai-websocket"
+    "quickstart-healthcare-ai-audio-text-converter"
+    "quickstart-healthcare-ai-summarise"
+    "quickstart-healthcare-ai-build-query"
+    "quickstart-healthcare-ai-execute-query"
+)
 
-#Check is the Build Query exists
-if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
-  echo "[+] Destroying Build Query App"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-build-query gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
-  if [ $? -ne 0 ]; then
-      echo "[-] Failed to destroy Build Query App"
-      exit 1
-  fi
-  echo "[+] Build Query App destroyed successfully"
-fi
+for SVC_NAME_PREFIX in "${SERVICES[@]}"; do
+    SVC_NAME="${SVC_NAME_PREFIX}-${LOWER_UNIQUE_ID}"
 
-SVC_NAME="quickstart-healthcare-ai-execute-query-"$LOWER_UNIQUE_ID
+    if IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm \
+        gcr.io/google.com/cloudsdktool/google-cloud-cli:stable \
+        gcloud run services describe "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" > /dev/null 2>&1; then
 
-#Check is the Execute Query exists
-if check_service_exists "$SVC_NAME" "$GCP_REGION" "$GCP_PROJECT_ID"; then
-  echo "[+] Destroying Execute Query App"
-  IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm --name quickstart-destroy-execute-query gcr.io/google.com/cloudsdktool/google-cloud-cli:stable  gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
-  if [ $? -ne 0 ]; then
-      echo "[-] Failed to destroy Execute Query App"
-      exit 1
-  fi
-  echo "[+] Execute Query App destroyed successfully"
+        echo "[+] Destroying service: $SVC_NAME"
+        IMAGE_ARCH=$IMAGE_ARCH docker run -v "$CONFIG_FOLDER":/root/.config/ -ti --rm \
+            gcr.io/google.com/cloudsdktool/google-cloud-cli:stable \
+            gcloud run services delete "$SVC_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
 
-fi
+        if [ $? -ne 0 ]; then
+            echo "[-] Failed to destroy $SVC_NAME"
+            exit 1
+        fi
+        echo "[+] $SVC_NAME destroyed successfully"
+    else
+        echo "[+] Service $SVC_NAME does not exist. Skipping."
+    fi
+done
 
+# -------------------------------
+# CLEANUP FILES
+# -------------------------------
 echo "[+] Cleanup files"
 rm -rf "$SCRIPT_FOLDER"/websocket/frontend/node_modules
 rm -rf "$SCRIPT_FOLDER"/websocket/src/main/resources/static/
+rm -rf infrastructure/venv
 rm -rf "$CONFIG_FOLDER"
 echo "[+] Done cleaning up"

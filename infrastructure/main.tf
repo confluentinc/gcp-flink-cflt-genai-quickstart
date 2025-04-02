@@ -20,8 +20,8 @@ module "confluent_cloud" {
   confluent_cloud_environment = {
     name = var.confluent_cloud_environment_name
   }
-  gcloud_project = var.gcloud_project
-  bigquery_db = var.bigquery_db
+  gcp_project_id = var.gcp_project_id
+  bigquery_db = module.gcp.dataset_id
 
   create_model_sql_files = local.create_model_sql_files
   insert_data_sql_files  = local.insert_data_sql_files
@@ -33,3 +33,22 @@ module "confluent_cloud" {
      module.gcp
   ]
 }
+
+resource "null_resource" "run_python_script" {
+  depends_on = [module.gcp]  # Ensure GCP module is created first
+
+  provisioner "local-exec" {
+    command = <<EOT
+      echo "[+] Running Python script: bq_loader.py with DATASET_ID=${module.gcp.dataset_id}" && \
+      python3 -m venv venv && \
+      source venv/bin/activate && \
+      pip install -r requirements.txt && \
+      DATASET_ID=${module.gcp.dataset_id} python3 ${path.module}/bq_loader.py
+    EOT
+  }
+
+  triggers = {
+    always_run = timestamp()  # Forces execution on each `apply`
+  }
+}
+

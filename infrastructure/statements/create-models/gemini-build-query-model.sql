@@ -14,7 +14,7 @@ Generate an SQL query for the following request:
 
 Database Schema:
 
-CREATE TABLE `${gcloud-project}.${bigquery-db}.visits`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.visits`
 (
   Notes STRING,
   VisitID STRING,
@@ -24,7 +24,7 @@ CREATE TABLE `${gcloud-project}.${bigquery-db}.visits`
   VisitDate DATE
 );
 
-CREATE TABLE `${gcloud-project}.${bigquery-db}.patients`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.patients`
 (
   ContactInfo STRING,
   LastName STRING,
@@ -34,7 +34,7 @@ CREATE TABLE `${gcloud-project}.${bigquery-db}.patients`
   PatientID STRING
 );
 
-CREATE TABLE `${gcloud-project}.${bigquery-db}.generatedsummaries`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.generatedsummaries`
 (
   GeneratedDate DATE,
   EndDate DATE,
@@ -44,7 +44,7 @@ CREATE TABLE `${gcloud-project}.${bigquery-db}.generatedsummaries`
   SummaryID STRING
 );
 
-CREATE TABLE `${gcloud-project}.${bigquery-db}.medicalrecords`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.medicalrecords`
 (
   Details STRING,
   RecordType STRING,
@@ -53,7 +53,7 @@ CREATE TABLE `${gcloud-project}.${bigquery-db}.medicalrecords`
   RecordID STRING
 );
 
-CREATE TABLE `${gcloud-project}.${bigquery-db}.appointments`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.appointments`
 (
   Reason STRING,
   AppointmentDate DATE,
@@ -62,7 +62,7 @@ CREATE TABLE `${gcloud-project}.${bigquery-db}.appointments`
   AppointmentID STRING
 );
 
-CREATE TABLE `${gcloud-project}.${bigquery-db}.medications`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.medications`
 (
   MedicationName STRING,
   Frequency STRING,
@@ -72,7 +72,7 @@ CREATE TABLE `${gcloud-project}.${bigquery-db}.medications`
   MedicationID STRING
 );
 
-CREATE TABLE `${gcloud-project}.${bigquery-db}.doctors`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.doctors`
 (
   ContactInfo STRING,
   LastName STRING,
@@ -81,7 +81,7 @@ CREATE TABLE `${gcloud-project}.${bigquery-db}.doctors`
   DoctorID STRING
 );
 
-CREATE TABLE `${gcloud-project}.${bigquery-db}.symptoms`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.symptoms`
 (
   Severity INT64,
   DateReported DATE,
