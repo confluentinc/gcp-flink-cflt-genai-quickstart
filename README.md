@@ -109,10 +109,14 @@ Next, open the top-left menu and select **APIs & Services**.
 Click the **Credentials** tab on the left, then click **+ Create Credentials** and choose **API Key**.  
 Save this API key, as it will be required by the application when running the `deploy.sh` script.
 
-If not enabled yet please navigate to the **+Enable APIs and Services** tab to enable  APIs below.
+If not enabled yet please navigate to the **+Enable APIs and Services** tab to enable APIs below.
 - Artifact Registry API
 - Cloud Build API
 - Cloud Run Admin API
+
+![Enabling APIs on GCP](./assets/gcp-enable-api.gif)
+In case you see MANAGE instead of ENABLE that means these APIs are already enabled.
+
 ---
 ## Run the Quickstart
 
