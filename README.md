@@ -117,7 +117,8 @@ If not enabled yet please navigate to the **+Enable APIs and Services** tab to e
 - Cloud Run Admin API
 
 ![Enabling APIs on GCP](./assets/gcp-enable-api.gif)
-In case you see MANAGE instead of ENABLE that means these APIs are already enabled.
+> [!NOTE]
+>In case you see MANAGE instead of ENABLE that means these APIs are already enabled.
 
 ---
 ## Run the Quickstart
@@ -169,7 +170,8 @@ Let's assume the patient's name we have an appointment is Justin Evans. Here are
 
 ### 3. Bring down the infrastructure
 
-Please note: Running this script will remove all previously deployed resources, including cloud infrastructure, data platform assets, and streaming applications, ensuring a clean state for subsequent use.
+> [!CAUTION]
+> Running this script will remove all previously deployed resources, including cloud infrastructure, data platform assets, and streaming applications, ensuring a clean state for subsequent use.
 
 ```
 ./destroy.sh
