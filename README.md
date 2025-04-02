@@ -177,16 +177,16 @@ Try deleting both **.config** files under `root` and `/services` directory.
 
 
 ### Where can I see my deployed kstreams apps?
-Deployments can be found under GCP Cloud Run. Along with your kstream apps you can find your websocket app here as well.
-That way for later use you can find you UI url under deployed websocket app in Cloud Run.
+All deployments including your websocket application can be found under your GCP account Cloud Run.
+In case you need to access the UI link at a later time it can be found under websocket application.
 
 
-### Which deploy.sh and destroy.sh I should run?
-The root directory script files are enough to run when deploying and destroying the project.
+### Which deploy.sh and destroy.sh should I run?
+When deploying and destroying the project please run the root directory script files. 
 
 
 ### Is there a shortcut to pass environment variables once instead providing them every time I deploy?
-Yes, after your first deploy you can find all of them under your .env file. Be sure to export those before your next deploy.
+Yes, after your first deploy you can find all of them under your .env file. Be sure to export these variables before your next deploy.
 
 ### I am hitting this "Error: error reading Kafka Topic: 401 API-key based authentication failed.: API-key based authentication failed." error while rotating my keys. How can I fix this?
 Kindly check if this is a key propagation issue and if the enough time has passed after creation. Check if all permissions, ACLs, etc are correctly set. 
