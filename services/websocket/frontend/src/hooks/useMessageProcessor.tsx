@@ -2,8 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RecordingResult } from "./useAudioRecorder";
 
-const RESPONSE_TIMEOUT = 15000; // 15 seconds timeout for waiting for response
-const WEBSOCKET_TIMEOUT = 15000; // 15 seconds timeout for websocket to open
+const RESPONSE_TIMEOUT = 30000; // 30 seconds timeout for waiting for response
 
 export const useMessageProcessor = () => {
   const [result, setResult] = useState<RecordingResult | null>(null);
@@ -53,26 +52,14 @@ export const useMessageProcessor = () => {
 
       wsRef.current = new WebSocket(wsURL);
 
-     // Create a timeout to close the connection if it's not established within the specified duration
-     const wsTimeout = setTimeout(() => {
-       // Check if the WebSocket is still not open (WebSocket readyState 0 is CONNECTING)
-       if (wsRef.current.readyState !== WebSocket.OPEN) {
-         console.log('Closing WebSocket due to timeout.');
-         wsRef.current.close(); // Attempt to close the WebSocket
-       }
-     }, WEBSOCKET_TIMEOUT);
-
-
       wsRef.current.onopen = () => {
         console.log('WebSocket connection established');
         console.log(`Connected to: ${wsRef.current.url}`);
         resolve(wsRef);
-        clearTimeout(wsTimeout); // Cancel the timeout
       };
 
       wsRef.current.onmessage = (event) => {
         console.log('Received WebSocket message:', event.data);
-        clearTimeout(wsTimeout); // Cancel the timeout
         clearResponseTimeout();
 
         try {
@@ -174,7 +161,7 @@ export const useMessageProcessor = () => {
       console.error("Connection error: ", error);
       toast({
         title: "Connection Error",
-        description: "Could not connect to the server, please try again",
+        description: "Could not connect to the server",
         variant: "destructive",
       });
       conversationIdRef.current = null;
@@ -227,7 +214,7 @@ export const useMessageProcessor = () => {
       console.error("WebSocket connection error:", error);
       toast({
         title: "Connection Error",
-        description: "Could not connect to the server, please try again",
+        description: "Could not connect to the server",
         variant: "destructive",
       });
     }
