@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RecordingResult } from "./useAudioRecorder";
 
-const RESPONSE_TIMEOUT = 15000; // 15 seconds timeout for waiting for response
+const RESPONSE_TIMEOUT = 30000; // 30 seconds timeout for waiting for response
 const WEBSOCKET_TIMEOUT = 15000; // 15 seconds timeout for websocket to open
 
 export const useMessageProcessor = () => {
