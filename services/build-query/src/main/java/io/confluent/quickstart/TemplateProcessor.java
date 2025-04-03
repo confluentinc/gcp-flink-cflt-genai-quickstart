@@ -7,16 +7,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class TemplateProcessor {
-    public String processTemplate(String template) {
+    public static String processTemplate(String template, String gcpProjectId, String bigQueryDb) {
         String result = template;
-        result = result.replace("${gcp-project-id}", System.getenv("GCP_PROJECT_ID"));
-        result = result.replace("${bigquery-db}", System.getenv("BIGQUERY_DATABASE"));
+        result = result.replace("${gcp-project-id}", gcpProjectId);
+        result = result.replace("${bigquery-db}", bigQueryDb);
         return result;
     }
 
-    public String loadAndProcessTemplate(String templatePath) throws IOException, URISyntaxException {
-        Path path = Paths.get(getClass().getClassLoader().getResource(templatePath).toURI());
+    public static String loadAndProcessTemplate(String templatePath, String gcpProjectId, String bigQueryDb) throws IOException, URISyntaxException {
+        Path path = Paths.get(ClassLoader.getSystemResource(templatePath).toURI());
         String template = Files.readString(path);
-        return processTemplate(template);
+        return processTemplate(template, gcpProjectId, bigQueryDb);
     }
 } 

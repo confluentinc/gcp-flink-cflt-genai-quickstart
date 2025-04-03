@@ -117,7 +117,7 @@ wait
 # Set environment variable string for gcloud deployments
 common_env_vars="BOOTSTRAP_SERVER=$BOOTSTRAP_SERVER,KAFKA_API_KEY=$KAFKA_API_KEY,KAFKA_API_SECRET=$KAFKA_API_SECRET,SR_API_KEY=$SR_API_KEY,SR_API_SECRET=$SR_API_SECRET,SR_URL=$SR_URL,CLIENT_ID=$CLIENT_ID,GCP_PROJECT_ID=$GCP_PROJECT_ID"
 audio_text_converter_env_vars="$common_env_vars,TOPIC_IN=audio_request,TOPIC_OUT=input_request"
-build_query_env_vars="$common_env_vars,TOPIC_IN=input_request,TOPIC_OUT=generated_sql"
+build_query_env_vars="$common_env_vars,TOPIC_IN=input_request,TOPIC_OUT=generated_sql,BIGQUERY_DATABASE=$BIGQUERY_DATABASE"
 execute_query_env_vars="$common_env_vars,TOPIC_IN=generated_sql,TOPIC_OUT=sql_results"
 summarise_env_vars="$common_env_vars,TOPIC_IN=sql_results,TOPIC_OUT=summarised_results"
 
