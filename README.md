@@ -10,7 +10,7 @@ Leveraging Confluent Cloud for real-time data streaming and Google Cloud Platfor
     - [Use Case](#use-case)
     - [Table of Contents](#table-of-contents)
     - [Architecture](#architecture)
-        - [Natural Language Voice Assistantt](# Natural Language Voice Assistant)
+        - [Natural Language Voice Assistant](#natural-language-voice-assistant)
         - [Key Concepts](#key-concepts)
     - [Requirements](#requirements)
         - [Docker](#docker)
@@ -20,12 +20,14 @@ Leveraging Confluent Cloud for real-time data streaming and Google Cloud Platfor
     - [Run the Quickstart](#run-the-quickstart)
         - [1. Bring up the infrastructure](#1-bring-up-the-infrastructure)
         - [2. Have a conversation](#2-have-a-conversation)
+          - [2a. Example Conversations](#2a-example-conversations)
         - [3. Bring down the infrastructure](#3-bring-down-the-infrastructure)
-    - [Next Steps - Improving the Results](#next-steps---improving-the-results)
+  - [FAQ](#faq)
+  - [Next Steps - Improving the Results](#next-steps---improving-the-results)
+  
 
 
 ## Key Features
-[//]: <> (change the key concepts accordingly)
 * **Real-Time Data Processing**: Powered by Confluent Cloud and Kstreams App, ensuring low-latency communication and
   event-driven architecture.
 * **Intelligent Conversations**: Integrated with GCP Gemini AI models for natural and accurate conversational
@@ -65,7 +67,7 @@ This section demonstrates how the system interacts with user queries in real tim
 3. **Model Inference:** Google Gemini is used for model inference to generate responses.
 4. **Output to User:** The system sends the processed results back to the user via the websocket.
 
-[//]: <> (change the key concepts accordingly - kept the embeddings since we will be using them)
+
 
 ### Key Concepts
 
@@ -74,11 +76,11 @@ This section demonstrates how the system interacts with user queries in real tim
 2. **Google Gemini:** Used for both summarization and generating responses in natural language.
 
 ## Requirements
-
 #### Docker
 
 The `deploy` script automates the entire build process; the only required software is Docker.
 Docker can be installed by following the official instructions - [Get Docker](https://docs.docker.com/get-docker/).
+
 ---
 ## Access Keys to Cloud Services Providers
 
@@ -108,6 +110,15 @@ If an account hasn’t been created yet, sign up and navigate to the *Console* s
 Next, open the top-left menu and select **APIs & Services**.  
 Click the **Credentials** tab on the left, then click **+ Create Credentials** and choose **API Key**.  
 Save this API key, as it will be required by the application when running the `deploy.sh` script.
+
+If not enabled yet please navigate to the **+Enable APIs and Services** tab to enable APIs below.
+- Artifact Registry API
+- Cloud Build API
+- Cloud Run Admin API
+
+![Enabling APIs on GCP](./assets/gcp-enable-api.gif)
+> [!NOTE]
+>In case you see MANAGE instead of ENABLE that means these APIs are already enabled.
 
 ---
 ## Run the Quickstart
@@ -144,18 +155,51 @@ For the purposes of this quickstart, any email and password will be accepted, an
 
 
 #### 2a. Example Conversations
-Let's assume the patient's name we have an appointment is Sheila Smith. Here are some example questions to ask:
-- What are the summaries of recent appointments with Sheila Smith?
-- What type of medicine Sheila Smith uses currently?
-- What is the last diagnosis at the latest appointment of Sheila Smith?
 
+> [!IMPORTANT]
+>Please keep in mind that for the sake of this quickstart you are the healthcare worker who would like to get the appointment related information
+of your patient.
+
+
+Let's assume the patient's name we have an appointment is Justin Evans. Here are some example questions to ask:
+- What are the summaries of recent appointments with Justin Evans?
+- What type of medicine Justin Evans uses currently?
+- What is the last diagnosis at the latest appointment of Justin Evans?
+
+[//]: <> (#### 2b. Queries)
 
 ### 3. Bring down the infrastructure
 
-Please note: Running this script will remove all previously deployed resources, including cloud infrastructure, data platform assets, and streaming applications, ensuring a clean state for subsequent use.
+> [!CAUTION]
+> Running this script will remove all previously deployed resources, including cloud infrastructure, data platform assets, and streaming applications, ensuring a clean state for subsequent use.
 
 ```
 ./destroy.sh
 ```
+
+## FAQ
+### When I run destroy.sh I encounter **gcp reauth needed** error. How can I solve this problem?
+The credentials associated with the session have expired due to a timeout.
+Reauthentication is not enabled while you have an existing **.config** file.
+Try deleting both **.config** files under `root` and `/services` directory.
+
+
+### Where can I see my deployed kstreams apps?
+All deployments including your websocket application can be found under your GCP account Cloud Run.
+In case you need to access the UI link at a later time it can be found under websocket application.
+
+
+### Which deploy.sh and destroy.sh should I run?
+When deploying and destroying the project please run the root directory script files. 
+
+
+### Is there a shortcut to pass environment variables once instead providing them every time I deploy?
+Yes, after your first deploy you can find all of them under your .env file. Be sure to export these variables before your next deploy.
+
+### I am hitting "Error: error reading Kafka Topic: 401 API-key based authentication failed.: API-key based authentication failed." error while rotating my keys. How can I fix this?
+Kindly check if this is a key propagation issue and if the enough time has passed after creation. Check if all permissions, ACLs, etc are correctly set. 
+If everything looks in place then most probably the revoked API values were cached in the credentials section of the terraform resource confluent_kafka_topic. 
+A `terraform apply -refresh=false` under `/infrastructure` directory should correct the issue.
+
 
 ## Next Steps - Improving the Results
