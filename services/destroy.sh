@@ -53,39 +53,6 @@ fi
 
 LOWER_UNIQUE_ID=$(to_lowercase "$UNIQUE_ID")
 
-
-
-# -------------------------------
-# DELETE BIGQUERY DATASET FIRST
-# -------------------------------
-
-echo "[+] Retrieving BigQuery Dataset ID from Terraform"
-
-# Navigate to Terraform directory
-cd "$(dirname "$0")/../infrastructure" || { echo "[-] ERROR: Cannot access infrastructure directory"; exit 1; }
-
-# Ensure Terraform is initialized and retrieve DATASET_ID
-terraform init -input=false -backend=false > /dev/null 2>&1
-DATASET_ID=$(terraform output -raw dataset_id 2>/dev/null || echo "")
-
-# Validate DATASET_ID
-if [ -z "$DATASET_ID" ]; then
-    echo "[-] ERROR: Could not retrieve DATASET_ID from Terraform. Run 'terraform apply'."
-    exit 1
-fi
-
-echo "[+] Using DATASET_ID: $DATASET_ID"
-
-# Return to original directory
-cd - > /dev/null
-
-# Delete BigQuery dataset
-echo "[+] Deleting BigQuery dataset: $GCP_PROJECT_ID:$DATASET_ID"
-bq rm -r -f -d "$GCP_PROJECT_ID:$DATASET_ID" && echo "[+] Dataset deleted" || {
-    echo "[-] ERROR: Failed to delete dataset $GCP_PROJECT_ID:$DATASET_ID"; exit 1;
-}
-
-
 # -------------------------------
 # DESTROY CLOUD RUN SERVICES
 # -------------------------------
