@@ -229,6 +229,8 @@ export SR_API_KEY=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans -
 export SR_API_SECRET=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw clients_schema_registry_api_secret)
 export SR_URL=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw schema_registry_url)
 
+export BIGQUERY_DATABASE=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw dataset_id)
+
 export AUDIO_REQUEST_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw audio_request_topic)
 export AUDIO_RESPONSE_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw audio_response_topic)
 export INPUT_REQUEST_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw input_request_topic)
