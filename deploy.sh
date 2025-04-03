@@ -216,6 +216,8 @@ fi
 
 echo "[+] DATASET_ID retrieved: $DATASET_ID"
 
+echo "export BIGQUERY_DATABASE=\"$DATASET_ID\"" >> .env
+
 source .env
 
 echo "[+] Deploying backend"

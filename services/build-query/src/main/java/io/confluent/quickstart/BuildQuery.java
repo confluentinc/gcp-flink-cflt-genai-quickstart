@@ -59,6 +59,7 @@ public class BuildQuery {
      */
 
     static VertexClient vertexClient;
+    static TemplateProcessor templateProcessor;
 
     public static void main(final String[] args) throws IOException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
@@ -69,7 +70,7 @@ public class BuildQuery {
         final Properties streamsConfiguration = getStreamsConfiguration(bootstrapServers, authKey, authSecret);
         prompt = getPromptText();
         vertexClient = new VertexClient(projectId, location, MODEL_NAME);
-
+        templateProcessor = new TemplateProcessor();
         final StreamsBuilder builder = new StreamsBuilder();
         buildQueryStream(builder);
         final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
