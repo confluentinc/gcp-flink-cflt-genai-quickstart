@@ -89,17 +89,10 @@ prompt_for_yes_no() {
     done
 }
 
-#Reusing the unique_id if it exists
-if [ -f .unique_id ]; then
-  unique_id=$(cat .unique_id)
-else
-  unique_id=$(generate_random_string 8)
-  echo $unique_id > .unique_id
-fi
-
+# Generate unique ID using process ID
+unique_id="qsid$$"
 export CLIENT_ID="pie_labs|flink-cflt-gcp-genai-quickstart|$unique_id"
 echo "[+] Deploying quickstart with unique ID: $unique_id with CLIENT_ID: $CLIENT_ID"
-
 
 # Set platform to linux/arm64 if m1 mac is detected. Otherwise set to linux/amd64
 IMAGE_ARCH=$(uname -m | grep -qE 'arm64|aarch64' && echo 'arm64' || echo 'x86_64')
@@ -204,17 +197,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "[+] Terraform apply complete"
-
-echo "[+] Extracting dataset_id from Terraform outputs"
-
-DATASET_ID=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw dataset_id 2>/dev/null || echo "")
-
-if [ -z "$DATASET_ID" ]; then
-    echo "[-] ERROR: dataset_id not found in Terraform outputs"
-    exit 1
-fi
-
-echo "[+] DATASET_ID retrieved: $DATASET_ID"
 
 source .env
 

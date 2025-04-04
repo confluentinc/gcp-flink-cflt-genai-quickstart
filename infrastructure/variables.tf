@@ -59,12 +59,6 @@ variable "env_display_id_postfix" {
   nullable    = true
 }
 
-variable "dataset_id" {
-  description = "The BigQuery dataset ID"
-  type        = string
-  default     = "doctors_practice_quickstart"
-}
-
 variable "gcloud_project" {
   description = "Google Cloud Project ID"
   type        = string
