@@ -76,25 +76,6 @@ public class InputQueryHandler {
                 log.error("Failed to send text message to Confluent Cloud", throwable);
             }
         });
-
-        //TODO: Below is for testing
-//        AudioResponse audioResponse = new AudioResponse();
-//        String randomText = generateRandomString(10);
-//        audioResponse.setQuery(textQuery);
-//        audioResponse.setDescription("test description" + randomText);
-//        audioResponse.setRenderedResult("test rendered results-" + randomText);
-//        audioResponse.setAudio(returnAudioBytes());
-//        audioResponse.setSessionId(sessionId);
-//
-//        final ProducerRecord<String, AudioResponse> producerTestRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioResponseTopic(),
-//                sessionId,
-//                audioResponse);
-//
-//        kafkaAudioResponseTemplate.send(producerTestRecord).whenComplete((recordMetadata, throwable) -> {
-//            if (throwable != null) {
-//                log.error("Failed to send audio message to Confluent Cloud", throwable);
-//            }
-//        });
     }
 
     public void onNewAudioMessage(AudioQuery audioQuery) {
@@ -108,25 +89,6 @@ public class InputQueryHandler {
                 log.error("Failed to send audio message to Confluent Cloud", throwable);
             }
         });
-
-        //TODO: Below is for testing
-//        AudioResponse audioResponse = new AudioResponse();
-//        String randomText = generateRandomString(10);
-//        audioResponse.setQuery("test query-" + randomText);
-//        audioResponse.setDescription("test description" + randomText);
-//        audioResponse.setRenderedResult("test rendered results-" + randomText);
-//        audioResponse.setAudio(audioQuery.getAudio());
-//        audioResponse.setSessionId(audioQuery.getSessionId());
-//
-//        final ProducerRecord<String, AudioResponse> producerTestRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioResponseTopic(),
-//                audioQuery.getSessionId(),
-//                audioResponse);
-//
-//        kafkaAudioResponseTemplate.send(producerTestRecord).whenComplete((recordMetadata, throwable) -> {
-//            if (throwable != null) {
-//                log.error("Failed to send audio message to Confluent Cloud", throwable);
-//            }
-//        });
     }
 
     /**
@@ -186,87 +148,4 @@ public class InputQueryHandler {
         session.sendMessage(new TextMessage(audioJSON));
         log.info("Sent audio response to session id {}", session.getId());
     }
-
-    //TODO: Below is for testing
-//    public static String generateRandomString(int length) {
-//        // Initialize a StringBuilder to hold the result
-//        StringBuilder sb = new StringBuilder(length);
-//
-//        // Characters will be chosen from this string
-//        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-//
-//        // Create an instance of Random
-//        Random random = new Random();
-//
-//        // Generate random indexes and append the corresponding character to the StringBuilder
-//        for (int i = 0; i < length; i++) {
-//            int randomIndex = random.nextInt(charSet.length());
-//            sb.append(charSet.charAt(randomIndex));
-//        }
-//
-//        return sb.toString();
-//    }
-
-    //TODO: Below is for testing
-//    private static byte[] generateSineWave(int frequency, int durationSeconds, int sampleRate, int bitsPerSample) {
-//        double amplitude = 32760; // Max amplitude for 16-bit
-//        int samples = durationSeconds * sampleRate;
-//        byte[] output = new byte[samples * 2]; // 2 bytes per sample (16-bit)
-//
-//        for (int i = 0; i < samples; i++) {
-//            short value = (short) (amplitude * Math.sin(2 * Math.PI * frequency * i / sampleRate));
-//            // Little endian
-//            output[2 * i] = (byte) (value & 0xFF);
-//            output[2 * i + 1] = (byte) ((value >> 8) & 0xFF);
-//        }
-//
-//        return output;
-//    }
-
-    //TODO: Below is for testing
-//    private static byte[] addWavHeader(byte[] audioBytes) {
-//        final int SAMPLE_RATE = 44100;
-//        final int NUM_CHANNELS = 1;
-//        final int BITS_PER_SAMPLE = 16;
-//
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        ByteBuffer buffer = ByteBuffer.allocate(44);
-//
-//        int totalLength = audioBytes.length + 36;
-//        int byteRate = SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8;
-//
-//        buffer.put("RIFF".getBytes());
-//        buffer.putInt(totalLength);
-//        buffer.put("WAVE".getBytes());
-//        buffer.put("fmt ".getBytes());
-//        buffer.putInt(16);
-//        buffer.putShort((short) 1); // PCM
-//        buffer.putShort((short) NUM_CHANNELS);
-//        buffer.putInt(SAMPLE_RATE);
-//        buffer.putInt(byteRate);
-//        buffer.putShort((short) (NUM_CHANNELS * BITS_PER_SAMPLE / 8));
-//        buffer.putShort((short) BITS_PER_SAMPLE);
-//        buffer.put("data".getBytes());
-//        buffer.putInt(audioBytes.length);
-//
-//        baos.write(buffer.array(), 0, buffer.position());
-//        try {
-//            baos.write(audioBytes);
-//        } catch (IOException e) {
-//            System.out.println("Error writing WAV data: " + e.getMessage());
-//        }
-//
-//        return baos.toByteArray();
-//    }
-
-    //TODO: Below is for testing
-//    private static byte[] returnAudioBytes() {
-//        final int SAMPLE_RATE = 44100;
-//        final int BITS_PER_SAMPLE = 16;
-//        final int DURATION_SECONDS = 2;
-//        final int FREQUENCY = 440;
-//        byte[] rawAudioBytes = generateSineWave(FREQUENCY, DURATION_SECONDS, SAMPLE_RATE, BITS_PER_SAMPLE);
-//        byte[] wavBytes = addWavHeader(rawAudioBytes);
-//        return wavBytes;
-//    }
 }

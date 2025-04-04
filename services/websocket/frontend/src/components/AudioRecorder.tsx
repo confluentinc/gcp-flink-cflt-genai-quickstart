@@ -96,7 +96,7 @@ export const AudioRecorder = () => {
       isAwaitingResponseRef.current = true
 
       // Add user message with transcript (empty for now) and audio URL
-      addUserMessage(result?.transcript || 'Audio message', audioBlob)
+      addUserMessage(result?.transcript || 'Audio message from user', audioBlob)
 
       // Process the recording with the conversation ID
       processAudioRecording(audioBlob, conversationId)

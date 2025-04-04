@@ -46,11 +46,16 @@ public class Summarize {
     static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
 
     static final String MODEL_NAME = "gemini-2.0-flash-001";
-    static final String PROMPT =
-            "Summarize the following results of a SQL query in 3 sentences maximum. Use an " +
-            "informal style, like a conversation. Do not describe the rows or columns. \n\n";
 
+    static final String PROMPT =
+        "You are a clinical assistant providing a concise summary to a general practitioner preparing for a patient visit. " +
+        "Do not mention the data or the query — speak directly as if briefing the GP about the patient. " +
+        "Focus on key clinical information: the reason for the last visit, any diagnoses, medications prescribed, test results, " +
+        "and important follow-up notes. Be clear, relevant, and brief — ideally no more than three sentences. " +
+        "Use a professional tone appropriate for clinical handover. Respond in plain text only — no tags, formatting, or code.";
+    
     static VertexClient vertexClient;
+    
 
     public static void main(final String[] args) throws IOException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
