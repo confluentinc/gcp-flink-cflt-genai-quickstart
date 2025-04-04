@@ -23,7 +23,7 @@ ENV STREAMS_GROUP=$STREAMS_USER
 ####################################################################
 # Replace with the proper values:
 ####################################################################
-ENV FAT_JAR=kstreams-execute-query-8.0.0-0-jar-with-dependencies.jar
+ENV FAT_JAR=kstreams-execute-query-1.0.0-jar-with-dependencies.jar
 ENV APP_CLASS=io.confluent.quickstart.ExecuteQuery
 ####################################################################
 
