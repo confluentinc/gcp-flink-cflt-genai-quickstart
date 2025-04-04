@@ -18,8 +18,11 @@ import com.google.protobuf.ByteString;
 import io.confluent.common.utils.TestUtils;
 import io.confluent.quickstart.model.AudioQuery;
 import io.confluent.quickstart.model.AudioResponse;
+import io.confluent.quickstart.model.InputRequest;
 import io.confluent.quickstart.model.serdes.AudioQuerySerde;
 import io.confluent.quickstart.model.serdes.AudioResponseSerde;
+import io.confluent.quickstart.model.serdes.InputRequestSerde;
+import io.confluent.quickstart.model.serdes.InputRequestSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
@@ -87,12 +90,13 @@ public class AudioToTextConverter {
 
     private static void buildAudioToTextStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
         // Define processing for the audio-to-text conversion
+
         KStream<String, AudioQuery> inputRequests = builder.stream(audioRequestTopic, Consumed.with(Serdes.String(), new AudioQuerySerde(kafkaConfig, false)));
         // Call Google Speech-to-Text API and return transcribed text
         inputRequests
                 .filter((sessionId, text) -> sessionId != null && text != null)
                 .mapValues(AudioToTextConverter::transcribeAudio)
-                .to(inputRequestTopic, Produced.with(Serdes.String(), Serdes.String()));
+                .to(inputRequestTopic, Produced.with(Serdes.String(), new InputRequestSerde(kafkaConfig, false)));
     }
 
     private static void buildTextToAudioStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
@@ -109,7 +113,7 @@ public class AudioToTextConverter {
 
 
     // Method to transcribe audio using Google Speech-to-Text
-    private static String transcribeAudio(AudioQuery audioQuery) {
+    private static InputRequest transcribeAudio(AudioQuery audioQuery) {
         // Initialize the return text
         try (SpeechClient speechClient = SpeechClient.create()) {
 
@@ -133,12 +137,14 @@ public class AudioToTextConverter {
 
             log.info("Done processing audio for session id: {}\n{}", audioQuery.getSessionId(), results);
 
-            return results.get(0).getAlternatives(0).getTranscript();
-
+            InputRequest inputRequest = new InputRequest();
+            inputRequest.setSessionId(audioQuery.getSessionId());
+            inputRequest.setRequest(results.get(0).getAlternatives(0).getTranscript());
+            return inputRequest;
         } catch (Exception e) {
             log.error("Failure to transcribe Audio for session id: {}", audioQuery.getSessionId(), e);
+            throw new RuntimeException(e);
         }
-        return "Failure to transcribe Audio for session id: " + audioQuery.getSessionId();
     }
 
     // Method to synthesize speech using Google Text-to-Speech

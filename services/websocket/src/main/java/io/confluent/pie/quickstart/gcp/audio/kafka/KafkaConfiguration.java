@@ -2,6 +2,8 @@ package io.confluent.pie.quickstart.gcp.audio.kafka;
 
 import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioResponse;
+import io.confluent.pie.quickstart.gcp.audio.model.InputRequest;
+import io.confluent.pie.quickstart.gcp.audio.model.serdes.input.InputRequestDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +38,7 @@ public class KafkaConfiguration {
      * @return Kafka Template
      */
     @Bean
-    public KafkaTemplate<String, String> kafkaTextTemplate(KafkaProperties kafkaProperties) {
+    public KafkaTemplate<String, InputRequest> kafkaTextTemplate(KafkaProperties kafkaProperties) {
         final Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(null);
         return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProperties));
     }
@@ -47,11 +49,6 @@ public class KafkaConfiguration {
      * @param kafkaProperties Kafka properties
      * @return Kafka Template
      */
-    @Bean
-    public KafkaTemplate<String, AudioResponse> kafkaAudioResponseTemplate(KafkaProperties kafkaProperties) {
-        final Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(null);
-        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProperties));
-    }
 
     /**
      * Kafka listener container factory for consuming messages
