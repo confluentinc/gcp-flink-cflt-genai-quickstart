@@ -62,7 +62,7 @@ public class InputQueryHandler {
 
     public void onNewTextMessage(String sessionId, InputRequest inputRequest) {
 
-        inputRequest.setSession_id(sessionId);
+        inputRequest.setSessionId(sessionId);
         final ProducerRecord<String, InputRequest> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
                 sessionId,
                 inputRequest);
