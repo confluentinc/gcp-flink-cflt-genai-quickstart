@@ -119,7 +119,7 @@ public class InputQueryHandler {
 
         try {
             final String dataURL = encodeAudioAsDataURL(audioResponse.getAudio());
-            Audio audio = createAudioData(dataURL, audioResponse.getQuery(), audioResponse.getRenderedResult());
+            Audio audio = createAudioData(dataURL, audioResponse.getSummary());
             sendMessage(session, audio);
         } catch (IOException e) {
             log.error("Error sending message: {}", e.getMessage(), e);
@@ -131,11 +131,10 @@ public class InputQueryHandler {
     }
 
 
-    private Audio createAudioData(String dataURL, String query, String renderedResult) {
+    private Audio createAudioData(String dataURL, String summary) {
         Audio audio = new Audio();
         audio.setData(dataURL);
-        audio.setQuestion(query);
-        audio.setResult(renderedResult);
+        audio.setResult(summary);
         return audio;
     }
 

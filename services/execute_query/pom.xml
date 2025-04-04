@@ -43,6 +43,14 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <io.confluent.kafka-streams-examples.version>8.0.0-0</io.confluent.kafka-streams-examples.version>
+        <jackson-annotations.version>2.18.3</jackson-annotations.version>
+        <jackson-core.version>2.18.3</jackson-core.version>
+        <lombok.version>1.18.36</lombok.version>
+        <kafka-streams-json-schema-serde.version>7.9.0</kafka-streams-json-schema-serde.version>
+        <curator-test.version>2.9.0</curator-test.version>
+        <mockito-core.version>4.11.0</mockito-core.version>
+        <assertj-core.version>3.3.0</assertj-core.version>
+        <google-genai.version>0.1.0</google-genai.version>
     </properties>
 
     <dependencyManagement>
@@ -61,17 +69,17 @@
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-streams-json-schema-serde</artifactId>
-            <version>7.9.0</version>
+            <version>${kafka-streams-json-schema-serde.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.18.3</version>
+            <version>${jackson-annotations.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.18.3</version>
+            <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -87,6 +95,12 @@
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-tools</artifactId>
             <version>${kafka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -113,7 +127,7 @@
         <dependency>
             <groupId>com.google.genai</groupId>
             <artifactId>google-genai</artifactId>
-            <version>0.1.0</version>
+            <version>${google-genai.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
@@ -136,13 +150,13 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.3.0</version>
+            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.11.0</version>
+            <version>${mockito-core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -167,7 +181,7 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
-            <version>2.9.0</version>
+            <version>${curator-test.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -196,8 +210,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
         </plugins>

@@ -1,19 +1,19 @@
-package io.confluent.pie.quickstart.gcp.audio.model;
+package io.confluent.quickstart.model;
 
 import io.confluent.kafka.schemaregistry.annotations.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
 @Schema(value = """
         {
           "properties": {
-            "request": {
+            "session_id": {
+              "connect.index": 0,
+              "type": "string"
+            },
+            "summary": {
               "connect.index": 1,
               "oneOf": [
                 {
@@ -23,10 +23,6 @@ import lombok.Setter;
                   "type": "string"
                 }
               ]
-            },
-            "session_id": {
-              "connect.index": 0,
-              "type": "string"
             }
           },
           "required": [
@@ -36,9 +32,9 @@ import lombok.Setter;
           "type": "object"
         }
         """, refs = {})
-public class InputRequest {
+public class SummarisedResult {
 
     private String sessionId;
-    private String request;
+    private String summary;
 
 }

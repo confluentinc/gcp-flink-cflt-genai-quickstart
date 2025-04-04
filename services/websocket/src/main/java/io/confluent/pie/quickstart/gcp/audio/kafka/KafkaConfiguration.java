@@ -4,6 +4,8 @@ import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioResponse;
 import io.confluent.pie.quickstart.gcp.audio.model.InputRequest;
 import io.confluent.pie.quickstart.gcp.audio.model.serdes.input.InputRequestDeserializer;
+import io.confluent.pie.quickstart.gcp.audio.model.serdes.input.InputRequestSerializer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +42,7 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, InputRequest> kafkaTextTemplate(KafkaProperties kafkaProperties) {
         final Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(null);
+        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, InputRequestSerializer.class);
         return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProperties));
     }
 

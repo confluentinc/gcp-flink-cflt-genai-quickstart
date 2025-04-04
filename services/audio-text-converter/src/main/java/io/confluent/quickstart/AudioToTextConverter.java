@@ -19,10 +19,11 @@ import io.confluent.common.utils.TestUtils;
 import io.confluent.quickstart.model.AudioQuery;
 import io.confluent.quickstart.model.AudioResponse;
 import io.confluent.quickstart.model.InputRequest;
+import io.confluent.quickstart.model.SummarisedResult;
 import io.confluent.quickstart.model.serdes.AudioQuerySerde;
 import io.confluent.quickstart.model.serdes.AudioResponseSerde;
 import io.confluent.quickstart.model.serdes.InputRequestSerde;
-import io.confluent.quickstart.model.serdes.InputRequestSerializer;
+import io.confluent.quickstart.model.serdes.SummarisedResultSerde;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
@@ -102,12 +103,12 @@ public class AudioToTextConverter {
     private static void buildTextToAudioStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
 
         // Define processing for the text-to-audio conversion
-        KStream<String, String> summarizedResults = builder.stream(summarisedResultsTopic, Consumed.with(Serdes.String(), Serdes.String()));
+        KStream<String, SummarisedResult> summarizedResults = builder.stream(summarisedResultsTopic, Consumed.with(Serdes.String(), new SummarisedResultSerde(kafkaConfig, false)));
 
         // Call Google Text-to-Speech API and return audio bytes
         summarizedResults
-                .filter((sessionId, text) -> sessionId != null && text != null)
-                .map((sessionId, text) -> new KeyValue<>(sessionId, synthesizeSpeech(sessionId, text)))
+                .filter((sessionId, summary) -> sessionId != null && summary != null)
+                .map((sessionId, summary) -> new KeyValue<>(sessionId, synthesizeSpeech(sessionId, summary.getSummary())))
                 .to(audioResponseTopic, Produced.with(Serdes.String(), new AudioResponseSerde(kafkaConfig, false)));
     }
 
@@ -203,11 +204,7 @@ public class AudioToTextConverter {
         final AudioResponse audioResponse = new AudioResponse();
         audioResponse.setSessionId(sessionId.trim());
         audioResponse.setAudio(audio);
-        audioResponse.setDescription("");
-        audioResponse.setExecutedQuery("");
-        audioResponse.setResponse(summaryResults.trim());
-        audioResponse.setQuery("");
-        audioResponse.setRenderedResult(summaryResults.trim());
+        audioResponse.setSummary(summaryResults.trim());
         return audioResponse;
     }
 
