@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.pie.quickstart.gcp.audio.kafka.InputQueryHandler;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
+import io.confluent.pie.quickstart.gcp.audio.model.InputRequest;
 import io.confluent.pie.quickstart.gcp.audio.model.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -62,11 +63,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
             if (TEXT.equals(parsedMessage.getType())) {
 
-                String content = parsedMessage.getContent();
+                InputRequest inputRequest = new InputRequest(session.getId(), parsedMessage.getContent());
 
-                log.info("Received text message from {} of length {}", session.getId(), content.length());
+                log.info("Received text message from {} of length {}", session.getId(), inputRequest.getRequest().length());
 
-                inputQueryHandler.onNewTextMessage(session.getId(), content);
+                inputQueryHandler.onNewTextMessage(session.getId(), inputRequest);
 
             } else if (AUDIO.equals(parsedMessage.getType())) {
 

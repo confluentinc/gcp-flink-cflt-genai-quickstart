@@ -100,7 +100,6 @@ fi
 export CLIENT_ID="pie_labs|flink-cflt-gcp-genai-quickstart|$unique_id"
 echo "[+] Deploying quickstart with unique ID: $unique_id with CLIENT_ID: $CLIENT_ID"
 
-
 # Set platform to linux/arm64 if m1 mac is detected. Otherwise set to linux/amd64
 IMAGE_ARCH=$(uname -m | grep -qE 'arm64|aarch64' && echo 'arm64' || echo 'x86_64')
 
@@ -205,19 +204,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "[+] Terraform apply complete"
 
-echo "[+] Extracting dataset_id from Terraform outputs"
-
-DATASET_ID=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw dataset_id 2>/dev/null || echo "")
-
-if [ -z "$DATASET_ID" ]; then
-    echo "[-] ERROR: dataset_id not found in Terraform outputs"
-    exit 1
-fi
-
-echo "[+] DATASET_ID retrieved: $DATASET_ID"
-
-echo "export BIGQUERY_DATABASE=\"$DATASET_ID\"" >> .env
-
 source .env
 
 echo "[+] Deploying backend"
@@ -229,14 +215,8 @@ export SR_API_KEY=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans -
 export SR_API_SECRET=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw clients_schema_registry_api_secret)
 export SR_URL=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw schema_registry_url)
 
-export BIGQUERY_DATABASE=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw dataset_id)
-
 export AUDIO_REQUEST_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw audio_request_topic)
 export AUDIO_RESPONSE_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw audio_response_topic)
-export INPUT_REQUEST_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw input_request_topic)
-export GENERATED_SQL_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw generated_sql_topic)
-export SQL_RESULTS_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw sql_results_topic)
-export SUMMARISED_RESULTS_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw summarised_results_topic)
 ./services/deploy.sh
 
 echo "[+] Done"

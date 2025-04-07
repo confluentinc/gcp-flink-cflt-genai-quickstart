@@ -30,14 +30,12 @@ public class InputQueryHandler {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final KafkaTemplate<String, AudioQuery> kafkaAudioTemplate;
-    private final KafkaTemplate<String, String> kafkaTextTemplate;
-    private final KafkaTemplate<String, AudioResponse> kafkaAudioResponseTemplate;
+    private final KafkaTemplate<InputRequestKey, AudioQuery> kafkaAudioTemplate;
+    private final KafkaTemplate<InputRequestKey, InputRequest> kafkaTextTemplate;
     private final KafkaTopicConfig kafkaTopicConfig;
 
-    public InputQueryHandler(@Autowired KafkaTemplate<String, AudioQuery> kafkaAudioTemplate,
-                             @Autowired KafkaTemplate<String, String> kafkaTextTemplate,
-                             @Autowired KafkaTemplate<String, AudioResponse> kafkaAudioResponseTemplate,
+    public InputQueryHandler(@Autowired KafkaTemplate<InputRequestKey, AudioQuery> kafkaAudioTemplate,
+                             @Autowired KafkaTemplate<InputRequestKey, InputRequest> kafkaTextTemplate,
                              @Autowired KafkaTopicConfig kafkaTopicConfig) {
         this.kafkaAudioTemplate = kafkaAudioTemplate;
         this.kafkaTextTemplate = kafkaTextTemplate;
@@ -65,11 +63,14 @@ public class InputQueryHandler {
         log.info("Session closed: {}", session.getId());
     }
 
-    public void onNewTextMessage(String sessionId, String textQuery) {
+    public void onNewTextMessage(String sessionId, InputRequest inputRequest) {
+        inputRequest.setSessionId(sessionId);
+        InputRequestKey inputRequestKey = new InputRequestKey();
+        inputRequestKey.setSessionId(sessionId);
 
-        final ProducerRecord<String, String> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
-                sessionId,
-                textQuery);
+        final ProducerRecord<InputRequestKey, InputRequest> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
+                inputRequestKey,
+                inputRequest);
 
         kafkaTextTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
             if (throwable != null) {
@@ -80,8 +81,11 @@ public class InputQueryHandler {
 
     public void onNewAudioMessage(AudioQuery audioQuery) {
 
-        final ProducerRecord<String, AudioQuery> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioRequestTopic(),
-                audioQuery.getSessionId(),
+        InputRequestKey inputRequestKey = new InputRequestKey();
+        inputRequestKey.setSessionId(audioQuery.getSessionId());
+
+        final ProducerRecord<InputRequestKey, AudioQuery> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioRequestTopic(),
+                inputRequestKey,
                 audioQuery);
 
         kafkaAudioTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
@@ -123,7 +127,7 @@ public class InputQueryHandler {
 
         try {
             final String dataURL = encodeAudioAsDataURL(audioResponse.getAudio());
-            Audio audio = createAudioData(dataURL, audioResponse.getQuery(), audioResponse.getRenderedResult());
+            Audio audio = createAudioData(dataURL, audioResponse.getSummary());
             sendMessage(session, audio);
         } catch (IOException e) {
             log.error("Error sending message: {}", e.getMessage(), e);
@@ -135,11 +139,10 @@ public class InputQueryHandler {
     }
 
 
-    private Audio createAudioData(String dataURL, String query, String renderedResult) {
+    private Audio createAudioData(String dataURL, String summary) {
         Audio audio = new Audio();
         audio.setData(dataURL);
-        audio.setQuestion(query);
-        audio.setResult(renderedResult);
+        audio.setResult(summary);
         return audio;
     }
 
@@ -148,4 +151,5 @@ public class InputQueryHandler {
         session.sendMessage(new TextMessage(audioJSON));
         log.info("Sent audio response to session id {}", session.getId());
     }
+
 }
