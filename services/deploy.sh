@@ -112,10 +112,10 @@ deploy_gcloud() {
 }
 
 # Parallel build process for Maven and Node projects
-build_maven_project "$SCRIPT_FOLDER/audio-text-converter" & job_ids+=($!) services+=("audio-text-converter")
-build_maven_project "$SCRIPT_FOLDER/build-query" & job_ids+=($!) services+=("build-query")
-build_maven_project "$SCRIPT_FOLDER/execute_query" & job_ids+=($!) services+=("execute_query")
-build_maven_project "$SCRIPT_FOLDER/summarize" & job_ids+=($!) services+=("summarize")
+#build_maven_project "$SCRIPT_FOLDER/audio-text-converter" & job_ids+=($!) services+=("audio-text-converter")
+#build_maven_project "$SCRIPT_FOLDER/build-query" & job_ids+=($!) services+=("build-query")
+#build_maven_project "$SCRIPT_FOLDER/execute_query" & job_ids+=($!) services+=("execute_query")
+#build_maven_project "$SCRIPT_FOLDER/summarize" & job_ids+=($!) services+=("summarize")
 build_node_project "$SCRIPT_FOLDER/websocket" & job_ids+=($!) services+=("websocket")
 
 for i in "${!job_ids[@]}"; do
@@ -145,11 +145,11 @@ execute_query_env_vars="$common_env_vars,TOPIC_IN=generated_sql,TOPIC_OUT=sql_re
 summarise_env_vars="$common_env_vars,TOPIC_IN=sql_results,TOPIC_OUT=summarised_results"
 
 # Parallel deployment process
-deploy_gcloud "$AUDIO_TEXT_CONVERTER_SVC_NAME" "$SCRIPT_FOLDER/audio-text-converter" "$audio_text_converter_env_vars" & job_ids+=($!)
-                                                                                                                        services+=("audio-text-converter")
-deploy_gcloud "$BUILD_QUERY_SVC_NAME" "$SCRIPT_FOLDER/build-query" "$build_query_env_vars" & job_ids+=($!) services+=("build-query")
-deploy_gcloud "$EXECUTE_QUERY_SVC_NAME" "$SCRIPT_FOLDER/execute_query" "$execute_query_env_vars" & job_ids+=($!) services+=("execute_query")
-deploy_gcloud "$SUMMARISE_SVC_NAME" "$SCRIPT_FOLDER/summarize" "$summarise_env_vars" & job_ids+=($!) services+=("summarize")
+#deploy_gcloud "$AUDIO_TEXT_CONVERTER_SVC_NAME" "$SCRIPT_FOLDER/audio-text-converter" "$audio_text_converter_env_vars" & job_ids+=($!)
+#                                                                                                                        services+=("audio-text-converter")
+#deploy_gcloud "$BUILD_QUERY_SVC_NAME" "$SCRIPT_FOLDER/build-query" "$build_query_env_vars" & job_ids+=($!) services+=("build-query")
+#deploy_gcloud "$EXECUTE_QUERY_SVC_NAME" "$SCRIPT_FOLDER/execute_query" "$execute_query_env_vars" & job_ids+=($!) services+=("execute_query")
+#deploy_gcloud "$SUMMARISE_SVC_NAME" "$SCRIPT_FOLDER/summarize" "$summarise_env_vars" & job_ids+=($!) services+=("summarize")
 deploy_gcloud "$WEBSOCKET_SVC_NAME" "$SCRIPT_FOLDER/websocket" "$common_env_vars" & job_ids+=($!) services+=("websocket")
 
 for i in "${!job_ids[@]}"; do

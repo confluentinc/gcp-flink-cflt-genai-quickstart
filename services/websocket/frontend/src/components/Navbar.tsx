@@ -13,6 +13,11 @@ export const Navbar = () => {
     navigate('/login')
   }
 
+  const handleHelp = () => {
+     // Programmatically navigate to the help page
+     navigate('/help')
+  }
+
   return (
     <nav className="fixed top-0 w-full bg-[#1579a7] z-50 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between bg-[#1579a7] text-white">
@@ -30,15 +35,13 @@ export const Navbar = () => {
         <div className="flex items-center gap-4">
           {location.pathname !== '/login' && (
            <>
-             <a href="https://github.com/confluentinc/gcp-flink-cflt-genai-quickstart/blob/main/README.md"
-             target="_blank" rel="noopener noreferrer">
                  <Button
                         size="sm"
                         className="bg-[#59a9ce] hover:bg-[#59a9ce]/90 text-[#fff] transition-colors"
+                        onClick={handleHelp}
                      >
                        💡 Help
                  </Button>
-             </a>
                  <Button
                     size="sm"
                     className="bg-[#59a9ce] hover:bg-[#59a9ce]/90 text-[#fff] transition-colors"

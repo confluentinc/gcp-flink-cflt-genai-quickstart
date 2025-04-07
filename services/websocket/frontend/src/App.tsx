@@ -8,6 +8,7 @@ import Index from './pages/Index'
 import Login from './pages/Login'
 import Assistant from './pages/Assistant'
 import NotFound from './pages/NotFound'
+import Help from './pages/Help'
 
 const queryClient = new QueryClient()
 
@@ -37,6 +38,10 @@ const App = () => (
                 <Assistant />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="/help"
+            element={<Help />}
           />
           <Route
             path="*"
