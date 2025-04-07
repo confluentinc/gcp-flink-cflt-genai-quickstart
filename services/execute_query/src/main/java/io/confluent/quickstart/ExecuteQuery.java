@@ -54,24 +54,11 @@ public class ExecuteQuery {
 
     static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
 
-    static String schemaRegistryUrl = System.getenv("SR_URL");
-    static String schemaRegistryKey = System.getenv("SR_KEY");
-    static String schemaRegistrySecret = System.getenv("SR_SECRET");
-
+    static final String schemaRegistryUrl = System.getenv("SR_URL");
+    static final String schemaRegistryKey = System.getenv("SR_API_KEY");
+    static final String schemaRegistrySecret = System.getenv("SR_API_SECRET");
 
     static BigQueryClient bigQueryClient;
-
-//    // POJO classes
-//    public static class SqlRequest {
-//        public String sessionId;
-//        public String sqlRequest;
-//    }
-//
-//    public static class RawResults {
-//        public String sessionId;
-//        public String rawResults;
-//    }
-
 
     public static void main(final String[] args) throws IOException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
@@ -147,9 +134,7 @@ public class ExecuteQuery {
             .map((sessionId, req) ->
             {
                 try {
-                    SqlResultKey sqlResultKey = new SqlResultKey();
-                    sqlResultKey.setSessionId(sessionId.getSessionId());
-                    return new KeyValue<>(sqlResultKey, getQueryResults(req));
+                    return new KeyValue<>(new SqlResultKey(sessionId.getSessionId()), getQueryResults(req));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

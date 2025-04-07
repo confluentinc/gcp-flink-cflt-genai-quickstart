@@ -20,13 +20,13 @@ import lombok.Setter;
                   }
                 ]
               },
-              "session_id": {
+              "sessionId": {
                 "connect.index": 0,
                 "type": "string"
               }
             },
             "required": [
-              "session_id"
+              "sessionId"
             ],
             "title": "Record",
             "type": "object"

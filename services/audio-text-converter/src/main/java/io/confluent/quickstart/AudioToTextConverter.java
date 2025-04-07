@@ -17,11 +17,13 @@ import com.google.cloud.texttospeech.v1.VoiceSelectionParams;
 import com.google.protobuf.ByteString;
 import io.confluent.common.utils.TestUtils;
 import io.confluent.quickstart.model.AudioQuery;
+import io.confluent.quickstart.model.AudioQueryKey;
 import io.confluent.quickstart.model.AudioResponse;
 import io.confluent.quickstart.model.InputRequest;
 import io.confluent.quickstart.model.InputRequestKey;
 import io.confluent.quickstart.model.SummaryResult;
 import io.confluent.quickstart.model.SummaryResultKey;
+import io.confluent.quickstart.model.serdes.audioQueryKey.AudioQueryKeySerde;
 import io.confluent.quickstart.model.serdes.inputRequestKey.InputRequestKeySerde;
 import io.confluent.quickstart.model.serdes.audioQuery.AudioQuerySerde;
 import io.confluent.quickstart.model.serdes.audioResponse.AudioResponseSerde;
@@ -96,11 +98,11 @@ public class AudioToTextConverter {
     private static void buildAudioToTextStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
         // Define processing for the audio-to-text conversion
 
-        KStream<InputRequestKey, AudioQuery> inputRequests = builder.stream(audioRequestTopic, Consumed.with(new InputRequestKeySerde(kafkaConfig, true), new AudioQuerySerde(kafkaConfig, false)));
+        KStream<AudioQueryKey, AudioQuery> inputRequests = builder.stream(audioRequestTopic, Consumed.with(new AudioQueryKeySerde(kafkaConfig, true), new AudioQuerySerde(kafkaConfig, false)));
         // Call Google Speech-to-Text API and return transcribed text
         inputRequests
                 .filter((sessionId, text) -> sessionId != null && text != null)
-                .mapValues(AudioToTextConverter::transcribeAudio)
+                .map((sessionId, text) -> new KeyValue<>(new InputRequestKey(sessionId.getSessionId()), transcribeAudio(text)))
                 .to(inputRequestTopic, Produced.with(new InputRequestKeySerde(kafkaConfig, true), new InputRequestSerde(kafkaConfig, false)));
     }
 

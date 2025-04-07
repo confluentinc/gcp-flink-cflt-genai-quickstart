@@ -9,11 +9,11 @@ import lombok.Setter;
 @Schema(value = """
         {
           "properties": {
-            "session_id": {
+            "sessionId": {
               "connect.index": 0,
               "type": "string"
             },
-            "sql_request": {
+            "sqlRequest": {
               "connect.index": 1,
               "oneOf": [
                 {
@@ -26,7 +26,7 @@ import lombok.Setter;
             }
           },
           "required": [
-            "session_id"
+            "sessionId"
           ],
           "title": "Record",
           "type": "object"

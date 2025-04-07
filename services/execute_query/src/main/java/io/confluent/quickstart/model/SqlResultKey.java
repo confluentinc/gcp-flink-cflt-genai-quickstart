@@ -1,21 +1,23 @@
 package io.confluent.quickstart.model;
 
 import io.confluent.kafka.schemaregistry.annotations.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @Schema(value = """
         {
           "properties": {
-            "session_id": {
+            "sessionId": {
               "connect.index": 0,
               "type": "string"
             }
           },
           "required": [
-            "session_id"
+            "sessionId"
           ],
           "title": "Record",
           "type": "object"

@@ -65,9 +65,7 @@ fi
 LOWER_UNIQUE_ID=$(echo "$UNIQUE_ID" | tr '[:upper:]' '[:lower:]')
 
 AUDIO_TEXT_CONVERTER_SVC_NAME="quickstart-healthcare-ai-audio-text-converter-$LOWER_UNIQUE_ID"
-#BUILD_QUERY_SVC_NAME="quickstart-healthcare-ai-build-query-$LOWER_UNIQUE_ID"
 EXECUTE_QUERY_SVC_NAME="quickstart-healthcare-ai-execute-query-$LOWER_UNIQUE_ID"
-#SUMMARISE_SVC_NAME="quickstart-healthcare-ai-summarise-$LOWER_UNIQUE_ID"
 WEBSOCKET_SVC_NAME="quickstart-healthcare-ai-websocket-$LOWER_UNIQUE_ID"
 
 
@@ -114,9 +112,7 @@ deploy_gcloud() {
 
 # Parallel build process for Maven and Node projects
 build_maven_project "$SCRIPT_FOLDER/audio-text-converter" & job_ids+=($!) services+=("audio-text-converter")
-#build_maven_project "$SCRIPT_FOLDER/build-query" & job_ids+=($!) services+=("build-query")
 build_maven_project "$SCRIPT_FOLDER/execute_query" & job_ids+=($!) services+=("execute_query")
-#build_maven_project "$SCRIPT_FOLDER/summarize" & job_ids+=($!) services+=("summarize")
 build_node_project "$SCRIPT_FOLDER/websocket" & job_ids+=($!) services+=("websocket")
 
 for i in "${!job_ids[@]}"; do
@@ -132,7 +128,7 @@ if [ "${#failed_builds[@]}" -ne 0 ]; then
         echo " - $service"
     done
     echo "[-] Starting cleanup of quickstart setup"
-#    "$SCRIPT_FOLDER/../destroy.sh"
+    "$SCRIPT_FOLDER/../destroy.sh"
     exit 1
 else
     echo "[+] All builds completed successfully"
@@ -141,16 +137,12 @@ fi
 # Set environment variable string for gcloud deployments
 common_env_vars="BOOTSTRAP_SERVER=$BOOTSTRAP_SERVER,KAFKA_API_KEY=$KAFKA_API_KEY,KAFKA_API_SECRET=$KAFKA_API_SECRET,SR_API_KEY=$SR_API_KEY,SR_API_SECRET=$SR_API_SECRET,SR_URL=$SR_URL,CLIENT_ID=$CLIENT_ID,GCP_PROJECT_ID=$GCP_PROJECT_ID"
 audio_text_converter_env_vars="$common_env_vars,TOPIC_IN=audio_request,TOPIC_OUT=input_request"
-#build_query_env_vars="$common_env_vars,TOPIC_IN=input_request,TOPIC_OUT=generated_sql"
 execute_query_env_vars="$common_env_vars,TOPIC_IN=generated_sql,TOPIC_OUT=sql_results"
-#summarise_env_vars="$common_env_vars,TOPIC_IN=sql_results,TOPIC_OUT=summarised_results"
 
 # Parallel deployment process
 deploy_gcloud "$AUDIO_TEXT_CONVERTER_SVC_NAME" "$SCRIPT_FOLDER/audio-text-converter" "$audio_text_converter_env_vars" & job_ids+=($!)
                                                                                                                         services+=("audio-text-converter")
-#deploy_gcloud "$BUILD_QUERY_SVC_NAME" "$SCRIPT_FOLDER/build-query" "$build_query_env_vars" & job_ids+=($!) services+=("build-query")
 deploy_gcloud "$EXECUTE_QUERY_SVC_NAME" "$SCRIPT_FOLDER/execute_query" "$execute_query_env_vars" & job_ids+=($!) services+=("execute_query")
-#deploy_gcloud "$SUMMARISE_SVC_NAME" "$SCRIPT_FOLDER/summarize" "$summarise_env_vars" & job_ids+=($!) services+=("summarize")
 deploy_gcloud "$WEBSOCKET_SVC_NAME" "$SCRIPT_FOLDER/websocket" "$common_env_vars" & job_ids+=($!) services+=("websocket")
 
 for i in "${!job_ids[@]}"; do
@@ -167,7 +159,7 @@ if [ "${#failed_deploys[@]}" -ne 0 ]; then
         echo " - $service"
     done
     echo "[-] Starting cleanup of quickstart setup"
-#    "$SCRIPT_FOLDER/../destroy.sh"
+    "$SCRIPT_FOLDER/../destroy.sh"
     exit 1
 else
     echo "[+] All deployments completed successfully"
