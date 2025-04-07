@@ -19,9 +19,13 @@ import io.confluent.common.utils.TestUtils;
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.json.KafkaJsonSchemaSerde;
 import io.confluent.quickstart.model.GeneratedSql;
+import io.confluent.quickstart.model.GeneratedSqlKey;
 import io.confluent.quickstart.model.SqlResult;
-import io.confluent.quickstart.model.serdes.GeneratedSqlSerde;
-import io.confluent.quickstart.model.serdes.SqlResultSerde;
+import io.confluent.quickstart.model.SqlResultKey;
+import io.confluent.quickstart.model.serdes.generatedSql.GeneratedSqlSerde;
+import io.confluent.quickstart.model.serdes.generatedSqlKey.GeneratedSqlKeySerde;
+import io.confluent.quickstart.model.serdes.sqlResult.SqlResultSerde;
+import io.confluent.quickstart.model.serdes.sqlResultKey.SqlResultKeySerde;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -137,18 +141,20 @@ public class ExecuteQuery {
     static void executeBQStream(final StreamsBuilder builder,
                                 Map<String, String> kafkaConfig) {
 
-        builder.stream(inputTopic, Consumed.with(Serdes.String(), new GeneratedSqlSerde(kafkaConfig, false)))
+        builder.stream(inputTopic, Consumed.with(new GeneratedSqlKeySerde(kafkaConfig, true), new GeneratedSqlSerde(kafkaConfig, false)))
             // sanitize the output by removing null record values
             .filter((sessionId, req) -> sessionId != null && req != null)
             .map((sessionId, req) ->
             {
                 try {
-                    return new KeyValue<>(sessionId.toString(), getQueryResults(req));
+                    SqlResultKey sqlResultKey = new SqlResultKey();
+                    sqlResultKey.setSessionId(sessionId.getSessionId());
+                    return new KeyValue<>(sqlResultKey, getQueryResults(req));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             })
-            .to(outputTopic, Produced.with(Serdes.String(), new SqlResultSerde(kafkaConfig, false)));
+            .to(outputTopic, Produced.with(new SqlResultKeySerde(kafkaConfig, true), new SqlResultSerde(kafkaConfig, false)));
     }
 
 }

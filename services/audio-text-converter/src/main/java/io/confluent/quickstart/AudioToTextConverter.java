@@ -19,11 +19,15 @@ import io.confluent.common.utils.TestUtils;
 import io.confluent.quickstart.model.AudioQuery;
 import io.confluent.quickstart.model.AudioResponse;
 import io.confluent.quickstart.model.InputRequest;
-import io.confluent.quickstart.model.SummarisedResult;
-import io.confluent.quickstart.model.serdes.AudioQuerySerde;
-import io.confluent.quickstart.model.serdes.AudioResponseSerde;
-import io.confluent.quickstart.model.serdes.InputRequestSerde;
-import io.confluent.quickstart.model.serdes.SummarisedResultSerde;
+import io.confluent.quickstart.model.InputRequestKey;
+import io.confluent.quickstart.model.SummaryResult;
+import io.confluent.quickstart.model.SummaryResultKey;
+import io.confluent.quickstart.model.serdes.inputRequestKey.InputRequestKeySerde;
+import io.confluent.quickstart.model.serdes.audioQuery.AudioQuerySerde;
+import io.confluent.quickstart.model.serdes.audioResponse.AudioResponseSerde;
+import io.confluent.quickstart.model.serdes.inputRequest.InputRequestSerde;
+import io.confluent.quickstart.model.serdes.summaryResult.SummaryResultSerde;
+import io.confluent.quickstart.model.serdes.summaryResultKey.SummaryResultKeySerde;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Serdes;
@@ -92,23 +96,23 @@ public class AudioToTextConverter {
     private static void buildAudioToTextStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
         // Define processing for the audio-to-text conversion
 
-        KStream<String, AudioQuery> inputRequests = builder.stream(audioRequestTopic, Consumed.with(Serdes.String(), new AudioQuerySerde(kafkaConfig, false)));
+        KStream<InputRequestKey, AudioQuery> inputRequests = builder.stream(audioRequestTopic, Consumed.with(new InputRequestKeySerde(kafkaConfig, true), new AudioQuerySerde(kafkaConfig, false)));
         // Call Google Speech-to-Text API and return transcribed text
         inputRequests
                 .filter((sessionId, text) -> sessionId != null && text != null)
                 .mapValues(AudioToTextConverter::transcribeAudio)
-                .to(inputRequestTopic, Produced.with(Serdes.String(), new InputRequestSerde(kafkaConfig, false)));
+                .to(inputRequestTopic, Produced.with(new InputRequestKeySerde(kafkaConfig, true), new InputRequestSerde(kafkaConfig, false)));
     }
 
     private static void buildTextToAudioStream(StreamsBuilder builder, Map<String, String> kafkaConfig) {
 
         // Define processing for the text-to-audio conversion
-        KStream<String, SummarisedResult> summarizedResults = builder.stream(summarisedResultsTopic, Consumed.with(Serdes.String(), new SummarisedResultSerde(kafkaConfig, false)));
+        KStream<SummaryResultKey, SummaryResult> summarizedResults = builder.stream(summarisedResultsTopic, Consumed.with(new SummaryResultKeySerde(kafkaConfig, true), new SummaryResultSerde(kafkaConfig, false)));
 
         // Call Google Text-to-Speech API and return audio bytes
         summarizedResults
                 .filter((sessionId, summary) -> sessionId != null && summary != null)
-                .map((sessionId, summary) -> new KeyValue<>(sessionId, synthesizeSpeech(sessionId, summary.getSummary())))
+                .map((sessionId, summary) -> new KeyValue<>(sessionId.getSessionId(), synthesizeSpeech(sessionId.getSessionId(), summary.getSummary())))
                 .to(audioResponseTopic, Produced.with(Serdes.String(), new AudioResponseSerde(kafkaConfig, false)));
     }
 

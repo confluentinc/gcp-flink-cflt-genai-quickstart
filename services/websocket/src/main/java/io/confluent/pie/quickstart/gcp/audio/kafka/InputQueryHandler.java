@@ -5,6 +5,7 @@ import io.confluent.pie.quickstart.gcp.audio.model.Audio;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioResponse;
 import io.confluent.pie.quickstart.gcp.audio.model.InputRequest;
+import io.confluent.pie.quickstart.gcp.audio.model.InputRequestKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +29,12 @@ public class InputQueryHandler {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final KafkaTemplate<String, AudioQuery> kafkaAudioTemplate;
-    private final KafkaTemplate<String, InputRequest> kafkaTextTemplate;
+    private final KafkaTemplate<InputRequestKey, AudioQuery> kafkaAudioTemplate;
+    private final KafkaTemplate<InputRequestKey, InputRequest> kafkaTextTemplate;
     private final KafkaTopicConfig kafkaTopicConfig;
 
-    public InputQueryHandler(@Autowired KafkaTemplate<String, AudioQuery> kafkaAudioTemplate,
-                             @Autowired KafkaTemplate<String, InputRequest> kafkaTextTemplate,
+    public InputQueryHandler(@Autowired KafkaTemplate<InputRequestKey, AudioQuery> kafkaAudioTemplate,
+                             @Autowired KafkaTemplate<InputRequestKey, InputRequest> kafkaTextTemplate,
                              @Autowired KafkaTopicConfig kafkaTopicConfig) {
         this.kafkaAudioTemplate = kafkaAudioTemplate;
         this.kafkaTextTemplate = kafkaTextTemplate;
@@ -61,10 +62,12 @@ public class InputQueryHandler {
     }
 
     public void onNewTextMessage(String sessionId, InputRequest inputRequest) {
-
         inputRequest.setSessionId(sessionId);
-        final ProducerRecord<String, InputRequest> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
-                sessionId,
+        InputRequestKey inputRequestKey = new InputRequestKey();
+        inputRequestKey.setSessionId(sessionId);
+
+        final ProducerRecord<InputRequestKey, InputRequest> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
+                inputRequestKey,
                 inputRequest);
 
         kafkaTextTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
@@ -76,8 +79,11 @@ public class InputQueryHandler {
 
     public void onNewAudioMessage(AudioQuery audioQuery) {
 
-        final ProducerRecord<String, AudioQuery> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioRequestTopic(),
-                audioQuery.getSessionId(),
+        InputRequestKey inputRequestKey = new InputRequestKey();
+        inputRequestKey.setSessionId(audioQuery.getSessionId());
+
+        final ProducerRecord<InputRequestKey, AudioQuery> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioRequestTopic(),
+                inputRequestKey,
                 audioQuery);
 
         kafkaAudioTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {

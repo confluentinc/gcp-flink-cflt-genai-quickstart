@@ -144,6 +144,8 @@ resource "confluent_flink_statement" "create-tables" {
     secret = confluent_api_key.app-manager-flink-api-key.secret
   }
   statement = file(abspath(each.value))
+  stopped = false
+
   lifecycle {
     ignore_changes = [rest_endpoint, organization[0].id]
   }

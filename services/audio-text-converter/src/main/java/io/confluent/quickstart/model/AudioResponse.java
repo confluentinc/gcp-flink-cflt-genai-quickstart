@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class AudioResponse extends SummarisedResult {
+public class AudioResponse extends SummaryResult {
 
     private byte[] audio;
 

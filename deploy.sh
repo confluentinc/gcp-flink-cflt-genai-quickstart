@@ -211,10 +211,6 @@ export SR_URL=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm 
 
 export AUDIO_REQUEST_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw audio_request_topic)
 export AUDIO_RESPONSE_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw audio_response_topic)
-export INPUT_REQUEST_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw input_request_topic)
-export GENERATED_SQL_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw generated_sql_topic)
-export SQL_RESULTS_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw sql_results_topic)
-export SUMMARISED_RESULTS_TOPIC=$(IMAGE_ARCH=$IMAGE_ARCH docker compose run --remove-orphans --rm terraform output -raw summarised_results_topic)
 ./services/deploy.sh
 
 echo "[+] Done"

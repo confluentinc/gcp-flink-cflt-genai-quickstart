@@ -8,6 +8,7 @@ cleanup() {
     kill $(jobs -p) 2>/dev/null || true
     docker stop "$(docker ps -aq --filter "name=quickstart-deploy-")"
     docker stop "$(docker ps -aq --filter "name=quickstart-build-")"
+    "$SCRIPT_FOLDER/../destroy.sh"
     exit 1
 }
 
@@ -131,7 +132,7 @@ if [ "${#failed_builds[@]}" -ne 0 ]; then
         echo " - $service"
     done
     echo "[-] Starting cleanup of quickstart setup"
-    "$SCRIPT_FOLDER/../destroy.sh"
+#    "$SCRIPT_FOLDER/../destroy.sh"
     exit 1
 else
     echo "[+] All builds completed successfully"
@@ -166,7 +167,7 @@ if [ "${#failed_deploys[@]}" -ne 0 ]; then
         echo " - $service"
     done
     echo "[-] Starting cleanup of quickstart setup"
-    "$SCRIPT_FOLDER/../destroy.sh"
+#    "$SCRIPT_FOLDER/../destroy.sh"
     exit 1
 else
     echo "[+] All deployments completed successfully"
