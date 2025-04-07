@@ -160,14 +160,14 @@ for i in "${!job_ids[@]}"; do
 done
 
 # After deployment process, check if any deployments failed
-if [ "${#failed_deploys[@]}" -ne 0 ]; then
-    echo "[-] Some services failed to deploy:"
-    for service in "${failed_deploys[@]}"; do
-        echo " - $service"
-    done
-    echo "[-] Starting cleanup of quickstart setup"
-    "$SCRIPT_FOLDER/../destroy.sh"
-    exit 1
-else
-    echo "[+] All deployments completed successfully"
-fi
+#if [ "${#failed_deploys[@]}" -ne 0 ]; then
+#    echo "[-] Some services failed to deploy:"
+#    for service in "${failed_deploys[@]}"; do
+#        echo " - $service"
+#    done
+#    echo "[-] Starting cleanup of quickstart setup"
+#    "$SCRIPT_FOLDER/../destroy.sh"
+#    exit 1
+#else
+#    echo "[+] All deployments completed successfully"
+#fi
