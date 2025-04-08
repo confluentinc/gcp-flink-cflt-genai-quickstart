@@ -166,7 +166,7 @@ Let's assume the patient's name we have an appointment is Justin Evans. Here are
 - What type of medicine Justin Evans uses currently?
 - What is the last diagnosis at the latest appointment of Justin Evans?
 
-Example patient and doctor names to use can be found below.
+Some patient and doctor names to use with this quickstart can be found below.
 
 | Patient Names   |
 |-----------------|
