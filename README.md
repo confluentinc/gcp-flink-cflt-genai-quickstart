@@ -111,10 +111,20 @@ Next, open the top-left menu and select **APIs & Services**.
 Click the **Credentials** tab on the left, then click **+ Create Credentials** and choose **API Key**.  
 Save this API key, as it will be required by the application when running the `deploy.sh` script.
 
+> [!IMPORTANT]  
+> Please be sure to select **Don't Restrict Key** under your Gemini API Key as you can see below.
+
+![Unrestricted Gemini Key](./assets/gemini-key.png)
+
 If not enabled yet please navigate to the **+Enable APIs and Services** tab to enable APIs below.
 - Artifact Registry API
 - Cloud Build API
 - Cloud Run Admin API
+- Cloud Logging API
+- BigQuery API
+- Compute Engine API
+- Identity and Access Management (IAM) API
+- Cloud Pub/Sub API
 
 ![Enabling APIs on GCP](./assets/gcp-enable-api.gif)
 > [!NOTE]
