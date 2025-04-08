@@ -1,0 +1,248 @@
+{
+  "type": "record",
+  "name": "Record",
+  "fields": [
+    {
+      "name": "patient_id",
+      "type": "string"
+    },
+    {
+      "name": "visit_id",
+      "type": "string"
+    },
+    {
+      "name": "visit_date",
+      "type": "string"
+    },
+    {
+      "name": "patient_name",
+      "type": "string"
+    },
+    {
+      "name": "date_of_birth",
+      "type": "string"
+    },
+    {
+      "name": "gender",
+      "type": "string"
+    },
+    {
+      "name": "doctor",
+      "type": {
+                  "type" : "record",
+                  "name" : "Doctor",
+                  "fields" : [
+                      {"name": "id", "type": "string"},
+                      {"name": "name", "type": "string"},
+                    {"name": "specialty", "type": "string"}
+                  ]
+              }
+  },
+    {
+      "name": "diagnosis",
+      "type": "string"
+    },
+    {
+      "name": "symptoms",
+      "type": {
+        "type": "array",
+        "items": "string"
+      }
+    },
+    {
+      "name": "visit_notes",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "medication",
+      "type": "string"
+    },
+    {
+      "name": "next_appointment",
+      "type": "string"
+    },
+    {
+      "name": "history",
+      "type": "string"
+    },
+    {
+      "name": "lifestyle_factors",
+      "type": {
+        "type" : "record",
+        "name" : "LifestyleFactors",
+        "fields" : [
+          { "name": "smoking_status",
+            "type": {
+              "type" : "record",
+              "name" : "SmokingStatus",
+              "fields" : [
+                  {"name": "status", "type": "string"},
+                  {"name": "quit_date", "type": ["null", "string"]},
+                  {"name": "years_smoked", "type": "long"},
+                {"name": "packs_per_day", "type": "long"}
+              ]
+            }
+          },
+          { "name": "alcohol_consumption",
+            "type": {
+              "type" : "record",
+              "name" : "AlcoholConsumption",
+              "fields" : [
+                {"name": "frequency", "type": "string"},
+                {"name": "units_per_week", "type": "long"},
+                {"name": "binge_drinking", "type": "boolean"}
+                ]
+              }
+          },
+          { "name": "exercise_habits",
+            "type": {
+              "type" : "record",
+              "name" : "ExerciseHabits",
+              "fields" : [
+                {"name": "frequency", "type": "string"},
+                {"name": "type", "type": {"type": "array", "items": "string"}},
+                {"name": "duration_minutes_per_session", "type": "long"}
+                ]
+              }
+          },
+          { "name": "diet",
+            "type": {
+              "type" : "record",
+              "name" : "Diet",
+              "fields" : [
+                {"name": "notes", "type": "string"},
+                {"name": "diet_type", "type": "string"},
+                {"name": "meals_per_day", "type": "long"},
+                {"name": "snacks_per_day", "type": "long"},
+                {"name": "hydration_litres_per_day", "type": "double"}
+                ]
+              }
+          },
+          { "name": "sleep",
+            "type": {
+              "type" : "record",
+              "name" : "Sleep",
+              "fields" : [
+                {"name": "hours_per_night", "type": "long"},
+                {"name": "sleep_quality", "type": "string"},
+                {"name": "sleep_disorders", "type": {"type": "array", "items": "string"}}
+                ]
+              }
+          },
+          { "name": "caffeine_intake",
+            "type": {
+              "type" : "record",
+              "name" : "Caffeine",
+              "fields" : [
+                {"name": "cups_per_day", "type": "long"},
+                {"name": "source", "type": {"type": "array", "items": "string"}}
+                ]
+              }
+          },
+          { "name": "recreational_drug_use",
+            "type": {
+              "type" : "record",
+              "name" : "DrugUse",
+              "fields" : [
+                {"name": "status", "type": "string"}
+                ]
+              }
+          },
+          { "name": "mental_health",
+            "type": {
+              "type" : "record",
+              "name" : "MentalHealth",
+              "fields" : [
+                {"name": "reported_issues", "type": {"type": "array", "items": "string"}},
+                {"name": "under_treatment", "type": "boolean"},
+                {"name": "treatment_type", "type": {"type": "array", "items": "string"}}
+                ]
+              }
+          },
+          { "name": "social_support",
+            "type": {
+              "type" : "record",
+              "name" : "SocialSupport",
+              "fields" : [
+                {"name": "living_situation", "type": "string"},
+                {"name": "support_network", "type": "string"}
+                ]
+              }
+          },
+          { "name": "occupation",
+            "type": {
+              "type" : "record",
+              "name" : "Occupation",
+              "fields" : [
+                {"name": "employment_status", "type": "string"},
+                {"name": "job_nature", "type": "string"},
+                {"name": "work_stress_level", "type": "string"}
+                ]
+              }
+          }
+        ]
+    }
+  },
+  {
+    "name": "notes",
+    "type": [
+      "null",
+      {
+      "type" : "record",
+      "name" : "Notes",
+      "fields" : [
+        {
+          "name": "xray_links",
+          "type": [
+            "null",
+            {
+              "type": "array",
+              "items": "string"
+            }
+          ]
+        },
+        {
+          "name": "findings",
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+  ]}]},
+  {
+    "name": "retrieval_document_embeddings",
+    "type": {
+      "type": "array",
+      "items" : "float"
+    }
+  },
+  {
+    "name": "retrieval_document_name_embeddings",
+    "type": {
+      "type": "array",
+      "items" : "float"
+    }
+  },
+  {
+    "name": "semantic_similarities_embeddings",
+    "type": {
+      "type": "array",
+      "items" : "float"
+    }
+  },
+  {
+    "name": "retrieval_query_name_embeddings",
+    "type": {
+      "type": "array",
+      "items" : "float"
+    }
+  }
+  ]
+}
+
+
+
+

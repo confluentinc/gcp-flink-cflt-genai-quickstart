@@ -33,7 +33,7 @@ output "bootstrap_servers" {
 }
 
 output "dataset_id" {
-  value = var.dataset_id
+  value = module.gcp.dataset_id
 }
 
 output "audio_request_topic" {

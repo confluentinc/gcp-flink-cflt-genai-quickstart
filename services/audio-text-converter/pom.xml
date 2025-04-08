@@ -7,7 +7,7 @@
     <groupId>io.confluent</groupId>
     <artifactId>kstreams-audio-text-converter</artifactId>
     <packaging>jar</packaging>
-    <version>8.0.0-0</version>
+    <version>1.0.0</version>
 
     <organization>
         <name>Confluent, Inc.</name>
@@ -34,20 +34,19 @@
 
     <properties>
         <kafka.streams.version>7.8.0-ccs</kafka.streams.version>
-        <avro.serializer.version>7.8.0</avro.serializer.version>
         <kafka.clients.version>7.8.0-ccs</kafka.clients.version>
-        <avro.version>1.11.4</avro.version>
         <kafka.version>3.8.0</kafka.version>
         <google.cloud.speech.version>4.54.0</google.cloud.speech.version>
         <google.cloud.texttospeech.version> 2.48.0</google.cloud.texttospeech.version>
+        <commonmark.version>0.22.0</commonmark.version>
+        <lombok.version>1.18.36</lombok.version>
 
         <confluent.version>7.9.0</confluent.version>
 
-        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j-jdk14.version>1.7.30</slf4j-jdk14.version>
-        <commonmark.version>0.22.0</commonmark.version>
-        <lombok.version>1.18.36</lombok.version>
+
+        <scala-library.version>2.13.11</scala-library.version>
     </properties>
 
     <dependencyManagement>
@@ -74,22 +73,10 @@
             <version>${kafka.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro</artifactId>
-            <version>${avro.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.confluent</groupId>
-            <artifactId>kafka-avro-serializer</artifactId>
-            <version>${avro.serializer.version}</version>
-        </dependency>
-        <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-json-schema-serializer</artifactId>
             <version>${confluent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-speech</artifactId>
@@ -106,30 +93,23 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala-library.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>${slf4j-jdk14.version}</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.commonmark/commonmark -->
         <dependency>
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark</artifactId>
             <version>${commonmark.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro-maven-plugin</artifactId>
-            <version>${avro.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>${slf4j-jdk14.version}</version> <!-- Use the latest version -->
-        </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>2.13.11</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>

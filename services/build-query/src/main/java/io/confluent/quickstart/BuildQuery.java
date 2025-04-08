@@ -27,6 +27,7 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -41,11 +42,12 @@ public class BuildQuery {
     static final String authSecret = System.getenv("KAFKA_API_SECRET");
 
     static String healthCheckPort = System.getenv("HEALTH_CHECK_PORT");
-    static final String projectId = ("GCP_PROJECT_ID");
+    static final String projectId = System.getenv("GCP_PROJECT_ID");
     static final String location = System.getenv("GCP_REGION");
+    static final String bigQueryDb = System.getenv("BIGQUERY_DATABASE");
 
     static final String MODEL_NAME = "gemini-2.0-flash-001";
-    static final String PROMPT_CONST = "Build a BigQuery SQL query with those characteristics.\n\n";
+//    static final String PROMPT_CONST = "Build a BigQuery SQL query with those characteristics.\n\n";
     static String prompt;
     static final String PROMPT_FILENAME = "build_query_prompt.txt";
     /*
@@ -60,15 +62,17 @@ public class BuildQuery {
 
     static VertexClient vertexClient;
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException, URISyntaxException {
         if (inputTopic == null || outputTopic == null || bootstrapServers == null) {
             System.out.println("Unable to run: TOPIC_IN, TOPIC_OUT and BOOTSTRAP env vars must be set.");
             System.exit(1);
         }
 
         final Properties streamsConfiguration = getStreamsConfiguration(bootstrapServers, authKey, authSecret);
-        prompt = getPromptText();
+//        prompt = getPromptText();
         vertexClient = new VertexClient(projectId, location, MODEL_NAME);
+
+        prompt = TemplateProcessor.loadAndProcessTemplate(PROMPT_FILENAME, projectId, bigQueryDb);
 
         final StreamsBuilder builder = new StreamsBuilder();
         buildQueryStream(builder);
@@ -82,11 +86,11 @@ public class BuildQuery {
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 
-    static public String getPromptText() throws IOException {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is = loader.getResourceAsStream(PROMPT_FILENAME);
-        return new String(is.readAllBytes(), StandardCharsets.UTF_8);
-    }
+//    static public String getPromptText() throws IOException {
+//        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+//        InputStream is = loader.getResourceAsStream(PROMPT_FILENAME);
+//        return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+//    }
 
     static Properties getStreamsConfiguration(final String bootstrapServers, final String key, final String secret) {
         final Properties streamsConfiguration = new Properties();
@@ -109,7 +113,7 @@ public class BuildQuery {
     }
 
     static String getQuery(String text) throws IOException {
-        return vertexClient.callModel(BuildQuery.getPromptText() + text);
+        return vertexClient.callModel(prompt + text);
     }
 
     static void buildQueryStream(final StreamsBuilder builder) {

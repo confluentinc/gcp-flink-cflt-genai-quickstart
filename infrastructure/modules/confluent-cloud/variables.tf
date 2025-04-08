@@ -19,8 +19,8 @@ variable "env_display_id_postfix" {
   type        = string
 }
 
-variable "gcloud_project" {
-  description = "Google Cloud Project ID"
+variable "gcp_project_id" {
+  description = "GCP project ID"
   type        = string
 }
 
@@ -49,5 +49,15 @@ variable "insert_data_sql_files" {
 
 variable "gcp_gemini_api_key" {
   description = "GCP Gemini API Key"
+  type        = string
+}
+
+variable "gcp_service_account_key" {
+  description = "The GCP service account key JSON for GCS access"
+  type        = string
+}
+
+variable "gcs_bucket_name" {
+  description = "The name of the GCS bucket containing the JSON files"
   type        = string
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.pie.quickstart.gcp.audio.model.Audio;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioResponse;
+import io.confluent.pie.quickstart.gcp.audio.model.InputRequest;
+import io.confluent.pie.quickstart.gcp.audio.model.InputRequestKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,18 +32,15 @@ public class InputQueryHandler {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final KafkaTemplate<String, AudioQuery> kafkaAudioTemplate;
-    private final KafkaTemplate<String, String> kafkaTextTemplate;
-    private final KafkaTemplate<String, AudioResponse> kafkaAudioResponseTemplate;
+    private final KafkaTemplate<InputRequestKey, AudioQuery> kafkaAudioTemplate;
+    private final KafkaTemplate<InputRequestKey, InputRequest> kafkaTextTemplate;
     private final KafkaTopicConfig kafkaTopicConfig;
 
-    public InputQueryHandler(@Autowired KafkaTemplate<String, AudioQuery> kafkaAudioTemplate,
-                             @Autowired KafkaTemplate<String, String> kafkaTextTemplate,
-                             @Autowired KafkaTemplate<String, AudioResponse> kafkaAudioResponseTemplate,
+    public InputQueryHandler(@Autowired KafkaTemplate<InputRequestKey, AudioQuery> kafkaAudioTemplate,
+                             @Autowired KafkaTemplate<InputRequestKey, InputRequest> kafkaTextTemplate,
                              @Autowired KafkaTopicConfig kafkaTopicConfig) {
         this.kafkaAudioTemplate = kafkaAudioTemplate;
         this.kafkaTextTemplate = kafkaTextTemplate;
-        this.kafkaAudioResponseTemplate = kafkaAudioResponseTemplate;
         this.kafkaTopicConfig = kafkaTopicConfig;
     }
 
@@ -65,42 +64,29 @@ public class InputQueryHandler {
         log.info("Session closed: {}", session.getId());
     }
 
-    public void onNewTextMessage(String sessionId, String textQuery) {
+    public void onNewTextMessage(String sessionId, InputRequest inputRequest) {
+        inputRequest.setSessionId(sessionId);
+        InputRequestKey inputRequestKey = new InputRequestKey();
+        inputRequestKey.setSessionId(sessionId);
 
-        final ProducerRecord<String, String> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
-                sessionId,
-                textQuery);
+        final ProducerRecord<InputRequestKey, InputRequest> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getInputRequestTopic(),
+                inputRequestKey,
+                inputRequest);
 
         kafkaTextTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
             if (throwable != null) {
                 log.error("Failed to send text message to Confluent Cloud", throwable);
             }
         });
-
-        //TODO: Below is for testing
-//        AudioResponse audioResponse = new AudioResponse();
-//        String randomText = generateRandomString(10);
-//        audioResponse.setQuery(textQuery);
-//        audioResponse.setDescription("test description" + randomText);
-//        audioResponse.setRenderedResult("test rendered results-" + randomText);
-//        audioResponse.setAudio(returnAudioBytes());
-//        audioResponse.setSessionId(sessionId);
-//
-//        final ProducerRecord<String, AudioResponse> producerTestRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioResponseTopic(),
-//                sessionId,
-//                audioResponse);
-//
-//        kafkaAudioResponseTemplate.send(producerTestRecord).whenComplete((recordMetadata, throwable) -> {
-//            if (throwable != null) {
-//                log.error("Failed to send audio message to Confluent Cloud", throwable);
-//            }
-//        });
     }
 
     public void onNewAudioMessage(AudioQuery audioQuery) {
 
-        final ProducerRecord<String, AudioQuery> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioRequestTopic(),
-                audioQuery.getSessionId(),
+        InputRequestKey inputRequestKey = new InputRequestKey();
+        inputRequestKey.setSessionId(audioQuery.getSessionId());
+
+        final ProducerRecord<InputRequestKey, AudioQuery> producerRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioRequestTopic(),
+                inputRequestKey,
                 audioQuery);
 
         kafkaAudioTemplate.send(producerRecord).whenComplete((recordMetadata, throwable) -> {
@@ -108,25 +94,6 @@ public class InputQueryHandler {
                 log.error("Failed to send audio message to Confluent Cloud", throwable);
             }
         });
-
-        //TODO: Below is for testing
-//        AudioResponse audioResponse = new AudioResponse();
-//        String randomText = generateRandomString(10);
-//        audioResponse.setQuery("test query-" + randomText);
-//        audioResponse.setDescription("test description" + randomText);
-//        audioResponse.setRenderedResult("test rendered results-" + randomText);
-//        audioResponse.setAudio(audioQuery.getAudio());
-//        audioResponse.setSessionId(audioQuery.getSessionId());
-//
-//        final ProducerRecord<String, AudioResponse> producerTestRecord = new ProducerRecord<>(kafkaTopicConfig.getAudioResponseTopic(),
-//                audioQuery.getSessionId(),
-//                audioResponse);
-//
-//        kafkaAudioResponseTemplate.send(producerTestRecord).whenComplete((recordMetadata, throwable) -> {
-//            if (throwable != null) {
-//                log.error("Failed to send audio message to Confluent Cloud", throwable);
-//            }
-//        });
     }
 
     /**
@@ -161,7 +128,7 @@ public class InputQueryHandler {
 
         try {
             final String dataURL = encodeAudioAsDataURL(audioResponse.getAudio());
-            Audio audio = createAudioData(dataURL, audioResponse.getQuery(), audioResponse.getRenderedResult());
+            Audio audio = createAudioData(dataURL, audioResponse.getSummary());
             sendMessage(session, audio);
         } catch (IOException e) {
             log.error("Error sending message: {}", e.getMessage(), e);
@@ -172,11 +139,11 @@ public class InputQueryHandler {
         return "data:audio/wav;base64," + Base64.getEncoder().encodeToString(audio);
     }
 
-    private Audio createAudioData(String dataURL, String query, String renderedResult) {
+
+    private Audio createAudioData(String dataURL, String summary) {
         Audio audio = new Audio();
         audio.setData(dataURL);
-        audio.setQuestion(query);
-        audio.setResult(renderedResult);
+        audio.setResult(summary);
         return audio;
     }
 
@@ -186,83 +153,4 @@ public class InputQueryHandler {
         log.info("Sent audio response to session id {}", session.getId());
     }
 
-    public static String generateRandomString(int length) {
-        // Initialize a StringBuilder to hold the result
-        StringBuilder sb = new StringBuilder(length);
-
-        // Characters will be chosen from this string
-        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        // Create an instance of Random
-        Random random = new Random();
-
-        // Generate random indexes and append the corresponding character to the StringBuilder
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(charSet.length());
-            sb.append(charSet.charAt(randomIndex));
-        }
-
-        return sb.toString();
-    }
-
-    private static byte[] generateSineWave(int frequency, int durationSeconds, int sampleRate, int bitsPerSample) {
-        double amplitude = 32760; // Max amplitude for 16-bit
-        int samples = durationSeconds * sampleRate;
-        byte[] output = new byte[samples * 2]; // 2 bytes per sample (16-bit)
-
-        for (int i = 0; i < samples; i++) {
-            short value = (short) (amplitude * Math.sin(2 * Math.PI * frequency * i / sampleRate));
-            // Little endian
-            output[2 * i] = (byte) (value & 0xFF);
-            output[2 * i + 1] = (byte) ((value >> 8) & 0xFF);
-        }
-
-        return output;
-    }
-
-    private static byte[] addWavHeader(byte[] audioBytes) {
-        final int SAMPLE_RATE = 44100;
-        final int NUM_CHANNELS = 1;
-        final int BITS_PER_SAMPLE = 16;
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteBuffer buffer = ByteBuffer.allocate(44);
-
-        int totalLength = audioBytes.length + 36;
-        int byteRate = SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8;
-
-        buffer.put("RIFF".getBytes());
-        buffer.putInt(totalLength);
-        buffer.put("WAVE".getBytes());
-        buffer.put("fmt ".getBytes());
-        buffer.putInt(16);
-        buffer.putShort((short) 1); // PCM
-        buffer.putShort((short) NUM_CHANNELS);
-        buffer.putInt(SAMPLE_RATE);
-        buffer.putInt(byteRate);
-        buffer.putShort((short) (NUM_CHANNELS * BITS_PER_SAMPLE / 8));
-        buffer.putShort((short) BITS_PER_SAMPLE);
-        buffer.put("data".getBytes());
-        buffer.putInt(audioBytes.length);
-
-        baos.write(buffer.array(), 0, buffer.position());
-        try {
-            baos.write(audioBytes);
-        } catch (IOException e) {
-            System.out.println("Error writing WAV data: " + e.getMessage());
-        }
-
-        return baos.toByteArray();
-    }
-
-
-    private static byte[] returnAudioBytes() {
-        final int SAMPLE_RATE = 44100;
-        final int BITS_PER_SAMPLE = 16;
-        final int DURATION_SECONDS = 2;
-        final int FREQUENCY = 440;
-        byte[] rawAudioBytes = generateSineWave(FREQUENCY, DURATION_SECONDS, SAMPLE_RATE, BITS_PER_SAMPLE);
-        byte[] wavBytes = addWavHeader(rawAudioBytes);
-        return wavBytes;
-    }
 }

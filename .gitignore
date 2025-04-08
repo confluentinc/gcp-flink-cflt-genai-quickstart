@@ -93,3 +93,6 @@ terraform.rc
 # Misc
 .unique_id
 .config
+
+# ----- Generated Files -----
+gemini-connection-result.json
