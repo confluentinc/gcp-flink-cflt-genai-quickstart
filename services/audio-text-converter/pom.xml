@@ -7,7 +7,7 @@
     <groupId>io.confluent</groupId>
     <artifactId>kstreams-audio-text-converter</artifactId>
     <packaging>jar</packaging>
-    <version>8.0.0-0</version>
+    <version>1.0.0</version>
 
     <organization>
         <name>Confluent, Inc.</name>
@@ -46,6 +46,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j-jdk14.version>1.7.30</slf4j-jdk14.version>
 
+        <scala-library.version>2.13.11</scala-library.version>
     </properties>
 
     <dependencyManagement>
@@ -95,7 +96,7 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.13.11</version>
+            <version>${scala-library.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

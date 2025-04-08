@@ -28,27 +28,14 @@ module "confluent_cloud" {
   create_table_sql_files = local.create_table_sql_files
 
   gcp_gemini_api_key = var.gcp_gemini_api_key
+  
+  # GCS Source connector configuration
+  gcs_bucket_name = module.gcp.bucket_name
+  gcp_service_account_key = base64decode(module.gcp.service_account_key)
 
   depends_on = [
      module.gcp
   ]
 }
 
-resource "null_resource" "run_python_script" {
-  depends_on = [module.gcp]  # Ensure GCP module is created first
-
-  provisioner "local-exec" {
-    command = <<EOT
-      echo "[+] Running Python script: bq_loader.py with DATASET_ID=${module.gcp.dataset_id}" && \
-      python3 -m venv venv && \
-      source venv/bin/activate && \
-      pip install -r requirements.txt && \
-      DATASET_ID=${module.gcp.dataset_id} python3 ${path.module}/bq_loader.py
-    EOT
-  }
-
-  triggers = {
-    always_run = timestamp()  # Forces execution on each `apply`
-  }
-}
 

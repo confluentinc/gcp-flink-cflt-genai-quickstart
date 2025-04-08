@@ -1,10 +1,10 @@
 insert into
-`results_summarized`
+`summarised_results`
 select
-session_id,
+sessionId,
 output
 from
-`raw_results`,
+`sql_results`,
 LATERAL TABLE(ML_PREDICT('gemini15summarize', results))
-where session_id is not null;
+where sessionId is not null;
 
