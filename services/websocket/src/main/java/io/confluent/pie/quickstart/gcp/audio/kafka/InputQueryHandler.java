@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.confluent.pie.quickstart.gcp.audio.model.Audio;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioQuery;
 import io.confluent.pie.quickstart.gcp.audio.model.AudioResponse;
+import io.confluent.pie.quickstart.gcp.audio.model.InputRequest;
+import io.confluent.pie.quickstart.gcp.audio.model.InputRequestKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,6 @@ public class InputQueryHandler {
                              @Autowired KafkaTopicConfig kafkaTopicConfig) {
         this.kafkaAudioTemplate = kafkaAudioTemplate;
         this.kafkaTextTemplate = kafkaTextTemplate;
-        this.kafkaAudioResponseTemplate = kafkaAudioResponseTemplate;
         this.kafkaTopicConfig = kafkaTopicConfig;
     }
 

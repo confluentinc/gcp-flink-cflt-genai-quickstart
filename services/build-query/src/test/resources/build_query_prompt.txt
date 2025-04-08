@@ -7,7 +7,7 @@ You are querying a clinical data warehouse that stores patient encounters in a s
 
 Database Schema:
 
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.patients_visits`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.gcs_greenacres_with_embeddingss`
 (
   patient_id STRING,
   visit_id STRING,

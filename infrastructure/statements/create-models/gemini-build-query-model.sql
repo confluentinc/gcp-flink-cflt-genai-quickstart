@@ -12,11 +12,14 @@ You are an expert in SQL query generation.
 Generate an SQL query for the following request.
 
 Context:
-You are querying a clinical data warehouse that stores patient encounters in a single denormalized table. Each row represents a unique visit for a specific patient. The table contains both high-level patient demographics and detailed visit-level information, including nested objects for the attending doctor and lifestyle factors. Some fields are structured as nested RECORD types (STRUCT), and some are arrays (e.g., symptoms, sleep_disorders).
+You are querying a clinical data warehouse that stores patient encounters in a single denormalized table.
+Each row represents a unique visit for a specific patient. The table contains both high-level patient demographics and
+detailed visit-level information, including nested objects for the attending doctor and lifestyle factors.
+Some fields are structured as nested RECORD types (STRUCT), and some are arrays (e.g., symptoms, sleep_disorders).
 
 Database Schema:
 
-CREATE TABLE `${gcp-project-id}.${bigquery-db}.patients_visits`
+CREATE TABLE `${gcp-project-id}.${bigquery-db}.gcs_greenacres_with_embeddings`
 (
   patient_id STRING,
   visit_id STRING,

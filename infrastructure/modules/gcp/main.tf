@@ -48,7 +48,7 @@ resource "local_file" "service_account_key_file" {
 }
 
 resource "google_bigquery_dataset" "dataset" {
-  dataset_id  = "doctors_practice_quickstart_jb_${var.unique_id}"
+  dataset_id  = "doctors_practice_quickstart_${var.unique_id}"
   project     = var.gcp_project_id
   friendly_name = "Doctors Practice"
   description   = "Dataset for storing medical data"
