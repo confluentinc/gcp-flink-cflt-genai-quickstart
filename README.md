@@ -166,6 +166,48 @@ Let's assume the patient's name we have an appointment is Justin Evans. Here are
 - What type of medicine Justin Evans uses currently?
 - What is the last diagnosis at the latest appointment of Justin Evans?
 
+Some patient and doctor names to use with this quickstart can be found below.
+
+| Patient Names   |
+|-----------------|
+| Aaron Rhodes    |
+| Cynthia Adams   |
+| Shelia Tran     |
+| Sherry Scott    |
+| Nathan Allen    |
+| Amy Vazquez     |
+| Kyle Wood       |
+| James Allen     |
+| Marissa Davis   |
+| Robert Brown    |
+| Jared Mcguire   |
+| Richard Smith   |
+| Chad Vasquez    |
+| Ryan Tucker     |
+| Joshua Reyes    |
+| Tara Saunders   |
+| Connie Park     |
+| Scott Fowler    |
+| April Chandler  |
+| Kimberly Bailey |
+| Tracey Lopez    |
+| Shannon Kelley  |
+| Michelle Mclean |
+| Sean Cox        |
+
+| Doctor Names    |Specialty|
+| --------------- |---------|
+|Alexa Hull|Psychiatry|
+|Ashley Taylor|Family Medicine|
+|Tyler Davis|Psychiatry|
+|Stacey Walsh|Psychiatry|
+|Raymond Barnes|Psychiatry|
+|Scott Keller|Dermatology|
+|Ralph Ellis|Ophthalmology|
+|Shawn Gordon|Pediatrics|
+|Emily Powell|Ophthalmology|
+|Natasha Simmons|Psychiatry|
+
 [//]: <> (#### 2b. Queries)
 
 ### 3. Bring down the infrastructure
@@ -201,5 +243,7 @@ Kindly check if this is a key propagation issue and if the enough time has passe
 If everything looks in place then most probably the revoked API values were cached in the credentials section of the terraform resource confluent_kafka_topic. 
 A `terraform apply -refresh=false` under `/infrastructure` directory should correct the issue.
 
+### Do I need to provide credit card information when I create an account at Google Cloud Platform and Confluent Cloud?
+Yes, please provide your credit card information if you do not already have an account at GCP or Confluent Cloud and need to create one for this quickstart.
 
 ## Next Steps - Improving the Results
