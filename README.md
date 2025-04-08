@@ -166,6 +166,47 @@ Let's assume the patient's name we have an appointment is Justin Evans. Here are
 - What type of medicine Justin Evans uses currently?
 - What is the last diagnosis at the latest appointment of Justin Evans?
 
+Example patient and doctor names to use can be found below.
+
+| Patient Names   |
+|-----------------|
+| Aaron Rhodes    |
+| Cynthia Adams   |
+| Shelia Tran     |
+| Sherry Scott    |
+| Nathan Allen    |
+| Amy Vazquez     |
+| Kyle Wood       |
+| James Allen     |
+| Marissa Davis   
+| Robert Brown    
+| Jared Mcguire   
+| Richard Smith   
+| Chad Vasquez    
+| Ryan Tucker     
+| Joshua Reyes    
+| Tara Saunders   
+| Connie Park     
+| Scott Fowler    
+| April Chandler  
+| Kimberly Bailey 
+| Tracey Lopez    
+| Shannon Kelley  
+| Michelle Mclean 
+| Sean Cox        |
+
+| Doctor Names    |Specialty|
+| --------------- |---------|
+|Alexa Hull|Psychiatry|
+|Ashley Taylor|Family Medicine|
+|Tyler Davis|Psychiatry|
+|Stacey Walsh|Psychiatry|
+|Raymond Barnes|Psychiatry|
+|Scott Keller|Dermatology|
+|Ralph Ellis|Ophthalmology|
+|Shawn Gordon|Pediatrics|
+|Emily Powell|Ophthalmology|
+
 [//]: <> (#### 2b. Queries)
 
 ### 3. Bring down the infrastructure
