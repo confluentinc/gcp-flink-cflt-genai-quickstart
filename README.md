@@ -206,6 +206,7 @@ Some patient and doctor names to use with this quickstart can be found below.
 |Ralph Ellis|Ophthalmology|
 |Shawn Gordon|Pediatrics|
 |Emily Powell|Ophthalmology|
+|Natasha Simmons|Psychiatry|
 
 [//]: <> (#### 2b. Queries)
 
