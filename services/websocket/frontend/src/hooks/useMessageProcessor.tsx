@@ -5,7 +5,6 @@ import { RecordingResult } from "./useAudioRecorder";
 const RESPONSE_TIMEOUT = 30000; // 30 seconds timeout for waiting for response
 const WEBSOCKET_TIMEOUT = 15000; // 15 seconds timeout for websocket to open
 
-
 export const useMessageProcessor = () => {
   const [result, setResult] = useState<RecordingResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
