@@ -115,6 +115,11 @@ If not enabled yet please navigate to the **+Enable APIs and Services** tab to e
 - Artifact Registry API
 - Cloud Build API
 - Cloud Run Admin API
+- Cloud Logging API
+- BigQuery API
+- Compute Engine API
+- Identity and Access Management (IAM) API
+- Cloud Pub/Sub API
 
 ![Enabling APIs on GCP](./assets/gcp-enable-api.gif)
 > [!NOTE]
