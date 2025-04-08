@@ -136,8 +136,8 @@ fi
 
 # Set environment variable string for gcloud deployments
 common_env_vars="BOOTSTRAP_SERVER=$BOOTSTRAP_SERVER,KAFKA_API_KEY=$KAFKA_API_KEY,KAFKA_API_SECRET=$KAFKA_API_SECRET,SR_API_KEY=$SR_API_KEY,SR_API_SECRET=$SR_API_SECRET,SR_URL=$SR_URL,CLIENT_ID=$CLIENT_ID,GCP_PROJECT_ID=$GCP_PROJECT_ID"
-audio_text_converter_env_vars="$common_env_vars,TOPIC_IN=audio_request,TOPIC_OUT=input_request"
-execute_query_env_vars="$common_env_vars,TOPIC_IN=generated_sql,TOPIC_OUT=sql_results"
+audio_text_converter_env_vars="$common_env_vars"
+execute_query_env_vars="$common_env_vars"
 
 # Parallel deployment process
 deploy_gcloud "$AUDIO_TEXT_CONVERTER_SVC_NAME" "$SCRIPT_FOLDER/audio-text-converter" "$audio_text_converter_env_vars" & job_ids+=($!)
@@ -151,16 +151,3 @@ for i in "${!job_ids[@]}"; do
         failed_deploys+=("${services[$i]}")
     fi
 done
-=======
-## After deployment process, check if any deployments failed
-#if [ "${#failed_deploys[@]}" -ne 0 ]; then
-#    echo "[-] Some services failed to deploy:"
-#    for service in "${failed_deploys[@]}"; do
-#        echo " - $service"
-#    done
-#    echo "[-] Starting cleanup of quickstart setup"
-#    "$SCRIPT_FOLDER/../destroy.sh"
-#    exit 1
-#else
-#    echo "[+] All deployments completed successfully"
-#fi
