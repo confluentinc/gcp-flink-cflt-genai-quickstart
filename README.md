@@ -178,21 +178,21 @@ Some patient and doctor names to use with this quickstart can be found below.
 | Amy Vazquez     |
 | Kyle Wood       |
 | James Allen     |
-| Marissa Davis   
-| Robert Brown    
-| Jared Mcguire   
-| Richard Smith   
-| Chad Vasquez    
-| Ryan Tucker     
-| Joshua Reyes    
-| Tara Saunders   
-| Connie Park     
-| Scott Fowler    
-| April Chandler  
-| Kimberly Bailey 
-| Tracey Lopez    
-| Shannon Kelley  
-| Michelle Mclean 
+| Marissa Davis   |
+| Robert Brown    |
+| Jared Mcguire   |
+| Richard Smith   |
+| Chad Vasquez    |
+| Ryan Tucker     |
+| Joshua Reyes    |
+| Tara Saunders   |
+| Connie Park     |
+| Scott Fowler    |
+| April Chandler  |
+| Kimberly Bailey |
+| Tracey Lopez    |
+| Shannon Kelley  |
+| Michelle Mclean |
 | Sean Cox        |
 
 | Doctor Names    |Specialty|
