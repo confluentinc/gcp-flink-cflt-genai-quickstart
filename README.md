@@ -125,6 +125,8 @@ If not enabled yet please navigate to the **+Enable APIs and Services** tab to e
 - Compute Engine API
 - Identity and Access Management (IAM) API
 - Cloud Pub/Sub API
+- Cloud Text-to-Speech API
+- Cloud Speech-to-Text API
 
 ![Enabling APIs on GCP](./assets/gcp-enable-api.gif)
 > [!NOTE]
