@@ -34,7 +34,7 @@
 
     <properties>
         <kafka.streams.version>7.8.0-ccs</kafka.streams.version>
-        <avro.serializer.version>7.8.0</avro.serializer.version>
+        <avro.serializer.version>64.7.7.2-2</avro.serializer.version>
         <kafka.clients.version>7.8.0-ccs</kafka.clients.version>
         <avro.version>1.11.4</avro.version>
         <kafka.version>3.8.0</kafka.version>
