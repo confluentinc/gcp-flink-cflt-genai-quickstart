@@ -47,7 +47,7 @@
         <jackson-core.version>2.18.3</jackson-core.version>
         <lombok.version>1.18.36</lombok.version>
         <kafka-streams-json-schema-serde.version>7.9.0</kafka-streams-json-schema-serde.version>
-        <curator-test.version>2.9.0</curator-test.version>
+        <curator-test.version>5.8.0</curator-test.version>
         <mockito-core.version>4.11.0</mockito-core.version>
         <assertj-core.version>3.3.0</assertj-core.version>
         <google-genai.version>0.1.0</google-genai.version>
