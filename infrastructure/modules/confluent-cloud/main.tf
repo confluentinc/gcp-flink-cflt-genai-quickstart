@@ -191,7 +191,6 @@ resource "confluent_flink_statement" "insert-data" {
 # TOPICS
 # ------------------------------------------------------
 
-
 //topic that captures and stores audio request
 resource "confluent_kafka_topic" "audio_request" {
   topic_name         = "audio_request"
@@ -375,6 +374,101 @@ resource "confluent_kafka_acl" "app-manager-delete-on-target-topic" {
   ]
 }
 
+# Add DELETE permission for the GCS Source connector service account
+resource "confluent_kafka_acl" "gcs_source_delete_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "*"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "DELETE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+# Add DESCRIBE permission for the GCS Source connector service account
+resource "confluent_kafka_acl" "gcs_source_describe_cluster" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "CLUSTER"
+  resource_name = "kafka-cluster"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "DESCRIBE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.gcs_source_kafka_api_key.id
+    secret = confluent_api_key.gcs_source_kafka_api_key.secret
+  }
+}
+
+# Add READ permission for topics
+resource "confluent_kafka_acl" "gcs_source_read_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "gcs-"
+  pattern_type  = "PREFIXED"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "READ"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.gcs_source_kafka_api_key.id
+    secret = confluent_api_key.gcs_source_kafka_api_key.secret
+  }
+}
+
+# Add WRITE permission for topics
+resource "confluent_kafka_acl" "gcs_source_write_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "gcs-"
+  pattern_type  = "PREFIXED"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "WRITE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.gcs_source_kafka_api_key.id
+    secret = confluent_api_key.gcs_source_kafka_api_key.secret
+  }
+}
+
+# Add CREATE permission for topics
+resource "confluent_kafka_acl" "gcs_source_create_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "gcs-"
+  pattern_type  = "PREFIXED"
+  principal     = "User:${confluent_service_account.gcs_source.id}"
+  host          = "*"
+  operation     = "CREATE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.gcs_source_kafka_api_key.id
+    secret = confluent_api_key.gcs_source_kafka_api_key.secret
+  }
+}
+
 # ------------------------------------------------------
 # SERVICE ACCOUNT
 # ------------------------------------------------------
@@ -435,13 +529,252 @@ resource "confluent_role_binding" "app-manager-assigner" {
 }
 
 # ------------------------------------------------------
-# SCHEMA REGISTRY
+# Schema Registry
 # ------------------------------------------------------
 data "confluent_schema_registry_cluster" "essentials" {
   environment {
     id = confluent_environment.staging.id
   }
   depends_on = [
-    confluent_kafka_cluster.standard
+    confluent_kafka_cluster.standard,
+  ]
+}
+
+# ------------------------------------------------------
+# GCS SOURCE CONNECTOR
+# ------------------------------------------------------
+
+# Service account for GCS Source connector
+resource "confluent_service_account" "gcs_source" {
+  display_name = "gcs-source-${var.env_display_id_postfix}"
+  description  = "Service account for GCS Source connector"
+}
+
+# Grant the service account the ConnectorAdmin role
+resource "confluent_role_binding" "gcs_source_kafka_cluster_admin" {
+  principal   = "User:${confluent_service_account.gcs_source.id}"
+  role_name   = "CloudClusterAdmin"
+  crn_pattern = confluent_kafka_cluster.standard.rbac_crn
+}
+
+# Create an API key for the service account
+resource "confluent_api_key" "gcs_source_kafka_api_key" {
+  display_name = "gcs-source-${var.env_display_id_postfix}-key"
+  description  = "Kafka API Key that is owned by 'gcs-source' service account"
+  owner {
+    id          = confluent_service_account.gcs_source.id
+    api_version = confluent_service_account.gcs_source.api_version
+    kind        = confluent_service_account.gcs_source.kind
+  }
+
+  managed_resource {
+    id          = confluent_kafka_cluster.standard.id
+    api_version = confluent_kafka_cluster.standard.api_version
+    kind        = confluent_kafka_cluster.standard.kind
+    environment {
+      id = confluent_environment.staging.id
+    }
+  }
+
+  depends_on = [
+    confluent_role_binding.gcs_source_kafka_cluster_admin
+  ]
+}
+
+# Upload data files to GCS
+locals {
+  data_files = fileset("${path.module}/data", "**/*")
+  avro_files = [for f in local.data_files : f if endswith(f, ".avro")]
+  avro_topics = [for f in local.avro_files : "gcs_${replace(basename(f), ".avro", "")}"]
+}
+
+# Create topics for each AVRO file
+resource "confluent_kafka_topic" "gcs_topics" {
+  for_each = toset(local.avro_topics)
+
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name         = each.value
+  partitions_count   = 6
+  rest_endpoint      = confluent_kafka_cluster.standard.rest_endpoint
+  config = {
+    "cleanup.policy"      = "delete"
+    "retention.ms"        = "604800000"  # 7 days
+    "min.insync.replicas" = "2"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+  depends_on = [
+    confluent_kafka_acl.gcs_source_create_topics
+  ]
+}
+
+resource "google_storage_bucket_object" "data" {
+  for_each = local.data_files
+
+  name         = "data/${each.value}"
+  source       = "${path.module}/data/${each.value}"
+  content_type = "application/octet-stream"
+  bucket       = var.gcs_bucket_name
+}
+
+# Create GCS Source connector
+resource "confluent_connector" "gcs_source" {
+  environment {
+    id = confluent_environment.staging.id
+  }
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+
+  config_sensitive = {
+    "gcs.credentials.json" = var.gcp_service_account_key
+  }
+
+  config_nonsensitive = {
+    "connector.class"          = "GcsSource"
+    "name"                     = "confluent-gcs-source"
+    "topic.regex.list"         = join(",", [for topic in local.avro_topics : "${topic}:.*\\.avro"])
+    "kafka.auth.mode"          = "SERVICE_ACCOUNT"
+    "kafka.service.account.id" = confluent_service_account.gcs_source.id
+    "input.data.format"        = "AVRO"
+    "output.data.format"       = "JSON_SR"
+    "tasks.max"                = "1"
+    "gcs.bucket.name"          = var.gcs_bucket_name
+    "topics.dir"               = "data"
+    "behavior.on.error"        = "IGNORE"
+    "schema.registry.url"      = data.confluent_schema_registry_cluster.essentials.rest_endpoint
+    "schema.registry.basic.auth.credentials.source" = "USER_INFO"
+    "schema.registry.basic.auth.user.info"          = "${confluent_api_key.clients-schema-registry-api-key.id}:${confluent_api_key.clients-schema-registry-api-key.secret}"
+  }
+
+  depends_on = [
+    confluent_kafka_acl.gcs_source_read_topics,
+    confluent_kafka_acl.gcs_source_write_topics,
+    confluent_kafka_acl.gcs_source_create_topics,
+    confluent_kafka_acl.gcs_source_describe_cluster,
+    google_storage_bucket_object.data,
+    confluent_kafka_topic.gcs_topics
+  ]
+}
+
+# ------------------------------------------------------
+# BIGQUERY SINK CONNECTOR
+# ------------------------------------------------------
+
+# Service account for BigQuery Sink connector
+resource "confluent_service_account" "bigquery_sink" {
+  display_name = "bigquery-sink-${var.env_display_id_postfix}"
+  description  = "Service account for BigQuery Sink connector"
+}
+
+# Grant the service account the ConnectorAdmin role
+resource "confluent_role_binding" "bigquery_sink_kafka_cluster_admin" {
+  principal   = "User:${confluent_service_account.bigquery_sink.id}"
+  role_name   = "CloudClusterAdmin"
+  crn_pattern = confluent_kafka_cluster.standard.rbac_crn
+}
+
+# Create an API key for the service account
+resource "confluent_api_key" "bigquery_sink_kafka_api_key" {
+  display_name = "bigquery-sink-${var.env_display_id_postfix}-key"
+  description  = "Kafka API Key that is owned by 'bigquery-sink' service account"
+  owner {
+    id          = confluent_service_account.bigquery_sink.id
+    api_version = confluent_service_account.bigquery_sink.api_version
+    kind        = confluent_service_account.bigquery_sink.kind
+  }
+
+  managed_resource {
+    id          = confluent_kafka_cluster.standard.id
+    api_version = confluent_kafka_cluster.standard.api_version
+    kind        = confluent_kafka_cluster.standard.kind
+    environment {
+      id = confluent_environment.staging.id
+    }
+  }
+
+  depends_on = [
+    confluent_role_binding.bigquery_sink_kafka_cluster_admin
+  ]
+}
+
+# Add DESCRIBE permission for the BigQuery Sink connector service account
+resource "confluent_kafka_acl" "bigquery_sink_describe_cluster" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "CLUSTER"
+  resource_name = "kafka-cluster"
+  pattern_type  = "LITERAL"
+  principal     = "User:${confluent_service_account.bigquery_sink.id}"
+  host          = "*"
+  operation     = "DESCRIBE"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.bigquery_sink_kafka_api_key.id
+    secret = confluent_api_key.bigquery_sink_kafka_api_key.secret
+  }
+}
+
+# Add READ permission for topics
+resource "confluent_kafka_acl" "bigquery_sink_read_topics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  resource_type = "TOPIC"
+  resource_name = "gcs-"
+  pattern_type  = "PREFIXED"
+  principal     = "User:${confluent_service_account.bigquery_sink.id}"
+  host          = "*"
+  operation     = "READ"
+  permission    = "ALLOW"
+  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  credentials {
+    key    = confluent_api_key.bigquery_sink_kafka_api_key.id
+    secret = confluent_api_key.bigquery_sink_kafka_api_key.secret
+  }
+}
+
+# Create BigQuery Sink connector
+resource "confluent_connector" "bigquery_sink" {
+  environment {
+    id = confluent_environment.staging.id
+  }
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+
+  config_sensitive = {
+    "keyfile" = var.gcp_service_account_key
+  }
+
+  config_nonsensitive = {
+    "connector.class"          = "BigQuerySink"
+    "name"                     = "confluent-bigquery-sink"
+    "topics"                   = join(",", local.avro_topics)
+    "kafka.auth.mode"          = "SERVICE_ACCOUNT"
+    "kafka.service.account.id" = confluent_service_account.bigquery_sink.id
+    "input.data.format"        = "JSON_SR"
+    "output.data.format"       = "JSON"
+    "tasks.max"                = "1"
+    "project"                  = var.gcp_project_id
+    "datasets"                 = var.bigquery_db
+    "auto.create.tables"       = "true"
+    "auto.update.schemas"      = "true"
+    "sanitize.field.names"     = "true"
+    "schema.registry.url"      = data.confluent_schema_registry_cluster.essentials.rest_endpoint
+    "schema.registry.basic.auth.credentials.source" = "USER_INFO"
+    "schema.registry.basic.auth.user.info"          = "${confluent_api_key.clients-schema-registry-api-key.id}:${confluent_api_key.clients-schema-registry-api-key.secret}"
+  }
+
+  depends_on = [
+    confluent_kafka_acl.bigquery_sink_read_topics,
+    confluent_kafka_acl.bigquery_sink_describe_cluster,
+    confluent_kafka_topic.gcs_topics
   ]
 }

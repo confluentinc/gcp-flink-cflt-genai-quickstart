@@ -1,5 +1,0 @@
-{"PatientID": 49398033190953719, "FirstName": "Simon", "LastName": "Francis", "DateOfBirth": "1979-03-22", "Gender": "Other", "ContactInfo": "{\"phone\": \"0161 4960860\", \"email\": \"simon-francis@example.co.uk\"}"}
-{"PatientID": 67027478568867692, "FirstName": "Irene", "LastName": "Anderson", "DateOfBirth": "1990-03-19", "Gender": "Male", "ContactInfo": "{\"phone\": \"+44114 4960405\", \"email\": \"irene-anderson@example.co.uk\"}"}
-{"PatientID": 1497458444119955, "FirstName": "Kathryn", "LastName": "Marsh", "DateOfBirth": "1939-04-01", "Gender": "Other", "ContactInfo": "{\"phone\": \"(0909) 8790809\", \"email\": \"kathryn_marsh@example.co.uk\"}"}
-{"PatientID": 23958623534315086, "FirstName": "Justin", "LastName": "Evans", "DateOfBirth": "1948-03-29", "Gender": "Other", "ContactInfo": "{\"phone\": \"0118 4960881\", \"email\": \"justin-evans@example.co.uk\"}"}
-{"PatientID": 40965765914971255, "FirstName": "Jordan", "LastName": "Bell", "DateOfBirth": "1945-03-30", "Gender": "Female", "ContactInfo": "{\"phone\": \"+442074960512\", \"email\": \"jordan_bell@example.co.uk\"}"}
