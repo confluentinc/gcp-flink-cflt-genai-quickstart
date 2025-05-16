@@ -20,7 +20,7 @@
     <url/>
 
     <properties>
-        <kstream.version>3.6.0</kstream.version>
+        <kstream.version>7.9.1-ce</kstream.version>
         <confluent.version>7.6.0</confluent.version>
         <lombok.version>1.18.36</lombok.version>
     </properties>

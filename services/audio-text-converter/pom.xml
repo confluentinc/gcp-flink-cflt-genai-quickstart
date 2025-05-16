@@ -35,7 +35,7 @@
     <properties>
         <kafka.streams.version>7.8.0-ccs</kafka.streams.version>
         <kafka.clients.version>7.8.0-ccs</kafka.clients.version>
-        <kafka.version>3.8.0</kafka.version>
+        <kafka.version>7.9.1-ce</kafka.version>
         <google.cloud.speech.version>4.54.0</google.cloud.speech.version>
         <google.cloud.texttospeech.version> 2.48.0</google.cloud.texttospeech.version>
         <commonmark.version>0.22.0</commonmark.version>
