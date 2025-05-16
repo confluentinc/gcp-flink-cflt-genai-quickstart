@@ -44,7 +44,7 @@
         <confluent.version>7.9.0</confluent.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <slf4j-jdk14.version>1.7.30</slf4j-jdk14.version>
+        <slf4j-jdk14.version>2.0.17</slf4j-jdk14.version>
 
         <scala-library.version>2.13.11</scala-library.version>
     </properties>
