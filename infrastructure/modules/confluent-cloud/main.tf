@@ -450,25 +450,6 @@ resource "confluent_kafka_acl" "gcs_source_write_topics" {
   }
 }
 
-# Add CREATE permission for topics
-resource "confluent_kafka_acl" "gcs_source_create_topics" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.standard.id
-  }
-  resource_type = "TOPIC"
-  resource_name = "gcs-"
-  pattern_type  = "PREFIXED"
-  principal     = "User:${confluent_service_account.gcs_source.id}"
-  host          = "*"
-  operation     = "CREATE"
-  permission    = "ALLOW"
-  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
-  credentials {
-    key    = confluent_api_key.gcs_source_kafka_api_key.id
-    secret = confluent_api_key.gcs_source_kafka_api_key.secret
-  }
-}
-
 # ------------------------------------------------------
 # SERVICE ACCOUNT
 # ------------------------------------------------------
@@ -607,9 +588,6 @@ resource "confluent_kafka_topic" "gcs_topics" {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
   }
-  depends_on = [
-    confluent_kafka_acl.gcs_source_create_topics
-  ]
 }
 
 resource "google_storage_bucket_object" "data" {
@@ -654,7 +632,6 @@ resource "confluent_connector" "gcs_source" {
   depends_on = [
     confluent_kafka_acl.gcs_source_read_topics,
     confluent_kafka_acl.gcs_source_write_topics,
-    confluent_kafka_acl.gcs_source_create_topics,
     confluent_kafka_acl.gcs_source_describe_cluster,
     google_storage_bucket_object.data,
     confluent_kafka_topic.gcs_topics
