@@ -37,7 +37,7 @@
         <avro.serializer.version>7.8.0</avro.serializer.version>
         <kafka.clients.version>7.8.0-ccs</kafka.clients.version>
         <avro.version>1.11.4</avro.version>
-        <kafka.version>3.8.0</kafka.version>
+        <kafka.version>3.9.1</kafka.version>
         <junit.version>4.13.2</junit.version>
         <junit.jupiter.version>5.10.3</junit.jupiter.version>
         <java.version>17</java.version>
