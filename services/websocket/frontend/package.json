@@ -32,19 +32,19 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
-    "@types/node": "^22.5.5",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react-swc": "^3.5.0",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9.9.0",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.9",
-    "globals": "^15.9.0",
-    "tailwindcss": "^3.4.11",
-    "typescript-eslint": "^8.0.1",
-    "vite": "^6.2.3"
+    "@eslint/js": "9.27.0",
+    "@types/node": "22.15.18",
+    "@types/react": "18.3.21",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react-swc": "3.9.0",
+    "autoprefixer": "10.4.21",
+    "eslint": "9.27.0",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-refresh": "0.4.20",
+    "globals": "15.15.0",
+    "tailwindcss": "3.4.17",
+    "typescript-eslint": "8.32.1",
+    "vite": "6.3.5"
   },
   "engines": {
     "node": "23.x"
