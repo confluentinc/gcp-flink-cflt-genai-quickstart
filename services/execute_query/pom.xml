@@ -44,7 +44,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <io.confluent.kafka-streams-examples.version>8.0.0-0</io.confluent.kafka-streams-examples.version>
         <jackson-annotations.version>2.18.3</jackson-annotations.version>
-        <jackson-core.version>2.18.3</jackson-core.version>
+        <jackson-core.version>2.18.8</jackson-core.version>
         <lombok.version>1.18.36</lombok.version>
         <kafka-streams-json-schema-serde.version>7.9.0</kafka-streams-json-schema-serde.version>
         <curator-test.version>2.9.0</curator-test.version>
