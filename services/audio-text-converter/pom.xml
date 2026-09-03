@@ -46,7 +46,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j-jdk14.version>1.7.30</slf4j-jdk14.version>
 
-        <scala-library.version>2.13.11</scala-library.version>
+        <scala-library.version>3.9.0</scala-library.version>
     </properties>
 
     <dependencyManagement>
